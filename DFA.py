@@ -1,18 +1,6 @@
 import string
 from enum import Enum
 
-
-
-class TOKEN(Enum):
-    NUM = "NUM"
-    KEYWORD = "KEYWORD"
-    ID = "ID"
-    SYMBOL = "SYMBOL"
-    COMMENT = "COMMENT"
-    WHITE_SPACE = "WHITESPACE"
-    EOF = "EOF"
-
-
 class State:
     def __init__(self, last_successor=None, goal_type=None):
         self.successors = dict()
@@ -31,9 +19,10 @@ class State:
                 self.successors[value] = other_state
 
 
-class DFA:
-    white_spaces = tuple(map(chr, [32, 10, 13, 9, 11, 12]))
+white_spaces = tuple(map(chr, [32, 10, 13, 9, 11, 12]))
 
+
+class DFA:
     def __init__(self, init_state, states):
         self.states = states
         self.init_state = init_state
