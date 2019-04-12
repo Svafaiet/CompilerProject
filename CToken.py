@@ -1,8 +1,10 @@
 import string
 from enum import Enum
 from functools import reduce
-from DFA import white_spaces
-from DFA import DFA
+from CompilerProject.DFA import DFA
+from CompilerProject.DFA import white_spaces
+from CompilerProject.LexicalAnalyzer import LexicalAnalyzer
+
 
 class TOKEN(Enum):
     NUM = "NUM"
@@ -13,28 +15,28 @@ class TOKEN(Enum):
     WHITE_SPACE = "WHITESPACE"
     EOF = "EOF"
 
-digits = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
-chars = tuple(string.ascii_lowercase) + tuple(string.ascii_uppercase)
+
+digits = '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
+letters = tuple(string.ascii_lowercase) + tuple(string.ascii_uppercase)
 symbols = ';', ':', ',', '[', ']', '(', ')', '{', '}', '+', '-', '<'
 # without '='
 keywords = "if", "else", "void", "while", "break", "continue", "switch", "default", "case", "return"
 
 
-def make_keyword_states(str):
-    keyword_list = []
-    keyword_list.append((str, TOKEN.KEYWORD))
-    for i in range(1, len(str)):
-        keyword_list.append((str[:-i],))
+def make_keyword_states(tok):
+    keyword_list = [(tok, TOKEN.KEYWORD)]
+    for i in range(1, len(tok)):
+        keyword_list.append((tok[:-i],))
     return keyword_list
 
 
-def make_keyword_edges(str):
-    keyword_edge_list = []
-    keyword_edge_list.append((str[:-1], str, (str[-1],)))
-    for i in range(2, len(str)):
-        keyword_edge_list.append((str[:(-i)], str[:(-i + 1)], (str[-i],)))
-    keyword_edge_list.append(("start", str[0:1], str[0]))
+def make_keyword_edges(tok):
+    keyword_edge_list = [(tok[:-1], tok, (tok[-1],))]
+    for i in range(2, len(tok)):
+        keyword_edge_list.append((tok[:(-i)], tok[:(-i + 1)], (tok[-i],)))
+    keyword_edge_list.append(("start", tok[0:1], tok[0]))
     return keyword_edge_list
+
 
 # making compressed states
 compressed_states = [
@@ -60,7 +62,7 @@ compressed_edges = [
     ("start", "num", digits),
     ("num", "num", digits),
 
-    ("id", "id", digits + chars),
+    ("id", "id", digits + letters),
 
     ("start", "white_space", white_spaces),
 
@@ -81,14 +83,16 @@ kw_compressed_edges = reduce(lambda l1, l2: l1 + l2, list(map(make_keyword_edges
 compressed_edges += kw_compressed_edges
 
 remaining_characters = dict()
-remaining_characters["start"] = list(chars)
+remaining_characters["start"] = list(letters)
 for compressed_state in kw_compressed_states:
     if not (compressed_state[0] in remaining_characters) and (compressed_state[0] != "start"):
-        remaining_characters[compressed_state[0]] = list(digits + chars)
+        remaining_characters[compressed_state[0]] = list(digits + letters)
 for compressed_edge in kw_compressed_edges:
     for value in compressed_edge[2]:
-        if not(value in remaining_characters[compressed_edge[0]]):
+        if value in remaining_characters[compressed_edge[0]]:
             remaining_characters[compressed_edge[0]].remove(value)
+
+compressed_edges += [(item, 'id', tuple(remaining_characters[item])) for item in remaining_characters]
 
 kw_to_id_edges = []
 for compressed_state in kw_compressed_states:
@@ -96,7 +100,11 @@ for compressed_state in kw_compressed_states:
 
 compressed_edges += tuple(kw_to_id_edges)
 
-dfa = DFA(compressed_states, compressed_edges)
+dfa = DFA.make_dfa(compressed_states, compressed_edges)
 
-print(tuple(compressed_states))
-print(tuple(compressed_edges))
+# print(tuple(compressed_states))
+# print(tuple(compressed_edges))
+model = LexicalAnalyzer('test.txt', dfa)
+token = model.get_next_token()
+while True:
+    print(next(token))

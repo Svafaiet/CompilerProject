@@ -1,6 +1,7 @@
 import string
 from enum import Enum
 
+
 class State:
     def __init__(self, last_successor=None, goal_type=None):
         self.successors = dict()
@@ -30,15 +31,14 @@ class DFA:
     @staticmethod
     def make_dfa(states, edges):
         """
-            for making a new state add (state_name, goal_type, last_successor_name) to collection and pass it to DFAMaker
-            first state will be initial state in dfa
-            goal_type and last_successor_name are not required
-            for edges do it in form (edge_first_state_name, edge_sec_state_name, set_of_available_values)
+        for making a new state add (state_name, goal_type, last_successor_name) to collection and pass it to DFAMaker
+        first state will be initial state in dfa. goal_type and last_successor_name are not required for edges do it
+        in form (edge_first_state_name, edge_sec_state_name, set_of_available_values)
         """
         if len(states) == 0:
             raise Exception("can not have empty dfa")
 
-        init_state_name = states[0]
+        init_state_name = states[0][0]
 
         name_to_state = dict()
         for state in states:
@@ -55,8 +55,5 @@ class DFA:
             name_to_state[edge[0]].add_successor(name_to_state[edge[1]], edge[2])
 
         return DFA(name_to_state[init_state_name], list(name_to_state.values()))
-
-
-    # todo
 
 
