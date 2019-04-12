@@ -1,7 +1,3 @@
-import string
-from enum import Enum
-
-
 class State:
     def __init__(self, goal_type=None, last_successor=None):
         self.successors = dict()
@@ -18,9 +14,6 @@ class State:
         for value in edge_values:
             if not (value in self.successors):
                 self.successors[value] = other_state
-
-
-white_spaces = tuple(map(chr, [32, 10, 13, 9, 11, 12]))
 
 
 class DFA:

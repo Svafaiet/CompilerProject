@@ -2,7 +2,6 @@ import string
 from enum import Enum
 from functools import reduce
 from DFA import DFA
-from DFA import white_spaces
 from LexicalAnalyzer import LexicalAnalyzer
 
 
@@ -21,12 +20,14 @@ letters = tuple(string.ascii_lowercase) + tuple(string.ascii_uppercase)
 symbols = ';', ':', ',', '[', ']', '(', ')', '{', '}', '+', '-', '<'
 # without '='
 keywords = "if", "else", "void", "while", "break", "continue", "switch", "default", "case", "return"
+# no keyword must contain other keywords
+white_spaces = tuple(map(chr, [32, 10, 13, 9, 11, 12]))
 
 
 def make_keyword_states(tok):
     keyword_list = [(tok, TOKEN.KEYWORD)]
     for i in range(1, len(tok)):
-        keyword_list.append((tok[:-i],))
+        keyword_list.append((tok[:-i], TOKEN.ID))
     return keyword_list
 
 
