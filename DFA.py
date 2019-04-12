@@ -3,7 +3,7 @@ from enum import Enum
 
 
 class State:
-    def __init__(self, last_successor=None, goal_type=None):
+    def __init__(self, goal_type=None, last_successor=None):
         self.successors = dict()
         self.last_successor = last_successor
         self.goal_type = goal_type
@@ -42,7 +42,7 @@ class DFA:
 
         name_to_state = dict()
         for state in states:
-            if not (state[0] in states):
+            if not (state[0] in name_to_state.keys()):
                 name_to_state[state[0]] = State()
 
         for state in states:

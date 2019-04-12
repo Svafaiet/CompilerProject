@@ -1,9 +1,9 @@
 import string
 from enum import Enum
 from functools import reduce
-from CompilerProject.DFA import DFA
-from CompilerProject.DFA import white_spaces
-from CompilerProject.LexicalAnalyzer import LexicalAnalyzer
+from DFA import DFA
+from DFA import white_spaces
+from LexicalAnalyzer import LexicalAnalyzer
 
 
 class TOKEN(Enum):
@@ -72,7 +72,7 @@ compressed_edges = [
     ("start", "one_equation", ('=',)),
     ("one_equation", "dual_equation", ('=',)),
 
-    ("cmnt", "cmnt_/", ('/',)),
+    ("start", "cmnt_/", ('/',)),
     ("cmnt_/", "cmnt_//", ('/',)),
     ("cmnt_/", "cmnt_/*", ('*',)),
     ("cmnt_/*", "cmnt_/**", ('*',)),
@@ -94,16 +94,10 @@ for compressed_edge in kw_compressed_edges:
 
 compressed_edges += [(item, 'id', tuple(remaining_characters[item])) for item in remaining_characters]
 
-kw_to_id_edges = []
-for compressed_state in kw_compressed_states:
-    kw_to_id_edges.append((compressed_state[0], "id", remaining_characters[compressed_state[0]]))
-
-compressed_edges += tuple(kw_to_id_edges)
-
+# print(tuple(compressed_states + [("start",)]))
+# print(tuple(compressed_edges))
 dfa = DFA.make_dfa(compressed_states, compressed_edges)
 
-# print(tuple(compressed_states))
-# print(tuple(compressed_edges))
 model = LexicalAnalyzer('test.txt', dfa)
 token = model.get_next_token()
 while True:
