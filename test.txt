@@ -1,14 +1,8 @@
-else
-els
-// comment
-/* comment
-    hello
-    // ggggg
-    *
-    hhh
-*/
-ali123
-14ababa
+void main(void){
+    int a = 0;
+    a + -2;
+    cd!e;
+    //  comment
+}
 
-
-
+ !

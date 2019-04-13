@@ -6,7 +6,6 @@ class LexicalAnalyzer:
     def get_next_token(self):
         with open(self.file, mode='r') as input_file:
             state = self.dfa.init_state
-            last_state = None
             byte = input_file.read(1)
             lexeme = ""
             while True:
@@ -29,10 +28,9 @@ class LexicalAnalyzer:
                     lexeme = ""
                     if error_detection:
                         pass
-                        #todo handle_errors
+                        # todo handle_errors
                     else:
                         continue
                 if not byte:
                     break
                 byte = input_file.read(1)
-

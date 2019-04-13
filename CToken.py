@@ -101,5 +101,8 @@ dfa = DFA.make_dfa(compressed_states, compressed_edges)
 
 model = LexicalAnalyzer('test.txt', dfa)
 token = model.get_next_token()
-while True:
-    print(next(token))
+try:
+    while True:
+        print(next(token))
+except StopIteration:
+    pass
