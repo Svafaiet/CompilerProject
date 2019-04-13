@@ -19,7 +19,7 @@ digits = '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
 letters = tuple(string.ascii_lowercase) + tuple(string.ascii_uppercase)
 symbols = ';', ':', ',', '[', ']', '(', ')', '{', '}', '+', '-', '<'
 # without '='
-keywords = "if", "else", "void", "while", "break", "continue", "switch", "default", "case", "return"
+keywords = "if", "else", "void", "int", "while", "break", "continue", "switch", "default", "case", "return"
 # no keyword must contain other keywords
 white_spaces = tuple(map(chr, [32, 10, 13, 9, 11, 12]))
 
@@ -101,8 +101,36 @@ dfa = DFA.make_dfa(compressed_states, compressed_edges)
 
 model = LexicalAnalyzer('test.txt', dfa)
 token = model.get_next_token()
-try:
-    while True:
-        print(next(token))
-except StopIteration:
-    pass
+with open('scanner.txt', mode='w') as output_file:
+    with open("lexical_errors.txt", mode="w") as err_file:
+        line = 1
+        last_line = 1
+        print_line = True
+        first_error = True
+        try:
+            while True:
+                lexeme, tok, error = next(token)
+                if not error:
+                    if lexeme == '\n' or (tok == TOKEN.COMMENT and '\n' in lexeme):
+                        print_line = True
+                        line += 1
+                    if tok != TOKEN.WHITE_SPACE and tok != TOKEN.COMMENT:
+                        if print_line:
+                            if line > 1:
+                                output_file.write('\n')
+                            output_file.write("{}. ".format(line))
+                            print_line = False
+                        output_file.write("({}, {}) ".format(tok.name, lexeme))
+                else:
+                    if last_line == line:
+                        err_file.write("({}, invalid input) ".format(lexeme))
+                    else:
+                        if not first_error:
+                            err_file.write("\n")
+                        first_error = False
+                        lexeme = lexeme.lstrip()
+                        err_file.write("{}. ".format(line))
+                        err_file.write("({}, invalid input) ".format(lexeme))
+                    last_line = line
+        except StopIteration:
+            pass
