@@ -23,7 +23,6 @@ keywords = "if", "else", "void", "int", "while", "break", "continue", "switch", 
 # no keyword must contain other keywords
 white_spaces = tuple(map(chr, [32, 10, 13, 9, 11, 12]))
 
-
 def make_keyword_states(tok):
     keyword_list = [(tok, TOKEN.KEYWORD)]
     for i in range(1, len(tok)):
@@ -79,6 +78,7 @@ compressed_edges = [
     ("cmnt_/*", "cmnt_/**", ('*',)),
     ("cmnt_/**", "cmnt", ('/',)),
     ("cmnt_//", "cmnt", ('\n',)),
+    ("cmnt_//", "cmnt", ("",)),
 ]
 kw_compressed_edges = reduce(lambda l1, l2: l1 + l2, list(map(make_keyword_edges, keywords)))
 compressed_edges += kw_compressed_edges
@@ -98,7 +98,7 @@ compressed_edges += [(item, 'id', tuple(remaining_characters[item])) for item in
 # print(tuple(compressed_states + [("start",)]))
 # print(tuple(compressed_edges))
 dfa = DFA.make_dfa(compressed_states, compressed_edges)
-
+not_printing_tokens = [TOKEN.WHITE_SPACE, TOKEN.COMMENT, TOKEN.EOF]
 model = LexicalAnalyzer('test.txt', dfa)
 token = model.get_next_token()
 with open('scanner.txt', mode='w') as output_file:
@@ -113,8 +113,8 @@ with open('scanner.txt', mode='w') as output_file:
                 if not error:
                     if lexeme == '\n' or (tok == TOKEN.COMMENT and '\n' in lexeme):
                         print_line = True
-                        line += 1
-                    if tok != TOKEN.WHITE_SPACE and tok != TOKEN.COMMENT:
+                        line += lexeme.count("\n")
+                    if tok not in not_printing_tokens:
                         if print_line:
                             if line > 1:
                                 output_file.write('\n')
@@ -122,13 +122,13 @@ with open('scanner.txt', mode='w') as output_file:
                             print_line = False
                         output_file.write("({}, {}) ".format(tok.name, lexeme))
                 else:
+                    lexeme = lexeme.lstrip()
                     if last_line == line:
                         err_file.write("({}, invalid input) ".format(lexeme))
                     else:
                         if not first_error:
                             err_file.write("\n")
                         first_error = False
-                        lexeme = lexeme.lstrip()
                         err_file.write("{}. ".format(line))
                         err_file.write("({}, invalid input) ".format(lexeme))
                     last_line = line

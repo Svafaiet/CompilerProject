@@ -1,8 +1,1 @@
-void main(void){
-    int a = 0;
-    a + -2;
-    cd!e;
-    //  comment
-}
-
- !
+// cmnt2

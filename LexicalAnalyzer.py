@@ -9,7 +9,7 @@ class LexicalAnalyzer:
             byte = input_file.read(1)
             lexeme = ""
             error_detection = False
-            while byte:
+            while True:
                 lexeme += byte
                 last_state = state
                 state = state.get_next_state(byte)
@@ -19,7 +19,10 @@ class LexicalAnalyzer:
                         error_detection = True
                     else:
                         if self.dfa.init_state.get_next_state(byte) is not None:
-                            yield (lexeme[:-1], last_state.goal_type, False)
+                            if byte:
+                                yield (lexeme[:-1], last_state.goal_type, False)
+                            else:
+                                yield (lexeme, last_state.goal_type, False)
                         else:
                             error_detection = True
                     if error_detection:
@@ -32,4 +35,7 @@ class LexicalAnalyzer:
                         last_state = None
                         lexeme = ""
                         continue
+                if not byte and not error_detection and not lexeme:
+                    break
                 byte = input_file.read(1)
+            yield ('', self.dfa.init_state.get_next_state('').goal_type, False)
