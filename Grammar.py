@@ -1,5 +1,6 @@
 from functools import reduce
 from copy import deepcopy
+from Production import epsilon
 
 
 class Grammar:
@@ -10,7 +11,8 @@ class Grammar:
     def make_prods(self, prods):
         self.prods = dict()
         for prod in prods:
-            self.prods[prod.none_terminal] = prod
+            ## TODO why prod??
+            self.prods[prod.non_terminal] = prod
 
     def left_factorize_prods(self):
         new_prods = []
@@ -19,7 +21,28 @@ class Grammar:
         self.make_prods(new_prods)
 
     def remove_left_recursion(self):
-        pass
+        non_terminals = self.prods.keys()
+        for i, non_terminal in non_terminals:
+            grammar_changed = True
+            while grammar_changed:
+                grammar_changed = False
+                rhs_i = self.prods[non_terminal]
+                for rhs in rhs_i:
+                    for A_j in non_terminals[:i]:
+                        if rhs[0] == A_j:
+                            rhs_revised = rhs[1:]
+                            self.prods[non_terminal].remove(rhs)
+                            grammar_changed = True
+                            for prod in self.prods[A_j]:
+                                self.prods[non_terminal].append(prod + rhs_revised)
+
+            alpha_set = [prod[1:] for prod in self.prods[non_terminal] if prod[0] == non_terminal]
+            beta_set = [prod for prod in self.prods[non_terminal] if prod[0] != non_terminal]
+            self.prods.pop(non_terminal)
+            non_terminal_new = non_terminal.join("_new")
+            self.prods[non_terminal] = [[beta_i + non_terminal_new] for beta_i in beta_set]
+            self.prods[non_terminal_new] = [[alpha_i + non_terminal_new] for alpha_i in alpha_set]
+            self.prods[non_terminal_new] += [epsilon]
 
     def find_epsilon_none_terminals(self):
         epsilon_none_terminals = []
