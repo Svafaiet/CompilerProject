@@ -2,6 +2,13 @@ from copy import deepcopy
 from functools import reduce
 
 
+class Epsilon:
+    pass
+
+
+epsilon = Epsilon()
+
+
 class Production:
     def __init__(self, non_terminal, rhss):
         self.non_terminal = non_terminal
@@ -32,7 +39,8 @@ class Production:
             new_prod_name = reduce(lambda str1, str2: str1 + str2, prefix)
             new_prods += [Production(new_prod_name, deepcopy(prefix)), ]
             for group_key in groups.keys():
-                group_factorization = Production.left_factorize_rhses(groups[group_key], deepcopy(prefix) + [group_key, ])
+                group_factorization = Production.left_factorize_rhses(groups[group_key],
+                                                                      deepcopy(prefix) + [group_key, ])
                 for left_factorized_rhs in group_factorization[0]:
                     left_factorized_rhss += [[new_prod_name, ] + left_factorized_rhs, ]
                 new_prods += group_factorization[1]

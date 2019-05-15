@@ -1,4 +1,5 @@
 from CToken import CTokenType, CToken
+from Production import epsilon
 
 
 def ck(keyword_name):
@@ -11,7 +12,7 @@ def cs(symbol_name):
 
 compressed_grammar = [
     ["program", ["declaration-list", CToken(CTokenType.EOF)]],
-    ["declaration-list", ["declaration-list", "declaration"], ["", ]],
+    ["declaration-list", ["declaration-list", "declaration"], [epsilon, ]],
     ["declaration", ["var-declaration", ], ["fun-declaration", ]],
     ["var-declaration",
      ["type-specifier", CToken(CTokenType.ID), cs(";")],
@@ -24,7 +25,7 @@ compressed_grammar = [
     ["param", ["type-specifier", CToken(CTokenType.ID)],
      ["type-specifier", CToken(CTokenType.ID), cs("["), cs("]")]],
     ["compound-stmt", [cs("{"), "declaration-list", "statement-list", cs("}")]],
-    ["statement-list", ["statement-list", "statement"], ["", ]],
+    ["statement-list", ["statement-list", "statement"], [epsilon, ]],
     ["statement", ["expression-stmt", ], ["compound-stmt", ], ["selection-stmt", ], ["iteration-stmt", ],
      ["return-stmt", ], ["switch-stmt", ]],
     ["expression-stmt", ["expression", cs(";")], [ck("continue"), cs(";")], [ck("break"), cs(";")], [cs(";"), ]],
@@ -32,6 +33,6 @@ compressed_grammar = [
     ["iteration-stmt", [ck("while"), cs("("), "expression", cs(")"), "statement"]],
     ["return-stmt", [ck("return"), cs(";")], [ck("return"), "expression", cs(";")]],
     ["switch-stmt", [ck("switch"), cs("("), "expression", cs(")"), cs("{"), "case-stmts", "default-stmt", cs("}")]],
-    ["case-stmts", ["case-stmts", "case-stmt"], ["", ]],
-    ["case-stmt", ] #todo
+    ["case-stmts", ["case-stmts", "case-stmt"], [epsilon, ]],
+    ["case-stmt", ]  # todo
 ]
