@@ -1,29 +1,29 @@
-from CToken import CTokenType, CToken
+from Token import CTokenType, Token
 from Production import epsilon
 
 
 def ck(keyword_name):
-    return CToken(CTokenType.KEYWORD, keyword_name)
+    return Token(CTokenType.KEYWORD, keyword_name)
 
 
 def cs(symbol_name):
-    return CToken(CTokenType.SYMBOL, symbol_name)
+    return Token(CTokenType.SYMBOL, symbol_name)
 
 
 compressed_grammar = [
-    ["program", ["declaration-list", CToken(CTokenType.EOF)]],
+    ["program", ["declaration-list", Token(CTokenType.EOF)]],
     ["declaration-list", ["declaration-list", "declaration"], [epsilon, ]],
     ["declaration", ["var-declaration", ], ["fun-declaration", ]],
     ["var-declaration",
-     ["type-specifier", CToken(CTokenType.ID), cs(";")],
-     ["type-specifier", CToken(CTokenType.ID), cs("["), CToken(CTokenType.NUM), cs("]"), cs(";")]
+     ["type-specifier", Token(CTokenType.ID), cs(";")],
+     ["type-specifier", Token(CTokenType.ID), cs("["), Token(CTokenType.NUM), cs("]"), cs(";")]
      ],
     ["type-specifier", [ck("int"), ], [ck("void"), ]],
-    ["fun-declaration", ["type-specifier", CToken(CTokenType.ID), cs("("), "params", cs(")"), "compound-stmt"]],
+    ["fun-declaration", ["type-specifier", Token(CTokenType.ID), cs("("), "params", cs(")"), "compound-stmt"]],
     ["params", ["param-list", ], [ck("void"), ]],
     ["param-list", ["param-list", cs("param")], ["param", ]],
-    ["param", ["type-specifier", CToken(CTokenType.ID)],
-     ["type-specifier", CToken(CTokenType.ID), cs("["), cs("]")]],
+    ["param", ["type-specifier", Token(CTokenType.ID)],
+     ["type-specifier", Token(CTokenType.ID), cs("["), cs("]")]],
     ["compound-stmt", [cs("{"), "declaration-list", "statement-list", cs("}")]],
     ["statement-list", ["statement-list", "statement"], [epsilon, ]],
     ["statement", ["expression-stmt", ], ["compound-stmt", ], ["selection-stmt", ], ["iteration-stmt", ],

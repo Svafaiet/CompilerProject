@@ -1,10 +1,6 @@
 from enum import Enum
 
 
-class Token:
-    pass
-
-
 class CTokenType(Enum):
     NUM = "NUM"
     KEYWORD = "KEYWORD"
@@ -15,7 +11,7 @@ class CTokenType(Enum):
     EOF = "EOF"
 
 
-class CToken(Token):
+class Token:
     def __init__(self, token_type, token_value=None):
         self.token_type = token_type
         self.token_value = token_value

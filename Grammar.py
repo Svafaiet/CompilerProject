@@ -29,25 +29,28 @@ class Grammar:
                     ebsilon_none_terminals.append(prod.none_terminal)
                 else:
                     for term in sub_prod:
-                        pass #TODO
+                        pass  # TODO
 
-    def find_first_sets(self):
+    def make_first_sets(self):
         pass
 
-    def find_follow_sets(self):
+    def make_follow_sets(self):
         pass
 
-    def make_LL1_dfa(self):
-        pass
+    def make_grammar_ll1(self):
+        self.left_factorize_prods()
+        self.remove_left_recursion()
+        self.find_ebsilon_none_terminals()
+        self.make_first_sets()
+        self.make_follow_sets()
+
+
 
     @staticmethod
     def make_grammar(self, compressed_prods):
-
 
         none_terminals = []
 
         for c_prod in compressed_prods:
             for prod in c_prod[1:]:
                 r = prod(c_prod[0], prod)
-
-

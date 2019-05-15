@@ -1,4 +1,5 @@
 from LexicalAnalyzer import LexicalAnalyzer
+from Token import Token
 
 
 class TokenHandler:
@@ -15,27 +16,17 @@ class TokenHandler:
     def get_next_token(self):
         model = LexicalAnalyzer(self.file_in, self.dfa)
         token = model.get_next_token()
-        # with open('scanner.txt', mode='w') as output_file:
         with open(self.file_error, mode="a") as err_file:
             line = 1
             last_line = 1
-            # print_line = True
             first_error = True
             try:
                 while True:
                     lexeme, tok, error = next(token)
-                    if '\n' in lexeme:
-                        # print_line = True
-                        line += lexeme.count("\n")
+                    line += lexeme.count("\n")
                     if not error:
                         if tok not in self.excluded_tokens:
-                            yield lexeme, tok
-                            # if print_line:
-                            #     if line > 1:
-                            #         output_file.write('\n')
-                            #     output_file.write("{}. ".format(line))
-                            #     print_line = False
-                            # output_file.write("({}, {}) ".format(tok.name, lexeme))
+                            yield Token(token_type=tok, token_value=lexeme)
                     else:
                         lexeme = lexeme.lstrip()
                         if last_line == line:
