@@ -4,21 +4,26 @@ from copy import deepcopy
 
 class Grammar:
     def __init__(self, prods):
-        self.none_terminals = []  # TODO
-        self.prods = prods
+        self.prods = None
+        self.make_prods(prods)
+
+    def make_prods(self, prods):
+        self.prods = dict()
+        for prod in prods:
+            self.prods[prod.none_terminal] = prod
 
     def left_factorize_prods(self):
         new_prods = []
         for prod in self.prods:
             new_prods += prod.left_factorize()
-        # TODO
+        self.make_prods(new_prods)
 
     def remove_left_recursion(self):
         pass
 
     def find_ebsilon_none_terminals(self):
         ebsilon_none_terminals = []
-        for prod in self.prods:
+        for prod in self.prods.values():
             for sub_prod in prod.sub_prods:
                 if len(sub_prod) == 1 and sub_prod[0] == "":
                     ebsilon_none_terminals.append(prod.none_terminal)
