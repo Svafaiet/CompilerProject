@@ -44,30 +44,36 @@ class Grammar:
             self.prods[non_terminal_new] = [[alpha_i + non_terminal_new] for alpha_i in alpha_set]
             self.prods[non_terminal_new] += [epsilon]
 
-    def find_epsilon_none_terminals(self):
-        epsilon_none_terminals = []
+    def find_ebsilon_none_terminals(self):
+        ebsilon_none_terminals = []
         for prod in self.prods.values():
             for sub_prod in prod.sub_prods:
                 if len(sub_prod) == 1 and sub_prod[0] == "":
-                    epsilon_none_terminals.append(prod.none_terminal)
+                    ebsilon_none_terminals.append(prod.none_terminal)
                 else:
                     for term in sub_prod:
-                        pass #TODO
+                        pass  # TODO
 
-    def find_first_sets(self):
+    def make_first_sets(self):
         pass
 
-    def find_follow_sets(self):
+    def make_follow_sets(self):
         pass
 
-    def make_LL1_dfa(self):
-        pass
+    def make_grammar_ll1(self):
+        self.left_factorize_prods()
+        self.remove_left_recursion()
+        self.find_ebsilon_none_terminals()
+        self.make_first_sets()
+        self.make_follow_sets()
+
+
 
     @staticmethod
     def make_grammar(self, compressed_prods):
-        non_terminals = []
+
+        none_terminals = []
+
         for c_prod in compressed_prods:
             for prod in c_prod[1:]:
                 r = prod(c_prod[0], prod)
-
-

@@ -1,10 +1,8 @@
 import string
 from functools import reduce
 
-from CToken import CTokenType
+from Token import CTokenType
 from DFA import DFA
-from LexicalAnalyzer import LexicalAnalyzer
-import math
 
 
 def make_c_lexical_dfa():

@@ -1,6 +1,6 @@
 import CLexicalDFA
 from TokenHandler import TokenHandler
-from CToken import CTokenType
+from Token import CTokenType
 
 
 class Compiler:
