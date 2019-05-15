@@ -16,7 +16,7 @@ class TokenHandler:
         model = LexicalAnalyzer(self.file_in, self.dfa)
         token = model.get_next_token()
         # with open('scanner.txt', mode='w') as output_file:
-        with open("lexical_errors.txt", mode="a") as err_file:
+        with open(self.file_error, mode="a") as err_file:
             line = 1
             last_line = 1
             # print_line = True
