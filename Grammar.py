@@ -87,7 +87,27 @@ class LL1Grammar:
 
     def make_first_sets(self):
         for none_terminal in self.grammar.prods.keys():
-            self.first_sets[none_terminal] = set()
+            self.first_sets[none_terminal] = dict()
+        grammar_changed = True
+        while grammar_changed:
+            grammar_changed = False
+            for prod in self.grammar.prods.values():
+                for rhs in prod.rhses:
+                    if not (rhs is epsilon):
+                        for value in rhs:
+                            if isinstance(value, Token):
+                                if not (value in self.first_sets[prod.none_terminal]):
+                                    self.first_sets[prod.none_terminal][value] = rhs
+                                    grammar_changed = True
+                            elif not isinstance(value, Directive):
+                                for token in self.first_sets[value]:
+                                    if not (token in self.first_sets[prod.none_terminal]):
+                                        self.first_sets[prod.none_terminal][token] = rhs
+                                        grammar_changed = True
+                            if not ((value in self.epsilons) or (isinstance(value, Directive))):
+                                break
 
     def make_follow_sets(self):
-        pass
+        for none_terminal in self.grammar.prods.keys():
+            self.follow_sets[none_terminal] = dict()
+        #TODO
