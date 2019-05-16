@@ -1,5 +1,8 @@
 from functools import reduce
 from copy import deepcopy
+
+from Directive import Directive
+from Token import Token
 from Production import epsilon
 
 
@@ -13,6 +16,15 @@ class Grammar:
         for prod in prods:
             ## TODO why prod??
             self.prods[prod.non_terminal] = prod
+
+    @staticmethod
+    def make_grammar(compressed_prods):
+
+        none_terminals = []
+
+        for c_prod in compressed_prods:
+            for prod in c_prod[1:]:
+                r = prod(c_prod[0], prod)
 
     def left_factorize_prods(self):
         new_prods = []
@@ -44,36 +56,38 @@ class Grammar:
             self.prods[non_terminal_new] = [[alpha_i + non_terminal_new] for alpha_i in alpha_set]
             self.prods[non_terminal_new] += [epsilon]
 
-    def find_ebsilon_none_terminals(self):
-        ebsilon_none_terminals = []
-        for prod in self.prods.values():
-            for sub_prod in prod.sub_prods:
-                if len(sub_prod) == 1 and sub_prod[0] == "":
-                    ebsilon_none_terminals.append(prod.none_terminal)
-                else:
-                    for term in sub_prod:
-                        pass  # TODO
 
-    def make_first_sets(self):
-        pass
-
-    def make_follow_sets(self):
-        pass
-
-    def make_grammar_ll1(self):
-        self.left_factorize_prods()
-        self.remove_left_recursion()
-        self.find_ebsilon_none_terminals()
+class LL1Grammar:
+    def __init__(self, grammar):
+        self.grammar = grammar
+        self.grammar.left_factorize_prods()
+        self.grammar.remove_left_recursion()
+        self.epsilons = list()
+        self.first_sets = dict()
+        self.follow_sets = dict()
+        self.find_epsilon_none_terminals()
         self.make_first_sets()
         self.make_follow_sets()
 
+    def find_epsilon_none_terminals(self):
+        self.epsilons = list()
+        for prod in self.grammar.prods.values():
+            if epsilon in prod.rhses:
+                self.epsilons.append(prod.none_terminal)
+        epsilons_changed = True
+        while epsilons_changed:
+            epsilons_changed = False
+            for prod in self.grammar.prods.values():
+                if not ((prod.none_terminal in self.epsilons) or any(isinstance(rhs, Token) for rhs in prod.rhses)):
+                    for rhs in prod.rhses:
+                        if all((isinstance(value, Directive) or value in self.epsilons) for value in rhs):
+                            epsilons_changed = True
+                            self.epsilons.append(prod.none_terminal)
+                            break
 
+    def make_first_sets(self):
+        for none_terminal in self.grammar.prods.keys():
+            self.first_sets[none_terminal] = set()
 
-    @staticmethod
-    def make_grammar(self, compressed_prods):
-
-        none_terminals = []
-
-        for c_prod in compressed_prods:
-            for prod in c_prod[1:]:
-                r = prod(c_prod[0], prod)
+    def make_follow_sets(self):
+        pass
