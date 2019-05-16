@@ -25,18 +25,18 @@ class Grammar:
             grammar_changed = True
             while grammar_changed:
                 grammar_changed = False
-                rhs_i = self.prods[non_terminal].rhss
+                rhs_i = self.prods[non_terminal].rhses
                 for rhs in rhs_i:
                     for A_j in non_terminals[:i]:
                         if rhs[0] == A_j:
                             rhs_revised = rhs[1:]
-                            self.prods[non_terminal].rhss.remove(rhs)
+                            self.prods[non_terminal].rhses.remove(rhs)
                             grammar_changed = True
-                            for prod in self.prods[A_j].rhss:
-                                self.prods[non_terminal].rhss.append(prod + rhs_revised)
+                            for prod in self.prods[A_j].rhses:
+                                self.prods[non_terminal].rhses.append(prod + rhs_revised)
 
-            alpha_set = [prod[1:] for prod in self.prods[non_terminal].rhss if prod[0] == non_terminal]
-            beta_set = [prod for prod in self.prods[non_terminal].rhss if prod[0] != non_terminal]
+            alpha_set = [prod[1:] for prod in self.prods[non_terminal].rhses if prod[0] == non_terminal]
+            beta_set = [prod for prod in self.prods[non_terminal].rhses if prod[0] != non_terminal]
             if len(alpha_set) > 0:
                 self.prods.pop(non_terminal)
                 non_terminal_new = non_terminal + '_new'
@@ -44,7 +44,7 @@ class Grammar:
                     beta_i + [non_terminal_new] if beta_i != [epsilon] else [non_terminal_new] for beta_i in beta_set])
                 self.prods[non_terminal_new] = Production(non_terminal_new,
                                                           [alpha_i + [non_terminal_new] for alpha_i in alpha_set])
-                self.prods[non_terminal_new].rhss += [[epsilon]]
+                self.prods[non_terminal_new].rhses += [[epsilon]]
 
     def find_epsilon_non_terminals(self):
         epsilon_non_terminals = []
