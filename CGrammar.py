@@ -12,7 +12,7 @@ def cs(symbol_name):
 
 compressed_grammar = [
     ["program", ["declaration-list", Token(CTokenType.EOF)]],
-    ["declaration-list", ["declaration-list", "declaration"], [epsilon, ]],
+    ["declaration-list", ["declaration-list", "declaration"], epsilon],
     ["declaration", ["var-declaration", ], ["fun-declaration", ]],
     ["var-declaration",
      ["type-specifier", Token(CTokenType.ID), cs(";")],
@@ -25,7 +25,7 @@ compressed_grammar = [
     ["param", ["type-specifier", Token(CTokenType.ID)],
      ["type-specifier", Token(CTokenType.ID), cs("["), cs("]")]],
     ["compound-stmt", [cs("{"), "declaration-list", "statement-list", cs("}")]],
-    ["statement-list", ["statement-list", "statement"], [epsilon, ]],
+    ["statement-list", ["statement-list", "statement"], epsilon],
     ["statement", ["expression-stmt", ], ["compound-stmt", ], ["selection-stmt", ], ["iteration-stmt", ],
      ["return-stmt", ], ["switch-stmt", ]],
     ["expression-stmt", ["expression", cs(";")], [ck("continue"), cs(";")], [ck("break"), cs(";")], [cs(";"), ]],
@@ -86,6 +86,5 @@ compressed_grammar = [
     ["arg-list",
      ["arg-list", cs(","), "expression"],
      ["expression"],
-     ]
-
+     ],
 ]

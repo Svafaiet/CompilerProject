@@ -1,4 +1,6 @@
+from Directive import Directive
 from Production import epsilon, Production
+from Token import Token
 
 
 class Grammar:
@@ -74,3 +76,59 @@ class Grammar:
             r = Production(c_prod[0], c_prod[1:])
             productions.append(r)
         return Grammar(productions)
+
+
+class LL1Grammar:
+    def __init__(self, grammar):
+        self.grammar = grammar
+        self.grammar.left_factorize_prods()
+        self.grammar.remove_left_recursion()
+        self.epsilons = list()
+        self.first_sets = dict()
+        self.follow_sets = dict()
+        self.find_epsilon_none_terminals()
+        self.make_first_sets()
+        self.make_follow_sets()
+
+    def find_epsilon_none_terminals(self):
+        self.epsilons = list()
+        for prod in self.grammar.prods.values():
+            if epsilon in prod.rhses:
+                self.epsilons.append(prod.none_terminal)
+        epsilons_changed = True
+        while epsilons_changed:
+            epsilons_changed = False
+            for prod in self.grammar.prods.values():
+                if not ((prod.none_terminal in self.epsilons) or any(isinstance(rhs, Token) for rhs in prod.rhses)):
+                    for rhs in prod.rhses:
+                        if all((isinstance(value, Directive) or value in self.epsilons) for value in rhs):
+                            epsilons_changed = True
+                            self.epsilons.append(prod.none_terminal)
+                            break
+
+    def make_first_sets(self):
+        for none_terminal in self.grammar.prods.keys():
+            self.first_sets[none_terminal] = dict()
+        grammar_changed = True
+        while grammar_changed:
+            grammar_changed = False
+            for prod in self.grammar.prods.values():
+                for rhs in prod.rhses:
+                    if not (rhs is epsilon):
+                        for value in rhs:
+                            if isinstance(value, Token):
+                                if not (value in self.first_sets[prod.none_terminal]):
+                                    self.first_sets[prod.none_terminal][value] = rhs
+                                    grammar_changed = True
+                            elif not isinstance(value, Directive):
+                                for token in self.first_sets[value]:
+                                    if not (token in self.first_sets[prod.none_terminal]):
+                                        self.first_sets[prod.none_terminal][token] = rhs
+                                        grammar_changed = True
+                            if not ((value in self.epsilons) or (isinstance(value, Directive))):
+                                break
+
+    def make_follow_sets(self):
+        for none_terminal in self.grammar.prods.keys():
+            self.follow_sets[none_terminal] = dict()
+        # TODO
