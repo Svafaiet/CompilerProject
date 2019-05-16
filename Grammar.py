@@ -1,6 +1,4 @@
-from functools import reduce
-from copy import deepcopy
-from Production import epsilon
+from Production import epsilon, Production
 
 
 class Grammar:
@@ -11,7 +9,6 @@ class Grammar:
     def make_prods(self, prods):
         self.prods = dict()
         for prod in prods:
-            ## TODO why prod??
             self.prods[prod.non_terminal] = prod
 
     def left_factorize_prods(self):
@@ -21,35 +18,38 @@ class Grammar:
         self.make_prods(new_prods)
 
     def remove_left_recursion(self):
-        non_terminals = self.prods.keys()
-        for i, non_terminal in non_terminals:
+        non_terminals = list(self.prods.keys())
+        for i, non_terminal in enumerate(non_terminals):
             grammar_changed = True
             while grammar_changed:
                 grammar_changed = False
-                rhs_i = self.prods[non_terminal]
+                rhs_i = self.prods[non_terminal].rhss
                 for rhs in rhs_i:
                     for A_j in non_terminals[:i]:
                         if rhs[0] == A_j:
                             rhs_revised = rhs[1:]
-                            self.prods[non_terminal].remove(rhs)
+                            self.prods[non_terminal].rhss.remove(rhs)
                             grammar_changed = True
-                            for prod in self.prods[A_j]:
-                                self.prods[non_terminal].append(prod + rhs_revised)
+                            for prod in self.prods[A_j].rhss:
+                                self.prods[non_terminal].rhss.append(prod + rhs_revised)
 
-            alpha_set = [prod[1:] for prod in self.prods[non_terminal] if prod[0] == non_terminal]
-            beta_set = [prod for prod in self.prods[non_terminal] if prod[0] != non_terminal]
-            self.prods.pop(non_terminal)
-            non_terminal_new = non_terminal.join("_new")
-            self.prods[non_terminal] = [[beta_i + non_terminal_new] for beta_i in beta_set]
-            self.prods[non_terminal_new] = [[alpha_i + non_terminal_new] for alpha_i in alpha_set]
-            self.prods[non_terminal_new] += [epsilon]
+            alpha_set = [prod[1:] for prod in self.prods[non_terminal].rhss if prod[0] == non_terminal]
+            beta_set = [prod for prod in self.prods[non_terminal].rhss if prod[0] != non_terminal]
+            if len(alpha_set) > 0:
+                self.prods.pop(non_terminal)
+                non_terminal_new = non_terminal + '_new'
+                self.prods[non_terminal] = Production(non_terminal, [
+                    beta_i + [non_terminal_new] if beta_i != [epsilon] else [non_terminal_new] for beta_i in beta_set])
+                self.prods[non_terminal_new] = Production(non_terminal_new,
+                                                          [alpha_i + [non_terminal_new] for alpha_i in alpha_set])
+                self.prods[non_terminal_new].rhss += [[epsilon]]
 
-    def find_ebsilon_none_terminals(self):
-        ebsilon_none_terminals = []
+    def find_epsilon_non_terminals(self):
+        epsilon_non_terminals = []
         for prod in self.prods.values():
             for sub_prod in prod.sub_prods:
                 if len(sub_prod) == 1 and sub_prod[0] == "":
-                    ebsilon_none_terminals.append(prod.none_terminal)
+                    epsilon_non_terminals.append(prod.none_terminal)
                 else:
                     for term in sub_prod:
                         pass  # TODO
@@ -61,19 +61,16 @@ class Grammar:
         pass
 
     def make_grammar_ll1(self):
-        self.left_factorize_prods()
         self.remove_left_recursion()
-        self.find_ebsilon_none_terminals()
+        self.left_factorize_prods()
+        self.find_epsilon_non_terminals()
         self.make_first_sets()
         self.make_follow_sets()
 
-
-
     @staticmethod
-    def make_grammar(self, compressed_prods):
-
-        none_terminals = []
-
+    def make_grammar(compressed_prods):
+        productions = []
         for c_prod in compressed_prods:
-            for prod in c_prod[1:]:
-                r = prod(c_prod[0], prod)
+            r = Production(c_prod[0], c_prod[1:])
+            productions.append(r)
+        return Grammar(productions)
