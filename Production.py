@@ -18,7 +18,6 @@ class Production:
         left_factorized_prod = Production.left_factorize_rhses(rhs_group=self.rhses, prefix=[])
         return [Production(self.non_terminal, left_factorized_prod[0]), ] + left_factorized_prod[1]
 
-    # (left_factorized_rhses, new_prods)
     @staticmethod
     def left_factorize_rhses(rhs_group, prefix):
         groups = dict()
