@@ -6,7 +6,7 @@ class Epsilon:
     pass
 
 
-epsilon = Epsilon()
+epsilon = [Epsilon()]
 
 
 class Production:
@@ -19,7 +19,7 @@ class Production:
         return [Production(self.non_terminal, left_factorized_prod[0]), ] + left_factorized_prod[1]
 
     @staticmethod
-    def left_factorize_rhses(rhs_group, prefix):
+    def left_factorize_rhses(rhs_group, prefix): # fixme epsilons not handled
         groups = dict()
         epsilon_flag = False
         for rhs in rhs_group:

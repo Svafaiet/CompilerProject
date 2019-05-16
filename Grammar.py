@@ -41,10 +41,10 @@ class Grammar:
                 self.prods.pop(non_terminal)
                 non_terminal_new = non_terminal + '_new'
                 self.prods[non_terminal] = Production(non_terminal, [
-                    beta_i + [non_terminal_new] if beta_i != [epsilon] else [non_terminal_new] for beta_i in beta_set])
+                    beta_i + [non_terminal_new] if beta_i != epsilon else [non_terminal_new] for beta_i in beta_set])
                 self.prods[non_terminal_new] = Production(non_terminal_new,
                                                           [alpha_i + [non_terminal_new] for alpha_i in alpha_set])
-                self.prods[non_terminal_new].rhses += [[epsilon]]
+                self.prods[non_terminal_new].rhses += [epsilon]
 
     def find_epsilon_non_terminals(self):
         epsilon_non_terminals = []
