@@ -13,6 +13,7 @@ class TokenHandler:
         self.file_in = file_in
         self.file_error = file_error
 
+    # @return next_token, its_line
     def get_next_token(self):
         model = LexicalAnalyzer(self.file_in, self.dfa)
         token = model.get_next_token()
@@ -26,7 +27,7 @@ class TokenHandler:
                     line += lexeme.count("\n")
                     if not error:
                         if tok not in self.excluded_tokens:
-                            yield Token(token_type=tok, token_value=lexeme)
+                            yield Token(token_type=tok, token_value=lexeme), line
                     else:
                         lexeme = lexeme.lstrip()
                         if last_line == line:
