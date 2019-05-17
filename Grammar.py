@@ -4,9 +4,10 @@ from Token import Token
 
 
 class Grammar:
-    def __init__(self, prods):
+    def __init__(self, prods, start):
         self.prods = None
         self.make_prods(prods)
+        self.start_symbol = start
 
     def make_prods(self, prods):
         self.prods = dict()
@@ -71,11 +72,12 @@ class Grammar:
 
     @staticmethod
     def make_grammar(compressed_prods):
+        start = compressed_prods[0][0]
         productions = []
         for c_prod in compressed_prods:
             r = Production(c_prod[0], c_prod[1:])
             productions.append(r)
-        return Grammar(productions)
+        return Grammar(productions, start)
 
 
 class LL1Grammar:
