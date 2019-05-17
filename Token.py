@@ -22,3 +22,6 @@ class Token:
         return (self.token_type == other.token_type) and \
                (self.token_value == other.token_value if
                 (self.token_value is not None) and (other.token_value is not None) else True)
+
+    def __hash__(self):
+        return hash(self.token_value)

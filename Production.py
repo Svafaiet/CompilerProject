@@ -3,7 +3,11 @@ from functools import reduce
 
 
 class Epsilon:
-    pass
+    def __hash__(self):
+        return hash("epsilon")
+
+    def __eq__(self, other):
+        return isinstance(other, Epsilon)
 
 
 epsilon = [Epsilon()]

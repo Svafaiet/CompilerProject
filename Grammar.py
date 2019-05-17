@@ -17,7 +17,7 @@ class Grammar:
     def left_factorize_prods(self):
         new_prods = []
         for prod in self.prods:
-            new_prods += prod.left_factorize()
+            new_prods += self.prods[prod].left_factorize()
         self.make_prods(new_prods)
 
     def remove_left_recursion(self):
@@ -88,9 +88,9 @@ class LL1Grammar:
         self.epsilons = list()
         self.first_sets = dict()
         self.follow_sets = dict()
-        self.find_epsilon_non_terminals()
-        self.make_first_sets()
-        self.make_follow_sets()
+        # self.find_epsilon_non_terminals()
+        # self.make_first_sets()
+        # self.make_follow_sets()
 
     def find_epsilon_non_terminals(self):
         self.epsilons = list()

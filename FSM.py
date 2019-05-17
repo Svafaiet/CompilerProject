@@ -1,13 +1,20 @@
+from Token import Token
+from Production import Epsilon
+
+
 class State:
     def __init__(self, num, transitions):
         self.num = num
         self.transitions = transitions
 
     def add_edge(self, label, next_state):
-        self.transitions[label] = State(next_state)
+        self.transitions[label] = State(next_state, {})
 
     def get_next(self, p):
         return self.transitions[p]
+
+    def __eq__(self, other):
+        return self.num == other.num and self.transitions == other.transitions
 
 
 class FSM:
@@ -33,3 +40,4 @@ class FSM:
 
     def change_state(self, p):
         self.current_state = self.current_state.get_next(p)
+

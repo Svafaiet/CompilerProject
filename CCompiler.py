@@ -1,6 +1,9 @@
 import CLexicalDFA
 from TokenHandler import TokenHandler
 from Token import CTokenType
+from Parser import Parser
+from CGrammar import compressed_grammar
+from Grammar import LL1Grammar, Grammar
 
 
 class Compiler:
@@ -20,3 +23,5 @@ DEFAULT_FILE_ERROR_NAME = "error.txt"
 c_lexical_dfa = CLexicalDFA.make_c_lexical_dfa()
 not_printing_tokens = [CTokenType.WHITE_SPACE, CTokenType.COMMENT]
 c_token_handler = TokenHandler(c_lexical_dfa, not_printing_tokens)
+grammar = LL1Grammar(Grammar.make_grammar(compressed_grammar))
+parser = Parser(grammar)
