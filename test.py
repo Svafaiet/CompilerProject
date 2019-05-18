@@ -29,11 +29,11 @@ grammar.follow_sets = {"E": [cs(")"), Token(CTokenType.EOF)],
                        "F": [cs(")"), Token(CTokenType.EOF), cs("+"), cs("*")]}
 
 parser = Parser(grammar)
-inp = [cs("("), Token(CTokenType.ID), cs(")"), Token(CTokenType.EOF)]
+inp = [cs("("), Token(CTokenType.ID), cs(")"), Token(CTokenType.ID), cs(")"), Token(CTokenType.EOF)]
 tok = inp[0]
 count = 1
 while True:
-    _, get_next = parser.parse(tok)
+    error_state, get_next, error_type = parser.parse(tok)
     if get_next:
         tok = inp[count]
         count += 1
