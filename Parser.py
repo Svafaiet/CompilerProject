@@ -1,6 +1,6 @@
 from Grammar import Grammar
 from FSM import FSM
-from CompilerProject.Production import epsilon
+from Production import epsilon
 import copy
 
 

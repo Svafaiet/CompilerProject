@@ -1,8 +1,15 @@
-from CompilerProject.Parser import Parser
-from CompilerProject.Production import epsilon
-from CompilerProject.Token import CTokenType, Token
-from CompilerProject.CGrammar import cs, ck
-from CompilerProject.Grammar import Grammar, LL1Grammar
+from Parser import Parser
+from Production import epsilon
+from Token import CTokenType, Token
+from CGrammar import cs, ck
+from Grammar import Grammar, LL1Grammar
+
+def test_rules(grammar):
+    for prod in grammar.prods:
+        print("{} -> {}".format(prod, grammar.prods[prod].rhses))
+
+def test_epsilons(ll1_grammar):
+    print("epsilons: {}", ll1_grammar.epsilons)
 
 rules = [
     ["E", ["T", "A"]],
@@ -12,10 +19,15 @@ rules = [
      [cs("*"), "F", "B"],
      epsilon
      ],
-    ["F", [cs("("), "E", cs(")")], [Token(CTokenType.ID)]]
+    ["F", [cs("("), "E", cs(")")], [Token(CTokenType.ID)]],
+    ["left", [cs("*"), "left_a"], [cs("*"), "left_a", cs("+")]],
+    ["left_a", [cs("+")], epsilon]
 ]
 
+
 grammar = LL1Grammar(Grammar.make_grammar(rules))
+test_rules(grammar.grammar)
+test_epsilons(grammar)
 grammar.first_sets = {"E": [cs("("), Token(CTokenType.ID)],
                       "A": [cs("+"), epsilon],
                       "T": [cs("("), Token(CTokenType.ID)],

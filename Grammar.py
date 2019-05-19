@@ -1,3 +1,5 @@
+from functools import reduce
+
 from Directive import Directive
 from Production import epsilon, Production
 from Token import Token
@@ -15,9 +17,54 @@ class Grammar:
             self.prods[prod.non_terminal] = prod
 
     def left_factorize_prods(self):
+        grammar_changed = True
+        unchecked_prods = list(self.prods.values())
         new_prods = []
-        for prod in self.prods:
-            new_prods += self.prods[prod].left_factorize()
+        while grammar_changed:
+            grammar_changed = False
+            for prod in list(unchecked_prods):
+                index = 0
+                prefix = []
+                while True:
+                    if any((len(rhs) <= index or rhs == epsilon) for rhs in prod.rhses):
+                        break
+                    if all(ith_term == prod.rhses[0][index] for ith_term in list(rhs[index] for rhs in prod.rhses)):
+                        prefix.append(prod.rhses[0][index])
+                        index += 1
+                    else:
+                        break
+                unchecked_prods.remove(prod)
+                if index > 0:
+                    prefix_name = reduce(lambda str1, str2: str(str1) + str(str2), prefix)
+                    suffix_name = prod.non_terminal + "." + prefix_name
+                    new_prods.append(Production(prod.non_terminal, [prefix + [suffix_name]]))
+                    new_rhses = list((epsilon if len(rhs) <= index else rhs[index:]) for rhs in prod.rhses)
+                    unchecked_prods.append(Production(suffix_name, new_rhses))
+                    grammar_changed = True
+                else:
+                    groups = dict()
+                    for rhs in prod.rhses:
+                        if rhs != epsilon:
+                            if not (rhs[0] in groups):
+                                groups[rhs[0]] = []
+                            groups[rhs[0]] = rhs
+                        else:
+                            groups[epsilon[0]] = epsilon
+                    if len(groups) == len(prod.rhses):
+                        new_prods.append(prod)
+                    else:
+                        new_rhses = []
+                        for term in groups:
+                            if term == epsilon[0]:
+                                new_rhses += epsilon
+                            elif len(groups[term]) == 1:
+                                new_rhses += groups[term][0]
+                            else:
+                                new_prod_name = prod.non_terminal + "." + str(term)
+                                new_rhses.append([new_prod_name])
+                                unchecked_prods += Production(new_prod_name, [groups[term]])
+                        unchecked_prods.append(Production(prod.non_terminal, new_rhses))
+                        grammar_changed = True
         self.make_prods(new_prods)
 
     def remove_left_recursion(self):
@@ -47,29 +94,6 @@ class Grammar:
                                                           [alpha_i + [non_terminal_new] for alpha_i in alpha_set])
                 self.prods[non_terminal_new].rhses += [epsilon]
 
-    def find_epsilon_non_terminals(self):
-        epsilon_non_terminals = []
-        for prod in self.prods.values():
-            for sub_prod in prod.sub_prods:
-                if len(sub_prod) == 1 and sub_prod[0] == "":
-                    epsilon_non_terminals.append(prod.none_terminal)
-                else:
-                    for term in sub_prod:
-                        pass  # TODO
-
-    def make_first_sets(self):
-        pass
-
-    def make_follow_sets(self):
-        pass
-
-    def make_grammar_ll1(self):
-        self.remove_left_recursion()
-        self.left_factorize_prods()
-        self.find_epsilon_non_terminals()
-        self.make_first_sets()
-        self.make_follow_sets()
-
     @staticmethod
     def make_grammar(compressed_prods):
         start = compressed_prods[0][0]
@@ -83,19 +107,19 @@ class Grammar:
 class LL1Grammar:
     def __init__(self, grammar):
         self.grammar = grammar
-        self.grammar.remove_left_recursion()
         self.grammar.left_factorize_prods()
+        self.grammar.remove_left_recursion()
         self.epsilons = list()
         self.first_sets = dict()
         self.follow_sets = dict()
-        # self.find_epsilon_non_terminals()
-        # self.make_first_sets()
-        # self.make_follow_sets()
+        self.find_epsilon_non_terminals()
+        self.make_first_sets()
+        self.make_follow_sets()
 
     def find_epsilon_non_terminals(self):
         self.epsilons = list()
         for prod in self.grammar.prods.values():
-            if [epsilon] in prod.rhses:
+            if epsilon in prod.rhses:
                 self.epsilons.append(prod.non_terminal)
         epsilons_changed = True
         while epsilons_changed:
@@ -116,21 +140,55 @@ class LL1Grammar:
             grammar_changed = False
             for prod in self.grammar.prods.values():
                 for rhs in prod.rhses:
-                    if not rhs == [epsilon]:
-                        for value in rhs:
+                    if not (rhs == epsilon):
+                        for value in list(filter(lambda x: not isinstance(x, Directive), rhs)):
                             if isinstance(value, Token):
                                 if not (value in self.first_sets[prod.non_terminal]):
                                     self.first_sets[prod.non_terminal][value] = rhs
                                     grammar_changed = True
-                            elif not isinstance(value, Directive):
+                            else:
                                 for token in self.first_sets[value]:
                                     if not (token in self.first_sets[prod.non_terminal]):
                                         self.first_sets[prod.non_terminal][token] = rhs
                                         grammar_changed = True
-                            if not ((value in self.epsilons) or (isinstance(value, Directive))):
+                            if not value in self.epsilons:
                                 break
 
     def make_follow_sets(self):
         for non_terminal in self.grammar.prods.keys():
-            self.follow_sets[non_terminal] = dict()
-        # TODO
+            self.follow_sets[non_terminal] = set()
+        grammar_changed = True
+        while grammar_changed:
+            grammar_changed = False
+            for prod in self.grammar.prods.values():
+                for simple_rhs in prod.rhses:
+                    rhs = list(filter(lambda x: not isinstance(x, Directive), simple_rhs))
+                    if not (rhs == epsilon):
+                        for i in range(len(rhs) - 1):
+                            if rhs[i] in self.follow_sets:
+                                index = i + 1
+                                while True:
+                                    if index >= len(rhs):
+                                        break
+                                    if isinstance(rhs[index], Token):
+                                        grammar_changed = not (rhs[index] in self.follow_sets[rhs[i]])
+                                        self.follow_sets[rhs[i]].add(rhs[index])
+                                        break
+                                    elif rhs[index] in self.first_sets:
+                                        for token in self.first_sets[rhs[index]]:
+                                            if not (token in self.follow_sets[rhs[i]]):
+                                                grammar_changed = True
+                                                self.follow_sets[rhs[i]].add(token)
+                                        if not (rhs[index] in self.epsilons):
+                                            break
+                                    index = index + 1
+            for none_terminal in self.epsilons:
+                for simple_rhs in self.grammar.prods[none_terminal].rhses:
+                    rhs = list(filter(lambda x: not isinstance(x, Directive), simple_rhs))
+                    if rhs != epsilon:
+                        if all(value in self.epsilons for value in rhs):
+                            for value in rhs:
+                                for token in self.follow_sets[value]:
+                                    if not (token in self.follow_sets[none_terminal]):
+                                        self.follow_sets[none_terminal].add(token)
+                                        grammar_changed = True
