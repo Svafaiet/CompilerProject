@@ -2,6 +2,7 @@ from Grammar import Grammar
 from FSM import FSM
 from Production import epsilon
 import copy
+from Token import CTokenType, Token
 
 
 class Parser:
@@ -27,18 +28,41 @@ class Parser:
             self.current_fsm.change_state(next_token)
             if self.current_fsm.current_state == self.current_fsm.final:
                 self.final_state_proc()
-            return False, True
-        else:
+            return False, True, None
+        elif self.is_valid(next_token):
             for edge in curr.transitions:
                 if isinstance(edge, str):
-                    if next_token in self.grammar.first_sets[edge] or epsilon in self.grammar.first_sets[edge] and next_token in self.grammar.follow_sets[edge]:
+                    if next_token in self.grammar.first_sets[edge] or epsilon in self.grammar.first_sets[edge] and \
+                            next_token in self.grammar.follow_sets[edge]:
                         self.non_terminal_proc(edge)
                         self.current_fsm = self.state_diagram[edge]
                         self.current_fsm.current_state = self.current_fsm.start
-                        return False, False
+                        return False, False, None
                 elif edge == epsilon[0] and next_token in self.grammar.follow_sets[self.current_fsm.name]:
                     self.final_state_proc()
-                    return False, False
+                    return False, False, None
+        else:
+            eof = Token(CTokenType.EOF)
+            if next_token == eof:
+                return True, False, (3, next_token)
+            elif eof in curr.transitions:
+                return True, False, (4, next_token)
+            else:
+                for edge in curr.transitions:
+                    if isinstance(edge, str):
+                        if next_token in self.grammar.follow_sets[edge]:
+                            self.current_fsm.change_state(edge)
+                            if self.current_fsm.current_state == self.current_fsm.final:
+                                self.final_state_proc()
+                            return True, True, (2, edge)
+                        else:
+                            return True, True, (1, next_token)
+                    else:
+                        self.current_fsm.change_state(edge)
+                        if self.current_fsm.current_state == self.current_fsm.final:
+                            self.final_state_proc()
+                        return True, False, (0, next_token)
+
 
     def non_terminal_proc(self, edge):
         fsm = copy.copy(self.current_fsm)
@@ -56,3 +80,14 @@ class Parser:
             return
         except IndexError:
             return
+
+    def is_valid(self, next_token):
+        curr = self.current_fsm.current_state
+        for edge in curr.transitions:
+            if isinstance(edge, str):
+                if next_token in self.grammar.first_sets[edge] or epsilon in self.grammar.first_sets[edge] and \
+                        next_token in self.grammar.follow_sets[edge]:
+                    return True
+            elif edge == epsilon[0] and next_token in self.grammar.follow_sets[self.current_fsm.name]:
+                return True
+        return False
