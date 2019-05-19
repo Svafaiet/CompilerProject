@@ -37,6 +37,7 @@ while True:
     if get_next:
         tok = inp[count]
         count += 1
+        print(count)
     if parser.current_fsm.name == parser.grammar.grammar.start_symbol and \
             parser.current_fsm.current_state == parser.current_fsm.final and\
             tok == Token(CTokenType.EOF):

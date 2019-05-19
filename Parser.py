@@ -58,7 +58,11 @@ class Parser:
                         else:
                             return True, True, (1, next_token)
                     else:
-                        return True, True, (0, edge)
+                        self.current_fsm.change_state(edge)
+                        if self.current_fsm.current_state == self.current_fsm.final:
+                            self.final_state_proc()
+                        return True, False, (0, next_token)
+
 
     def non_terminal_proc(self, edge):
         fsm = copy.copy(self.current_fsm)
