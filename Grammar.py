@@ -161,8 +161,8 @@ class LL1Grammar:
         while grammar_changed:
             grammar_changed = False
             for prod in self.grammar.prods.values():
-                for simple_rhs in prod.rhses:
-                    rhs = list(filter(lambda x: not isinstance(x, Directive), simple_rhs))
+                for naive_rhs in prod.rhses:
+                    rhs = list(filter(lambda x: not isinstance(x, Directive), naive_rhs))
                     if not (rhs == epsilon):
                         for i in range(len(rhs) - 1):
                             if rhs[i] in self.follow_sets:
@@ -181,14 +181,22 @@ class LL1Grammar:
                                                 self.follow_sets[rhs[i]].add(token)
                                         if not (rhs[index] in self.epsilons):
                                             break
-                                    index = index + 1
-            for none_terminal in self.epsilons:
-                for simple_rhs in self.grammar.prods[none_terminal].rhses:
-                    rhs = list(filter(lambda x: not isinstance(x, Directive), simple_rhs))
-                    if rhs != epsilon:
-                        if all(value in self.epsilons for value in rhs):
-                            for value in rhs:
-                                for token in self.follow_sets[value]:
-                                    if not (token in self.follow_sets[none_terminal]):
-                                        self.follow_sets[none_terminal].add(token)
-                                        grammar_changed = True
+                                    index += 1
+        grammar_changed = True
+        while grammar_changed:
+            grammar_changed = False
+            for none_terminal in self.grammar.prods:
+                for naive_rhs in self.grammar.prods[none_terminal].rhses:
+                    rhs = list(filter(lambda x: not isinstance(x, Directive), naive_rhs))
+                    if rhs[0] != epsilon[0]:
+                        follow_chain = [none_terminal] + list(reversed(rhs))
+                        for i in range(1, len(follow_chain)):
+                            value = follow_chain[i]
+                            if isinstance(value, Token):
+                                break
+                            for token in self.follow_sets[follow_chain[i - 1]]:
+                                if not (token in self.follow_sets[value]):
+                                    self.follow_sets[value].add(token)
+                                    grammar_changed = True
+                            if not (value in self.epsilons):
+                                break
