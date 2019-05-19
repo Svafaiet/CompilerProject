@@ -105,6 +105,11 @@ class Grammar:
 
 
 class LL1Grammar:
+    """
+        first sets don't contain epsilon however values which lead to epsilons are kept in epsilons
+        EOF does not automatically added to first product in grammar
+        first sets keep next rhs in dfa table for each none terminal and token
+    """
     def __init__(self, grammar):
         self.grammar = grammar
         self.grammar.left_factorize_prods()
