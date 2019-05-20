@@ -27,8 +27,7 @@ class Compiler:
                 token, line = next(tok_gen)
 
             if self.parser.current_fsm.name == parser.grammar.grammar.start_symbol and \
-                    parser.current_fsm.current_state == parser.current_fsm.final and \
-                    token == Token(CTokenType.EOF):
+                    parser.current_fsm.current_state == parser.current_fsm.final:
                 print("Successfully parsed input file")
                 return
 

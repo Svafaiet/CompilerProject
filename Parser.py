@@ -32,7 +32,7 @@ class Parser:
         elif self.is_valid(next_token):
             for edge in curr.transitions:
                 if isinstance(edge, str):
-                    if next_token in self.grammar.first_sets[edge] or epsilon in self.grammar.first_sets[edge] and \
+                    if next_token in self.grammar.first_sets[edge] or edge in self.grammar.epsilons and \
                             next_token in self.grammar.follow_sets[edge]:
                         self.non_terminal_proc(edge)
                         self.current_fsm = self.state_diagram[edge]
@@ -85,7 +85,7 @@ class Parser:
         curr = self.current_fsm.current_state
         for edge in curr.transitions:
             if isinstance(edge, str):
-                if next_token in self.grammar.first_sets[edge] or epsilon in self.grammar.first_sets[edge] and \
+                if next_token in self.grammar.first_sets[edge] or edge in self.grammar.epsilons and \
                         next_token in self.grammar.follow_sets[edge]:
                     return True
             elif edge == epsilon[0] and next_token in self.grammar.follow_sets[self.current_fsm.name]:

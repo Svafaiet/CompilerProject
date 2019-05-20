@@ -27,4 +27,7 @@ class Token:
         return hash(self.token_value)
 
     def __str__(self):
-        return str(self.token_type) + "-with_value-" + str(self.token_value)
+        if self.token_value:
+            return self.token_value
+        else:
+            return str(self.token_type)

@@ -12,7 +12,7 @@ def test_epsilons(ll1_grammar):
     print("epsilons: {}", ll1_grammar.epsilons)
 
 rules = [
-    ["E", ["T", "A"]],
+    ["E", ["T", "A", "C", Token(CTokenType.EOF)]],
     ["A", [cs("+"), "T", "A"], epsilon],
     ["T", ["F", "B"]],
     ["B",
@@ -20,38 +20,42 @@ rules = [
      epsilon
      ],
     ["F", [cs("("), "E", cs(")")], [Token(CTokenType.ID)]],
-    ["left", [cs("*"), "left_a"], [cs("*"), "left_a", cs("+")]],
-    ["left_a", [cs("+")], epsilon]
+    ["C", epsilon]
+    # ["left", [cs("*"), "left_a"], [cs("*"), "left_a", cs("+")]],
+    # ["left_a", [cs("+")], epsilon],
+    # ["R1", ["R2", cs("+")]],
+    # ["R2", ["R1", cs("*")], epsilon]
 ]
 
 
 grammar = LL1Grammar(Grammar.make_grammar(rules))
-test_rules(grammar.grammar)
-test_epsilons(grammar)
-grammar.first_sets = {"E": [cs("("), Token(CTokenType.ID)],
-                      "A": [cs("+"), epsilon],
-                      "T": [cs("("), Token(CTokenType.ID)],
-                      "B": [cs("*"), epsilon],
-                      "F": [cs("("), Token(CTokenType.ID)]}
+# test_rules(grammar.grammar)
 
-grammar.follow_sets = {"E": [cs(")"), Token(CTokenType.EOF)],
-                       "A": [cs(")"), Token(CTokenType.EOF)],
-                       "T": [cs(")"), Token(CTokenType.EOF), cs("+")],
-                       "B": [cs(")"), Token(CTokenType.EOF), cs("+")],
-                       "F": [cs(")"), Token(CTokenType.EOF), cs("+"), cs("*")]}
 
+
+# test_epsilons(grammar)
+# # grammar.first_sets = {"E": [cs("("), Token(CTokenType.ID)],
+# #                       "A": [cs("+"), epsilon],
+# #                       "T": [cs("("), Token(CTokenType.ID)],
+# #                       "B": [cs("*"), epsilon],
+# #                       "F": [cs("("), Token(CTokenType.ID)]}
+# #
+# # grammar.follow_sets = {"E": [cs(")"), Token(CTokenType.EOF)],
+# #                        "A": [cs(")"), Token(CTokenType.EOF)],
+# #                        "T": [cs(")"), Token(CTokenType.EOF), cs("+")],
+# #                        "B": [cs(")"), Token(CTokenType.EOF), cs("+")],
+# #                        "F": [cs(")"), Token(CTokenType.EOF), cs("+"), cs("*")]}
+#
 parser = Parser(grammar)
-inp = [cs("("), Token(CTokenType.ID), cs(")"), Token(CTokenType.ID), cs(")"), Token(CTokenType.EOF)]
+inp = [Token(CTokenType.ID), Token(CTokenType.EOF)]
 tok = inp[0]
 count = 1
 while True:
     error_state, get_next, error_type = parser.parse(tok)
+    if parser.current_fsm.name == parser.grammar.grammar.start_symbol and \
+            parser.current_fsm.current_state == parser.current_fsm.final:
+        print("Successfully parsed input")
+        break
     if get_next:
         tok = inp[count]
         count += 1
-        print(count)
-    if parser.current_fsm.name == parser.grammar.grammar.start_symbol and \
-            parser.current_fsm.current_state == parser.current_fsm.final and\
-            tok == Token(CTokenType.EOF):
-        print("Successfully parsed input")
-        break
