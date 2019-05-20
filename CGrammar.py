@@ -34,7 +34,7 @@ compressed_grammar = [
     ["return-stmt", [ck("return"), cs(";")], [ck("return"), "expression", cs(";")]],
     ["switch-stmt", [ck("switch"), cs("("), "expression", cs(")"), cs("{"), "case-stmts", "default-stmt", cs("}")]],
     ["case-stmts", ["case-stmts", "case-stmt"], epsilon, ],
-    ["case-stmt", ["case", Token(CTokenType.NUM), cs(":"), "statement-list"]],
+    ["case-stmt", [ck("case"), Token(CTokenType.NUM), cs(":"), "statement-list"]],
     ["default-stmt",
      [ck("default"), cs(":"), "statement-list"],
      epsilon
