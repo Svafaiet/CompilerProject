@@ -36,7 +36,7 @@ class Grammar:
                 unchecked_prods.remove(prod)
                 if index > 0:
                     prefix_name = reduce(lambda str1, str2: str(str1) + str(str2), prefix)
-                    suffix_name = prod.non_terminal + "." + prefix_name
+                    suffix_name = prod.non_terminal + "." + str(prefix_name)
                     new_prods.append(Production(prod.non_terminal, [prefix + [suffix_name]]))
                     new_rhses = list((epsilon if len(rhs) <= index else rhs[index:]) for rhs in prod.rhses)
                     unchecked_prods.append(Production(suffix_name, new_rhses))
@@ -113,9 +113,9 @@ class LL1Grammar:
 
     def __init__(self, grammar):
         self.grammar = grammar
-        # self.grammar.left_factorize_prods()
+        self.grammar.left_factorize_prods()
         self.grammar.remove_left_recursion()
-        # self.clean_grammar()
+        self.clean_grammar()
         self.epsilons = list()
         self.first_sets = dict()
         self.follow_sets = dict()
