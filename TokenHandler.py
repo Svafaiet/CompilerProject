@@ -13,14 +13,11 @@ class TokenHandler:
         self.file_in = file_in
         self.file_error = file_error
 
-    # @return next_token, its_line
     def get_next_token(self):
         model = LexicalAnalyzer(self.file_in, self.dfa)
         token = model.get_next_token()
         with open(self.file_error, mode="a") as err_file:
             line = 1
-            last_line = 1
-            first_error = True
             try:
                 while True:
                     lexeme, tok, error = next(token)
@@ -30,14 +27,6 @@ class TokenHandler:
                             yield Token(token_type=tok, token_value=lexeme), line
                     else:
                         lexeme = lexeme.lstrip()
-                        if last_line == line:
-                            err_file.write("({}, invalid input) ".format(lexeme))
-                        else:
-                            if not first_error:
-                                err_file.write("\n")
-                            first_error = False
-                            err_file.write("{}. ".format(line))
-                            err_file.write("({}, invalid input) ".format(lexeme))
-                        last_line = line
+                        err_file.write("{}. ({}, invalid input)\n".format(line, lexeme))
             except StopIteration:
                 pass
