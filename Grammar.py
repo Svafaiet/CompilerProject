@@ -87,7 +87,7 @@ class Grammar:
             beta_set = [prod for prod in self.prods[non_terminal].rhses if prod[0] != non_terminal]
             if len(alpha_set) > 0:
                 self.prods.pop(non_terminal)
-                non_terminal_new = non_terminal + '_new'
+                non_terminal_new = non_terminal + '.new'
                 self.prods[non_terminal] = Production(non_terminal, [
                     beta_i + [non_terminal_new] if beta_i != epsilon else [non_terminal_new] for beta_i in beta_set])
                 self.prods[non_terminal_new] = Production(non_terminal_new,
@@ -110,10 +110,12 @@ class LL1Grammar:
         EOF does not automatically added to first product in grammar
         first sets keep next rhs in dfa table for each none terminal and token
     """
+
     def __init__(self, grammar):
         self.grammar = grammar
-        self.grammar.left_factorize_prods()
+        # self.grammar.left_factorize_prods()
         self.grammar.remove_left_recursion()
+        # self.clean_grammar()
         self.epsilons = list()
         self.first_sets = dict()
         self.follow_sets = dict()
@@ -205,3 +207,19 @@ class LL1Grammar:
                                     grammar_changed = True
                             if not (value in self.epsilons):
                                 break
+
+    def clean_grammar(self):
+        grammar_changed = True
+        while grammar_changed:
+            grammar_changed = False
+            for prod in list(self.grammar.prods.values()):
+                if (len(prod.rhses) == 1) and (epsilon in prod.rhses):
+                    for other_prod in list(self.grammar.prods.values()):
+                        for rhs in other_prod.rhses:
+                            if prod.non_terminal in rhs:
+                                rhs.remove(prod.non_terminal)
+                        for i in range(len(other_prod.rhses)):
+                            if len(other_prod.rhses[i]) == 0:
+                                other_prod.rhses[i] = epsilon
+                    grammar_changed = True
+                    self.grammar.prods.pop(prod.non_terminal)
