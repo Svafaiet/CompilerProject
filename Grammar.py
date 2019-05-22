@@ -47,22 +47,22 @@ class Grammar:
                         if rhs != epsilon:
                             if not (rhs[0] in groups):
                                 groups[rhs[0]] = []
-                            groups[rhs[0]] = rhs
+                            groups[rhs[0]].append(rhs)
                         else:
-                            groups[epsilon[0]] = epsilon
+                            groups[epsilon[0]] = [epsilon]
                     if len(groups) == len(prod.rhses):
                         new_prods.append(prod)
                     else:
                         new_rhses = []
                         for term in groups:
                             if term == epsilon[0]:
-                                new_rhses += epsilon
+                                new_rhses.append(epsilon)
                             elif len(groups[term]) == 1:
-                                new_rhses += groups[term][0]
+                                new_rhses.append(groups[term][0])
                             else:
                                 new_prod_name = prod.non_terminal + "." + str(term)
                                 new_rhses.append([new_prod_name])
-                                unchecked_prods += Production(new_prod_name, [groups[term]])
+                                unchecked_prods.append(Production(new_prod_name, groups[term]))
                         unchecked_prods.append(Production(prod.non_terminal, new_rhses))
                         grammar_changed = True
         self.make_prods(new_prods)
@@ -113,8 +113,8 @@ class LL1Grammar:
 
     def __init__(self, grammar):
         self.grammar = grammar
-        self.grammar.left_factorize_prods()
         self.grammar.remove_left_recursion()
+        self.grammar.left_factorize_prods()
         self.clean_grammar()
         self.epsilons = list()
         self.first_sets = dict()

@@ -8,7 +8,7 @@ from DFA import DFA
 def make_c_lexical_dfa():
     digits = '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
     letters = tuple(string.ascii_lowercase) + tuple(string.ascii_uppercase)
-    symbols = ';', ':', ',', '[', ']', '(', ')', '{', '}', '+', '-', '<'
+    symbols = ';', ':', ',', '[', ']', '(', ')', '{', '}', '+', '-', '<', '>', '*'
     # without '='
     keywords = "if", "else", "void", "int", "while", "break", "continue", "switch", "default", "case", "return"
     # no keyword must contain other keywords

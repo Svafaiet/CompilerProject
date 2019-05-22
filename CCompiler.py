@@ -17,19 +17,23 @@ class Compiler:
         tok_gen = self.token_handler.get_next_token()
         token, line = next(tok_gen)
         while True:
+            if token.token_type == CTokenType.ID or token.token_type == CTokenType.EOF \
+                    or token.token_type == CTokenType.NUM:
+                token.token_value = None
             error, next_token_needed, error_type = parser.parse(token)
             if error:
                 err_type, tok = error_type
                 self.handle_errors(err_type, line, tok)
                 if err_type == 3 or err_type == 4:
                     return
-            if next_token_needed:
-                token, line = next(tok_gen)
 
             if self.parser.current_fsm.name == parser.grammar.grammar.start_symbol and \
                     parser.current_fsm.current_state == parser.current_fsm.final:
                 print("Successfully parsed input file")
                 return
+
+            if next_token_needed:
+                token, line = next(tok_gen)
 
     def handle_errors(self, error_type, line, token):
         with open(file=self.token_handler.file_error, mode="a") as f:
@@ -54,3 +58,5 @@ not_printing_tokens = [CTokenType.WHITE_SPACE, CTokenType.COMMENT]
 c_token_handler = TokenHandler(c_lexical_dfa, not_printing_tokens)
 grammar = LL1Grammar(Grammar.make_grammar(compressed_grammar))
 parser = Parser(grammar)
+compiler = Compiler(c_token_handler, parser)
+compiler.compile(DEFAULT_FILE_IN_NAME, DEFAULT_FILE_OUT_NAME, DEFAULT_FILE_ERROR_NAME)
