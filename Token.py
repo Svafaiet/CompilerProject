@@ -8,6 +8,8 @@ class CTokenType(Enum):
     SYMBOL = "SYMBOL"
     COMMENT = "COMMENT"
     WHITE_SPACE = "WHITESPACE"
+
+# class TokenType(Enum):
     EOF = "EOF"
 
 
@@ -20,8 +22,8 @@ class Token:
         if not isinstance(other, Token):
             return False
         return (self.token_type == other.token_type) and \
-               (self.token_value == other.token_value if
-                (self.token_value is not None) and (other.token_value is not None) else True)
+               (True if (self.token_value is None) or (other.token_value is None)
+                else self.token_value == other.token_value)
 
     def __hash__(self):
         return hash(self.token_value)
