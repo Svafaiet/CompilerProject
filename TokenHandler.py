@@ -16,17 +16,17 @@ class TokenHandler:
     def get_next_token(self):
         model = LexicalAnalyzer(self.file_in, self.dfa)
         token = model.get_next_token()
-        with open(self.file_error, mode="a") as err_file:
-            line = 1
-            try:
-                while True:
-                    lexeme, tok, error = next(token)
-                    line += lexeme.count("\n")
-                    if not error:
-                        if tok not in self.excluded_tokens:
-                            yield Token(token_type=tok, token_value=lexeme), line
-                    else:
-                        lexeme = lexeme.lstrip()
+        line = 1
+        try:
+            while True:
+                lexeme, tok, error = next(token)
+                line += lexeme.count("\n")
+                if not error:
+                    if tok not in self.excluded_tokens:
+                        yield Token(token_type=tok, token_value=lexeme), line
+                else:
+                    lexeme = lexeme.lstrip()
+                    with open(self.file_error, mode="a") as err_file:
                         err_file.write("{}. ({}, invalid input)\n".format(line, lexeme))
-            except StopIteration:
-                pass
+        except StopIteration:
+            pass

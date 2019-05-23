@@ -1,4 +1,6 @@
 import CLexicalDFA
+from ParseHandler import ParserHandler
+from ParseTree import ParseTree
 from Token import CTokenType, Token
 from TokenHandler import TokenHandler
 from Token import CTokenType
@@ -8,45 +10,19 @@ from Grammar import LL1Grammar, Grammar
 
 
 class Compiler:
-    def __init__(self, token_handler, parser):
+    def __init__(self, token_handler, parse_handler):
         self.token_handler = token_handler
-        self.parser = parser
+        self.parse_handler = parse_handler
 
     def compile(self, file_in, file_out, file_error):
         self.token_handler.set_files(file_in=file_in, file_error=file_error)
+        self.parse_handler.set_files(file_error=file_error)
+        parse_tree = self.parse_handler.parser.parse_tree
         tok_gen = self.token_handler.get_next_token()
-        token, line = next(tok_gen)
-        while True:
-            if token.token_type == CTokenType.ID or token.token_type == CTokenType.EOF \
-                    or token.token_type == CTokenType.NUM:
-                token.token_value = None
-            error, next_token_needed, error_type = parser.parse(token)
-            if error:
-                err_type, tok = error_type
-                self.handle_errors(err_type, line, tok)
-                if err_type == 3 or err_type == 4:
-                    return
-
-            if self.parser.current_fsm.name == parser.grammar.grammar.start_symbol and \
-                    parser.current_fsm.current_state == parser.current_fsm.final:
-                print("Successfully parsed input file")
-                return
-
-            if next_token_needed:
-                token, line = next(tok_gen)
-
-    def handle_errors(self, error_type, line, token):
-        with open(file=self.token_handler.file_error, mode="a") as f:
-            if error_type == 0:
-                f.write("{}: Syntax Error! Missing {}\n".format(line, token.token_type))
-            elif error_type == 1:
-                f.write("{}: Syntax Error! Unexpected {}\n".format(line, token.token_type))
-            elif error_type == 2:
-                f.write("{}: Syntax Error! Missing {}\n".format(line, token))
-            elif error_type == 3:
-                f.write("{}: Syntax Error! Unexpected EndOfFile\n".format(line))
-            elif error_type == 4:
-                f.write("{}: Syntax Error! Malformed Input\n".format(line))
+        is_terminated, error = False, False
+        while not is_terminated:
+            tok, line = next(tok_gen)
+            is_terminated, error = self.parse_handler.parse_token(tok, line)
 
 
 DEFAULT_FILE_IN_NAME = "scanner.txt"
@@ -58,5 +34,6 @@ not_printing_tokens = [CTokenType.WHITE_SPACE, CTokenType.COMMENT]
 c_token_handler = TokenHandler(c_lexical_dfa, not_printing_tokens)
 grammar = LL1Grammar(Grammar.make_grammar(compressed_grammar))
 parser = Parser(grammar)
-compiler = Compiler(c_token_handler, parser)
+parse_handler = ParserHandler(parser)
+compiler = Compiler(c_token_handler, parse_handler)
 compiler.compile(DEFAULT_FILE_IN_NAME, DEFAULT_FILE_OUT_NAME, DEFAULT_FILE_ERROR_NAME)
