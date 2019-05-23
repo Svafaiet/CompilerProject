@@ -7,11 +7,9 @@ class ParseTree:
         self.root = None
         self.stack = []
 
-    def init(self, rhs):
-        self.root = Node(rhs)
-        self.stack.append(self.root)
-
     def iterate(self, value):
+        if len(self.stack) == 0:
+            return
         top = self.stack.pop()
         top.iterate(value)
         if not top.is_finished():
@@ -21,11 +19,11 @@ class ParseTree:
 
     def insert_rhs(self, rhs):
         self.stack.append(Node(rhs))
+        if self.root == None:
+            self.root = self.stack[0]
 
     def view(self):
-        ans = ""
-        for i, value in enumerate(self.stack):
-            ans += value.view("\t" * i)
+        return self.root.view("")
 
 
 class Node:

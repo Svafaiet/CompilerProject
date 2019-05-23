@@ -28,20 +28,23 @@ class Parser:
         curr = self.current_fsm.current_state
         if next_token in curr.transitions:
             self.current_fsm.change_state(next_token)
+            self.parse_tree.iterate(next_token)
             if self.current_fsm.current_state == self.current_fsm.final:
                 self.final_state_proc()
             return False, True, None
         elif self.is_valid(next_token):
             for edge in curr.transitions:
                 if isinstance(edge, str):
-                    if next_token in self.grammar.first_sets[edge] or edge in self.grammar.epsilons and \
-                            next_token in self.grammar.follow_sets[edge]:
+                    if next_token in self.grammar.first_sets[edge]\
+                            or edge in self.grammar.epsilons and next_token in self.grammar.follow_sets[edge]:
                         self.non_terminal_proc(edge)
                         self.current_fsm = self.state_diagram[edge]
                         self.current_fsm.current_state = self.current_fsm.start
+                        self.parse_tree.insert_rhs(self.grammar.first_sets[edge][next_token])
                         return False, False, None
                 elif edge == epsilon[0] and next_token in self.grammar.follow_sets[self.current_fsm.name]:
                     self.final_state_proc()
+                    self.parse_tree.insert_rhs(epsilon)
                     return False, False, None
         else:
             eof = Token(CTokenType.EOF)
