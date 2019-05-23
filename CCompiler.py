@@ -1,5 +1,6 @@
 import CLexicalDFA
 from ParseHandler import ParserHandler
+from ParseTree import ParseTree
 from Token import CTokenType, Token
 from TokenHandler import TokenHandler
 from Token import CTokenType
@@ -16,11 +17,12 @@ class Compiler:
     def compile(self, file_in, file_out, file_error):
         self.token_handler.set_files(file_in=file_in, file_error=file_error)
         self.parse_handler.set_files(file_error=file_error)
+        parse_tree = self.parse_handler.parser.parse_tree
         tok_gen = self.token_handler.get_next_token()
-        is_terminated = False
+        is_terminated, error = False, False
         while not is_terminated:
             tok, line = next(tok_gen)
-            is_terminated = self.parse_handler.parse_token(tok, line)
+            is_terminated, error = self.parse_handler.parse_token(tok, line)
 
 
 DEFAULT_FILE_IN_NAME = "scanner.txt"

@@ -25,15 +25,15 @@ class ParserHandler:
                 err_type, tok = error_type
                 self.handle_errors(err_type, line, tok)
                 if err_type == 3 or err_type == 4:
-                    return True
+                    return True, True
 
             if self.parser.current_fsm.name == self.parser.grammar.grammar.start_symbol and \
                     self.parser.current_fsm.current_state == self.parser.current_fsm.final:
                 print("Successfully parsed input file")
-                return True
+                return True, error
 
             if next_token_needed:
-                return False
+                return False, error
 
     def handle_errors(self, error_type, line, token):
         with open(file=self.file_error, mode="a") as f:

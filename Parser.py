@@ -1,5 +1,6 @@
 from Grammar import Grammar
 from FSM import FSM
+from ParseTree import ParseTree
 from Production import epsilon
 import copy
 from Token import CTokenType, Token
@@ -12,6 +13,7 @@ class Parser:
         self.build_state_diagram()
         self.current_fsm = self.state_diagram[self.grammar.grammar.start_symbol]
         self.stack = []
+        self.parse_tree = ParseTree()
 
     def build_state_diagram(self):
         for prod in self.grammar.grammar.prods:
