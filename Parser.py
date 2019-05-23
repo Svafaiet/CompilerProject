@@ -35,12 +35,13 @@ class Parser:
         elif self.is_valid(next_token):
             for edge in curr.transitions:
                 if isinstance(edge, str):
-                    if next_token in self.grammar.first_sets[edge]\
-                            or edge in self.grammar.epsilons and next_token in self.grammar.follow_sets[edge]:
+                    if next_token in self.grammar.first_sets[edge] or edge in self.grammar.epsilons and \
+                            next_token in self.grammar.follow_sets[edge]:
+                        if curr == self.current_fsm.start:
+                            self.parse_tree.insert_rhs(self.grammar.first_sets[self.current_fsm.name][next_token])
                         self.non_terminal_proc(edge)
                         self.current_fsm = self.state_diagram[edge]
                         self.current_fsm.current_state = self.current_fsm.start
-                        self.parse_tree.insert_rhs(self.grammar.first_sets[edge][next_token])
                         return False, False, None
                 elif edge == epsilon[0] and next_token in self.grammar.follow_sets[self.current_fsm.name]:
                     self.final_state_proc()
@@ -66,7 +67,7 @@ class Parser:
                         self.current_fsm.change_state(edge)
                         if self.current_fsm.current_state == self.current_fsm.final:
                             self.final_state_proc()
-                        return True, False, (0, next_token)
+                        return True, False, (0, edge)
 
     def non_terminal_proc(self, edge):
         fsm = copy.copy(self.current_fsm)
