@@ -26,6 +26,7 @@ class ParseTree:
         ans = ""
         for i, value in enumerate(self.stack):
             ans += value.view("\t" * i)
+        return ans
 
 
 class Node:
