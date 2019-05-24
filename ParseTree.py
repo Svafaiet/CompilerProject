@@ -63,11 +63,11 @@ class Node:
         if self.rhs != epsilon:
             for i, value in list(filter(lambda x: not isinstance(x[1], Directive) ,enumerate(self.rhs[:self.index]))):
                 ans += prefix
-                ans += "|--> "
+                ans += "|- "
                 ans += str(value)
                 ans += "\n"
                 if isinstance(value, str):
-                    ans += self.children[i].view(prefix + "\t")
+                    ans += self.children[i].view(prefix + " ")
         else:
-            ans = prefix + "|-->EPSILON\n"
+            ans = prefix + "|- EPSILON\n"
         return ans
