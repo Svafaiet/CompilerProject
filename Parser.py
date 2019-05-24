@@ -37,7 +37,9 @@ class Parser:
                     if next_token in self.grammar.first_sets[edge] or edge in self.grammar.epsilons and \
                             next_token in self.grammar.follow_sets[edge]:
                         if curr == self.current_fsm.start:
-                            self.parse_tree.insert_rhs(self.get_rhs(next_token))
+                            rhs = self.get_rhs(next_token)
+                            self.current_fsm.start.rhs = rhs
+                            self.current_fsm.final.rhs = rhs
                         self.non_terminal_proc(edge)
                         self.current_fsm = self.state_diagram[edge]
                         self.current_fsm.current_state = self.current_fsm.start
