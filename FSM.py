@@ -6,6 +6,7 @@ class State:
     def __init__(self, num, transitions):
         self.num = num
         self.transitions = transitions
+        self.rhs = None
 
     def add_edge(self, label, next_state):
         self.transitions[label] = State(next_state, {})
@@ -35,6 +36,7 @@ class FSM:
                 current.add_edge(p, count)
                 count += 1
                 current = current.get_next(p)
+                current.rhs = rhs
             current.add_edge(rhs[-1], self.final.num)
             count += 1
 
