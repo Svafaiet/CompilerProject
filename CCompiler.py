@@ -24,7 +24,6 @@ class Compiler:
         while not is_terminated:
             tok, line = next(tok_gen)
             is_terminated, error = self.parse_handler.parse_token(tok, line)
-        print(parse_tree.view())
 
     @staticmethod
     def empty_files(file_out, file_error):

@@ -1,7 +1,2 @@
-4: Syntax Error! Unexpected CTokenType.ID
-4: Syntax Error! Unexpected CTokenType.ID
-4: Syntax Error! Unexpected CTokenType.SYMBOL
-4: Syntax Error! Unexpected CTokenType.SYMBOL
-4: Syntax Error! Missing params
-4: Syntax Error! Missing CTokenType.SYMBOL
-16: Syntax Error! Missing CTokenType.SYMBOL
+1. (i$, invalid input)
+1: Syntax Error! Malformed Input
