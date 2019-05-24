@@ -7,7 +7,6 @@ from Token import CTokenType
 from Parser import Parser
 from CGrammar import compressed_grammar
 from Grammar import LL1Grammar, Grammar
-from test import rules
 
 
 class Compiler:
