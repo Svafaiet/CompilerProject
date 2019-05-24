@@ -25,6 +25,11 @@ class Compiler:
             tok, line = next(tok_gen)
             is_terminated, error = self.parse_handler.parse_token(tok, line)
 
+        view = parser.parse_tree.view()
+        with open(file=file_out, mode="w") as f:
+            f.write(grammar.grammar.start_symbol + "\n")
+            f.write(view)
+
     @staticmethod
     def empty_files(file_out, file_error):
         # with(open(file=file_out, mode="w")):
@@ -46,6 +51,3 @@ parser = Parser(grammar)
 parse_handler = ParserHandler(parser)
 compiler = Compiler(c_token_handler, parse_handler)
 compiler.compile(DEFAULT_FILE_IN_NAME, DEFAULT_FILE_OUT_NAME, DEFAULT_FILE_ERROR_NAME)
-view = parser.parse_tree.view()
-print(grammar.grammar.start_symbol)
-print(view)
