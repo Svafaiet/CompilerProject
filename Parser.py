@@ -36,8 +36,6 @@ class Parser:
             self.current_fsm.change_state(next_token)
             if self.current_fsm.current_state == self.current_fsm.final:
                 self.final_state_proc()
-            # if curr == self.current_fsm.start:
-            #     self.parse_tree.insert_rhs(self.current_fsm.current_state.rhs)
             self.parse_tree.iterate(next_token)
             return False, True, None
         elif self.is_valid(next_token):
@@ -70,16 +68,18 @@ class Parser:
                 for edge in curr.transitions:
                     if isinstance(edge, str):
                         if next_token in self.grammar.follow_sets[edge]:
+                            self.parse_tree.iterate(None)
                             self.current_fsm.change_state(edge)
                             if self.current_fsm.current_state == self.current_fsm.final:
                                 self.final_state_proc()
                             return True, True, (2, edge)
                         else:
                             return True, True, (1, next_token)
-                    else:
+                    else: #todo directive
                         self.current_fsm.change_state(edge)
                         if self.current_fsm.current_state == self.current_fsm.final:
                             self.final_state_proc()
+                        self.parse_tree.iterate(edge) #fixme remove next phase
                         return True, False, (0, edge)
 
     def non_terminal_proc(self, edge):

@@ -15,6 +15,7 @@ class Compiler:
         self.parse_handler = parse_handler
 
     def compile(self, file_in, file_out, file_error):
+        Compiler.empty_files(file_out, file_error)
         self.token_handler.set_files(file_in=file_in, file_error=file_error)
         self.parse_handler.set_files(file_error=file_error)
         parse_tree = self.parse_handler.parser.parse_tree
@@ -23,8 +24,15 @@ class Compiler:
         while not is_terminated:
             tok, line = next(tok_gen)
             is_terminated, error = self.parse_handler.parse_token(tok, line)
-        print(self.parse_handler.parser.grammar.grammar.start_symbol)
         print(parse_tree.view())
+
+    @staticmethod
+    def empty_files(file_out, file_error):
+        # with(open(file=file_out, mode="w")):
+        #     pass
+        with(open(file=file_error, mode="w")):
+            pass
+
 
 
 DEFAULT_FILE_IN_NAME = "scanner.txt"
@@ -39,3 +47,6 @@ parser = Parser(grammar)
 parse_handler = ParserHandler(parser)
 compiler = Compiler(c_token_handler, parse_handler)
 compiler.compile(DEFAULT_FILE_IN_NAME, DEFAULT_FILE_OUT_NAME, DEFAULT_FILE_ERROR_NAME)
+view = parser.parse_tree.view()
+print(grammar.grammar.start_symbol)
+print(view)
