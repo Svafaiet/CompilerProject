@@ -19,8 +19,16 @@ class ParseTree:
 
     def insert_rhs(self, rhs):
         self.stack.append(Node(rhs))
-        if self.root == None:
+        if self.root is None:
             self.root = self.stack[0]
+
+    def top_index(self):
+        if not self.stack:
+            return 0
+        top = self.stack.pop()
+        index = top.index
+        self.stack.append(top)
+        return index
 
     def view(self):
         return self.root.view("")
@@ -30,13 +38,18 @@ class Node:
     def __init__(self, rhs):
         self.rhs = rhs
         self.children = {}
-        self.index = 0
+        self.index = -1
         for i in range(len(rhs)):
             if not isinstance(rhs[i], Directive):
                 self.children[i] = None
+                if self.index == -1:
+                    self.index = i
+
+
 
     def iterate(self, value):
         self.children[self.index] = value
+        self.index += 1
         while self.index < len(self.rhs):
             if not isinstance(self.rhs[self.index], Directive):
                 break

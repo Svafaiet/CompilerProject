@@ -119,15 +119,24 @@ class LL1Grammar:
         self.epsilons = list()
         self.first_sets = dict()
         self.follow_sets = dict()
+        self.init_sets()
         self.find_epsilon_non_terminals()
         self.make_first_sets()
         self.make_follow_sets()
+
+    def init_sets(self):
+        self.epsilons = list()
+        for non_terminal in self.grammar.prods.keys():
+            self.first_sets[non_terminal] = dict()
+        for non_terminal in self.grammar.prods.keys():
+            self.follow_sets[non_terminal] = set()
 
     def find_epsilon_non_terminals(self):
         self.epsilons = list()
         for prod in self.grammar.prods.values():
             if epsilon in prod.rhses:
                 self.epsilons.append(prod.non_terminal)
+                self.first_sets[prod.non_terminal][epsilon[0]] = epsilon
         epsilons_changed = True
         while epsilons_changed:
             epsilons_changed = False
@@ -137,11 +146,11 @@ class LL1Grammar:
                         if all((isinstance(value, Directive) or value in self.epsilons) for value in rhs):
                             epsilons_changed = True
                             self.epsilons.append(prod.non_terminal)
+                            self.first_sets[prod.non_terminal][epsilon[0]] = rhs
                             break
 
     def make_first_sets(self):
-        for non_terminal in self.grammar.prods.keys():
-            self.first_sets[non_terminal] = dict()
+
         grammar_changed = True
         while grammar_changed:
             grammar_changed = False
@@ -162,8 +171,7 @@ class LL1Grammar:
                                 break
 
     def make_follow_sets(self):
-        for non_terminal in self.grammar.prods.keys():
-            self.follow_sets[non_terminal] = set()
+
         grammar_changed = True
         while grammar_changed:
             grammar_changed = False
