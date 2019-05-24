@@ -7,6 +7,7 @@ from Token import CTokenType
 from Parser import Parser
 from CGrammar import compressed_grammar
 from Grammar import LL1Grammar, Grammar
+from test import rules
 
 
 class Compiler:
@@ -23,6 +24,7 @@ class Compiler:
         while not is_terminated:
             tok, line = next(tok_gen)
             is_terminated, error = self.parse_handler.parse_token(tok, line)
+        print(self.parse_handler.parser.grammar.grammar.start_symbol)
         print(parse_tree.view())
 
 
@@ -38,4 +40,3 @@ parser = Parser(grammar)
 parse_handler = ParserHandler(parser)
 compiler = Compiler(c_token_handler, parse_handler)
 compiler.compile(DEFAULT_FILE_IN_NAME, DEFAULT_FILE_OUT_NAME, DEFAULT_FILE_ERROR_NAME)
-print(compiler.parse_handler.parser.parse_tree.view())

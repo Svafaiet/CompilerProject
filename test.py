@@ -47,16 +47,16 @@ test_rules(grammar.grammar)
 # # #                        "B": [cs(")"), Token(CTokenType.EOF), cs("+")],
 # # #                        "F": [cs(")"), Token(CTokenType.EOF), cs("+"), cs("*")]}
 # #
-parser = Parser(grammar)
-inp = [Token(CTokenType.EOF)]
-tok = inp[0]
-count = 1
-while True:
-    error_state, get_next, error_type = parser.parse(tok)
-    if parser.current_fsm.name == parser.grammar.grammar.start_symbol and \
-            parser.current_fsm.current_state == parser.current_fsm.final:
-        print("Successfully parsed input")
-        break
-    if get_next:
-        tok = inp[count]
-        count += 1
+# parser = Parser(grammar)
+# inp = [Token(CTokenType.ID), Token(CTokenType.EOF)]
+# tok = inp[0]
+# count = 1
+# while True:
+#     error_state, get_next, error_type = parser.parse(tok)
+#     if parser.current_fsm.name == parser.grammar.grammar.start_symbol and \
+#             parser.current_fsm.current_state == parser.current_fsm.final:
+#         print("Successfully parsed input")
+#         break
+#     if get_next:
+#         tok = inp[count]
+#         count += 1
