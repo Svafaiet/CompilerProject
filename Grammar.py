@@ -1,6 +1,6 @@
 from functools import reduce
 
-from ActionSymbol import ActionSymbol
+from DirectiveSymbol import DirectiveSymbol
 from Production import epsilon, Production
 from Token import Token
 
@@ -143,7 +143,7 @@ class LL1Grammar:
             for prod in self.grammar.prods.values():
                 if not ((prod.non_terminal in self.epsilons) or any(isinstance(rhs, Token) for rhs in prod.rhses)):
                     for rhs in prod.rhses:
-                        if all((isinstance(value, ActionSymbol) or value in self.epsilons) for value in rhs):
+                        if all((isinstance(value, DirectiveSymbol) or value in self.epsilons) for value in rhs):
                             epsilons_changed = True
                             self.epsilons.append(prod.non_terminal)
                             self.first_sets[prod.non_terminal][epsilon[0]] = rhs
@@ -157,7 +157,7 @@ class LL1Grammar:
             for prod in self.grammar.prods.values():
                 for rhs in prod.rhses:
                     if not (rhs == epsilon):
-                        for value in list(filter(lambda x: not isinstance(x, ActionSymbol), rhs)):
+                        for value in list(filter(lambda x: not isinstance(x, DirectiveSymbol), rhs)):
                             if isinstance(value, Token):
                                 if not (value in self.first_sets[prod.non_terminal]):
                                     self.first_sets[prod.non_terminal][value] = rhs
@@ -177,7 +177,7 @@ class LL1Grammar:
             grammar_changed = False
             for prod in self.grammar.prods.values():
                 for naive_rhs in prod.rhses:
-                    rhs = list(filter(lambda x: not isinstance(x, ActionSymbol), naive_rhs))
+                    rhs = list(filter(lambda x: not isinstance(x, DirectiveSymbol), naive_rhs))
                     if not (rhs == epsilon):
                         for i in range(len(rhs) - 1):
                             if rhs[i] in self.follow_sets:
@@ -202,7 +202,7 @@ class LL1Grammar:
             grammar_changed = False
             for none_terminal in self.grammar.prods:
                 for naive_rhs in self.grammar.prods[none_terminal].rhses:
-                    rhs = list(filter(lambda x: not isinstance(x, ActionSymbol), naive_rhs))
+                    rhs = list(filter(lambda x: not isinstance(x, DirectiveSymbol), naive_rhs))
                     if rhs[0] != epsilon[0]:
                         follow_chain = [none_terminal] + list(reversed(rhs))
                         for i in range(1, len(follow_chain)):

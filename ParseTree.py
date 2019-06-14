@@ -1,4 +1,4 @@
-from ActionSymbol import ActionSymbol
+from DirectiveSymbol import DirectiveSymbol
 from Production import epsilon
 
 
@@ -40,7 +40,7 @@ class Node:
         self.children = {}
         self.index = -1
         for i in range(len(rhs)):
-            if not isinstance(rhs[i], ActionSymbol):
+            if not isinstance(rhs[i], DirectiveSymbol):
                 self.children[i] = None
                 if self.index == -1:
                     self.index = i
@@ -51,7 +51,7 @@ class Node:
         self.children[self.index] = value
         self.index += 1
         while self.index < len(self.rhs):
-            if not isinstance(self.rhs[self.index], ActionSymbol):
+            if not isinstance(self.rhs[self.index], DirectiveSymbol):
                 break
             self.index += 1
 
@@ -61,7 +61,7 @@ class Node:
     def view(self, prefix):
         ans = ""
         if self.rhs != epsilon:
-            for i, value in list(filter(lambda x: not isinstance(x[1], ActionSymbol), enumerate(self.rhs[:self.index]))):
+            for i, value in list(filter(lambda x: not isinstance(x[1], DirectiveSymbol), enumerate(self.rhs[:self.index]))):
                 ans += prefix
                 ans += "|- "
                 ans += str(value)

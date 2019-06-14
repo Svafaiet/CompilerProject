@@ -1,4 +1,4 @@
-from ActionSymbol import ActionSymbol
+from DirectiveSymbol import DirectiveSymbol
 from Grammar import Grammar
 from FSM import FSM
 from ParseTree import ParseTree

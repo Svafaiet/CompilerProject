@@ -1,9 +1,12 @@
-class ActionSymbol:
+from DirectiveSymbol import DirectiveSymbol
+
+
+class ActionSymbol(DirectiveSymbol):
     def __init__(self, directives):
         self.directives = directives
 
 
-class Directive:
+class ActionDirective:
     pass
 
 
@@ -33,7 +36,8 @@ class VariableDirectiveObj:
         self.type = type
         self.value = value
 
-class AddPC(Directive):
+
+class AddPC(ActionDirective):
     """
     i <- i + offset code directive
     """
@@ -42,7 +46,7 @@ class AddPC(Directive):
         self.offset = offset
 
 
-class TempGet(Directive):
+class TempGet(ActionDirective):
     """
     temp_name <- gettemp()
     """
@@ -51,7 +55,7 @@ class TempGet(Directive):
         self.temp_name = temp_name
 
 
-class AddressGet(Directive):
+class AddressGet(ActionDirective):
     """
     value_name <- gettemp(input)
     """
@@ -60,7 +64,7 @@ class AddressGet(Directive):
         self.value_name = value_name
 
 
-class PBAssign(Directive):
+class PBAssign(ActionDirective):
     """
     PB[i] <- (opp, args)
     """
