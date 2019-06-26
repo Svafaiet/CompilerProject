@@ -203,7 +203,8 @@ class LL1Grammar:
             for none_terminal in self.grammar.prods:
                 for naive_rhs in self.grammar.prods[none_terminal].rhses:
                     rhs = list(filter(lambda x: not isinstance(x, DirectiveSymbol), naive_rhs))
-                    if rhs[0] != epsilon[0]:
+
+                    if len(rhs) == 0 or rhs[0] != epsilon[0]:
                         follow_chain = [none_terminal] + list(reversed(rhs))
                         for i in range(1, len(follow_chain)):
                             value = follow_chain[i]
@@ -215,6 +216,19 @@ class LL1Grammar:
                                     grammar_changed = True
                             if not (value in self.epsilons):
                                 break
+
+    def print(self):
+        for prod in self.grammar.prods:
+            from functools import reduce
+            print("{}->{}".format(self.grammar.prods[prod].non_terminal, tuple(
+                ("[" + str(reduce(lambda x, y: str(x) + ", " + str(y), rhs)) + "]") for rhs in
+                self.grammar.prods[prod].rhses)))
+            for f in self.first_sets[prod]:
+                print(str(f), end=" ")
+            print()
+            for f in self.follow_sets[prod]:
+                print(str(f), end=" ")
+            print()
 
     def clean_grammar(self):
         grammar_changed = True
