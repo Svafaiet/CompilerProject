@@ -45,8 +45,6 @@ class Node:
                 if self.index == -1:
                     self.index = i
 
-
-
     def iterate(self, value):
         self.children[self.index] = value
         self.index += 1

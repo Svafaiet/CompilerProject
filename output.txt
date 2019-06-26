@@ -1,0 +1,24 @@
+program
+|- declaration-list
+ |- declaration-list.new
+  |- declaration
+   |- type-specifier
+    |- int
+   |- CTokenType.ID
+   |- var-func-declaration
+    |- var-declaration
+     |- ;
+  |- declaration-list.new
+   |- declaration
+    |- type-specifier
+     |- int
+    |- CTokenType.ID
+    |- var-func-declaration
+     |- var-declaration
+      |- [
+      |- CTokenType.NUM
+      |- ]
+      |- ;
+   |- declaration-list.new
+    |- EPSILON
+|- CTokenType.EOF

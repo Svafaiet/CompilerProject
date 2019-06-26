@@ -38,7 +38,6 @@ class Compiler:
             pass
 
 
-
 DEFAULT_FILE_IN_NAME = "scanner.txt"
 DEFAULT_FILE_OUT_NAME = "output.txt"
 DEFAULT_FILE_ERROR_NAME = "error.txt"

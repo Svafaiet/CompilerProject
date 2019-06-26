@@ -26,7 +26,10 @@ class Token:
                 else self.token_value == other.token_value)
 
     def __hash__(self):
-        return hash(self.token_value)
+        if self.token_type in [CTokenType.ID, CTokenType.NUM, CTokenType.EOF]:
+            return hash(self.token_type)
+        else:
+            return hash(self.token_value)
 
     def __str__(self):
         if self.token_value:

@@ -1,5 +1,6 @@
 from Production import epsilon
 from Token import CTokenType, Token
+from DirectiveSymbol import DirectiveSymbol
 
 
 def ck(keyword_name):

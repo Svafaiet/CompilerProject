@@ -17,9 +17,6 @@ class ParserHandler:
         :return: a boolean, the terminate state
         """
         while True:
-            if token.token_type == CTokenType.ID or token.token_type == CTokenType.EOF \
-                    or token.token_type == CTokenType.NUM:
-                token.token_value = None
             error, next_token_needed, error_type = self.parser.parse(token)
             if error:
                 err_type, tok = error_type
