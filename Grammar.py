@@ -94,6 +94,36 @@ class Grammar:
                                                           [alpha_i + [non_terminal_new] for alpha_i in alpha_set])
                 self.prods[non_terminal_new].rhses += [epsilon]
 
+    def compress(self):
+        """
+        :return: a string which compresses a grammar which don't have any DirectiveSymbol
+        """
+        ans = "[\n"
+        for none_terminal in self.prods:
+            ans += " [" + none_terminal + ", \n"
+            for rhs in self.prods[none_terminal].rhses:
+                ans += "  "
+                if rhs[0] == epsilon[0]:
+                    ans += "epsilon"
+                else:
+                    ans += "["
+                    for value in rhs:
+                        if isinstance(value, Token):
+                            ans += "Token("
+                            ans += str(value.token_type)
+                            if not value.token_value:
+                                ans += ", "
+                                ans += str(value.token_value)
+                            ans += ")"
+                        else:
+                            ans += value
+                        ans += ", "
+                    ans += "]"
+                ans += ",\n"
+            ans += " ],\n"
+        ans += "]"
+        return ans
+
     @staticmethod
     def make_grammar(compressed_prods):
         start = compressed_prods[0][0]
