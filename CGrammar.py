@@ -1,4 +1,5 @@
 from Production import epsilon
+from SemanticSymbol import SemanticSymbol
 from Token import CTokenType, Token
 
 
@@ -10,11 +11,15 @@ def cs(symbol_name):
     return Token(CTokenType.SYMBOL, symbol_name)
 
 
+def s(semantic_type):
+    return SemanticSymbol(semantic_type)
+
+
 compressed_grammar = [
     ["program", ["declaration-list", Token(CTokenType.EOF)]],
     ["declaration-list", ["declaration-list", "declaration"], epsilon],
     ["declaration", ["type-specifier", Token(CTokenType.ID), "var-func-declaration", ]],
-    ["var-func-declaration", ["var-declaration"], ["fun-declaration"]],
+    ["var-func-declaration", ["var-declaration"], [s("SCOPE_START"), "fun-declaration", s("SCOPE_END")]],
     ["var-declaration",
      [cs(";")],
      [cs("["), Token(CTokenType.NUM), cs("]"), cs(";")]
