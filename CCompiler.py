@@ -47,6 +47,11 @@ c_lexical_dfa = CLexicalDFA.make_c_lexical_dfa()
 not_printing_tokens = [CTokenType.WHITE_SPACE, CTokenType.COMMENT]
 c_token_handler = TokenHandler(c_lexical_dfa, not_printing_tokens)
 grammar = LL1Grammar(Grammar.make_grammar(compressed_grammar))
+# for prod in grammar.grammar.prods:
+#     print("{}->{}".format(grammar.grammar.prods[prod].non_terminal, grammar.grammar.prods[prod].rhses))
+#
+# for f in grammar.follow_sets["signed-factor-left"]:
+#     print(str(f))
 parser = Parser(grammar)
 parse_handler = ParserHandler(parser)
 compiler = Compiler(c_token_handler, parse_handler)

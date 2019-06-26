@@ -1,4 +1,4 @@
-from Directive import Directive
+from DirectiveSymbol import DirectiveSymbol
 from Grammar import Grammar
 from FSM import FSM
 from ParseTree import ParseTree
@@ -72,7 +72,7 @@ class Parser:
                             self.current_fsm.change_state(edge)
                             if self.current_fsm.current_state == self.current_fsm.final:
                                 self.final_state_proc()
-                            return True, True, (2, edge)
+                            return True, False, (2, edge)
                         else:
                             return True, True, (1, next_token)
                     else: #todo directive
