@@ -59,7 +59,8 @@ class Node:
     def view(self, prefix):
         ans = ""
         if self.rhs != epsilon:
-            for i, value in list(filter(lambda x: not isinstance(x[1], DirectiveSymbol), enumerate(self.rhs[:self.index]))):
+            for i, value in list(
+                    filter(lambda x: not isinstance(x[1], DirectiveSymbol), enumerate(self.rhs[:self.index]))):
                 ans += prefix
                 ans += "|- "
                 ans += str(value)
