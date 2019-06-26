@@ -1,6 +1,9 @@
 import CLexicalDFA
+from CodeGenerator import CodeGenerator
+from DirectiveHandler import DirectiveHandler
 from ParseHandler import ParserHandler
 from ParseTree import ParseTree
+from Semantics import Semantics
 from Token import CTokenType, Token
 from TokenHandler import TokenHandler
 from Token import CTokenType
@@ -19,6 +22,10 @@ class Compiler:
         self.token_handler.set_files(file_in=file_in, file_error=file_error)
         self.parse_handler.set_files(file_error=file_error)
         parse_tree = self.parse_handler.parser.parse_tree
+        semantics = Semantics()
+        code_generator = CodeGenerator()
+        directive_handler = DirectiveHandler(semantics, code_generator)
+        parse_tree.set_handler(directive_handler)
         tok_gen = self.token_handler.get_next_token()
         is_terminated, error = False, False
         while not is_terminated:
@@ -32,8 +39,8 @@ class Compiler:
 
     @staticmethod
     def empty_files(file_out, file_error):
-        # with(open(file=file_out, mode="w")):
-        #     pass
+        with(open(file=file_out, mode="w")):
+            pass
         with(open(file=file_error, mode="w")):
             pass
 
@@ -50,7 +57,8 @@ grammar = LL1Grammar(Grammar.make_grammar(compressed_grammar))
 #     print("{}->{}".format(grammar.grammar.prods[prod].non_terminal, grammar.grammar.prods[prod].rhses))
 #
 # for f in grammar.follow_sets["signed-factor-left"]:
-#     print(str(f))
+#     print(str(f))]
+print(grammar.grammar.compress())
 parser = Parser(grammar)
 parse_handler = ParserHandler(parser)
 compiler = Compiler(c_token_handler, parse_handler)

@@ -14,7 +14,7 @@ class Parser:
         self.build_state_diagram()
         self.current_fsm = self.state_diagram[self.grammar.grammar.start_symbol]
         self.stack = []
-        self.parse_tree = ParseTree()
+        self.parse_tree = ParseTree(self.grammar.grammar.start_symbol)
 
     def build_state_diagram(self):
         for prod in self.grammar.grammar.prods:
