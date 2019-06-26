@@ -1,6 +1,7 @@
 from Token import Token
-from Production import Epsilon
+from Production import epsilon
 from DirectiveSymbol import DirectiveSymbol
+
 
 
 class State:
@@ -33,12 +34,15 @@ class FSM:
         count = 1
         for rhs in rhs_s:
             current = self.start
-            for p in list(filter(lambda x: not isinstance(x, DirectiveSymbol), rhs[:-1])):
+            rhs_new = list(filter(lambda x: not isinstance(x, DirectiveSymbol), rhs))
+            if len(rhs_new) == 0:
+                rhs_new = epsilon
+            for p in rhs_new[:-1]:
                 current.add_edge(p, count)
                 count += 1
                 current = current.get_next(p)
                 current.rhs = rhs
-            current.add_edge(rhs[-1], self.final.num)
+            current.add_edge(rhs_new[-1], self.final.num)
             count += 1
 
     def change_state(self, p):
