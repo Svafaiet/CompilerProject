@@ -16,44 +16,45 @@ class Semantics:
 
     #TODO CHECK MAIN
 
-    def handle_semantic_symbol(self, **kwargs):
-        semantic_symbol = kwargs.pop('semantic_symbol', default="SCOPE_START")
+    def handle_semantic_symbol(self, semantic_symbol, **kwargs):
         current_node = kwargs.pop('current_node', None)
         semantic_symbol_type = semantic_symbol.type
         if current_node is None and semantic_symbol_type != "scope_end":
-            semantic_routine = eval(semantic_symbol_type.lower())
+            if semantic_symbol_type == 'DECLARE_TYPE':
+                self.prev_sym_entry = None
+            #Todo handle errors
+            return
+
+        if semantic_symbol_type == 'DECLARE_TYPE':
+            self.prev_sym_entry = current_node
+        semantic_routine = eval(semantic_symbol_type.lower())
         semantic_routine(current_node, kwargs)
 
     def scope_start(self, current_node, **kwargs):
         self.stack.append((len(self.symbol_table), current_node.non_terminal))
 
-    def scope_end(self, **kwargs):
+    def scope_end(self, *args, **kwargs):
         self.symbol_table = self.symbol_table[:self.stack[-1]]
         del self.stack[-1]
 
-    def declare_type(self, **kwargs):
-        current_node = kwargs.get('current_node', None)
-        if current_node is None:
-            self.prev_sym_entry = None
-            return
+    def declare_type(self, current_node, **kwargs):
         type = current_node.children[0]
         entry = SymbolTableRecord(type=type)
         self.symbol_table.append(entry)
-        self.prev_sym_entry = entry
 
-    def declare_name(self, **kwargs):
-        name = kwargs.get('current_node', None)
+    def declare_name(self, current_node, **kwargs):
+        name = current_node
         if self.prev_sym_entry is not None and name is not None:
             self.symbol_table[-1].name = name
 
-    def declare_var_size(self, **kwargs):
-        var_size = kwargs.get('current_node', None)
+    def declare_var_size(self, current_node, **kwargs):
+        var_size = current_node
         if self.prev_sym_entry is not None and var_size is not None:
             self.symbol_table[-1].attributes["var_size"] = var_size
             self.symbol_table[-1].attributes['dec-type'] = "variable"
 
-    def add_param(self, **kwargs):
-        param = kwargs.get('current_node', None)
+    def add_param(self, current_node, **kwargs):
+        param = current_node
         if self.prev_sym_entry is not None and param is not None:
             if 'param-len' in self.symbol_table[-1].attributes:
                 if self.symbol_table[-1].attributes["param-len"] == 0:
