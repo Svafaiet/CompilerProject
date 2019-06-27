@@ -27,7 +27,8 @@ class ParseTree:
         if top is None:
             new_node = Node(self.root_none_terminal, rhs, None)
         else:
-            new_node = Node(top.rhs[top.index], rhs, top.rhs[top.index])
+            new_node = Node(top.rhs[top.index], rhs, top.last_node)
+        new_node.pass_directives(self.directive_handler)
         self.stack.append(new_node)
         if self.root is None:
             self.root = self.stack[0]
@@ -47,8 +48,8 @@ class ParseTree:
 
 
 class Node:
-    def __init__(self, none_terminal, rhs, last_node):
-        self.none_terminal = none_terminal
+    def __init__(self, non_terminal, rhs, last_node):
+        self.non_terminal = non_terminal
         self.rhs = rhs
         self.children = {}
         self.index = -1
@@ -61,7 +62,8 @@ class Node:
                 if self.index == -1:
                     self.index = i
             else:
-                directive_handler.handle_directive(self.rhs[i], self.last_node)
+                if self.index == -1:
+                    directive_handler.handle_directive(self.rhs[i], self.non_terminal, self.last_node)
 
     def iterate(self, value, directive_handler):
         self.children[self.index] = value
@@ -70,7 +72,7 @@ class Node:
             if not isinstance(self.rhs[self.index], DirectiveSymbol):
                 break
             else:
-                directive_handler.handle_directive(self.rhs[self.index], self.last_node)
+                directive_handler.handle_directive(self.rhs[self.index], self.non_terminal, value)
             self.index += 1
         self.last_node = value
 

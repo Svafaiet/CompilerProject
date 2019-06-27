@@ -8,8 +8,7 @@ class SemanticSymbol(DirectiveSymbol):
     different kinds of type are:
         SCOPE_START
         SCOPE_END
-        CONTINUE_FLOW_OF_CONTROL
-        BREAK_FLOW_OF_CONTROL
+
 
     """
     def __init__(self, t):

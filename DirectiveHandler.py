@@ -9,8 +9,8 @@ class DirectiveHandler:
         self.semantics = semantics
         self.code_generator = code_generator
 
-    def handle_directive(self, directive, cur_node):
+    def handle_directive(self, directive, cur_non_terminal, cur_node):
         if isinstance(directive, SemanticSymbol):
-            self.semantics.handle_semantic_symbol(directive, current_node=cur_node)
+            self.semantics.handle_semantic_symbol(directive, current_non_terminal=cur_non_terminal, current_node=cur_node)
         elif isinstance(directive, ActionSymbol):
-            self.code_generator.handle_action_symbol(self.semantics, directive, current_node=cur_node)
+            self.code_generator.handle_action_symbol(self.semantics, directive, current_non_terminal=cur_non_terminal, current_node=cur_node)

@@ -36,16 +36,15 @@ class Semantics:
         self.stack.append((len(self.symbol_table), non_terminal))
 
     def scope_end(self, *args, **kwargs):
-        self.symbol_table = self.symbol_table[:self.stack[-1]]
+        self.symbol_table = self.symbol_table[:self.stack[-1][0]]
         del self.stack[-1]
 
     def declare_type(self, current_node, **kwargs):
-        type = current_node.children[0]
-        entry = SymbolTableRecord(type=type)
+        entry = SymbolTableRecord(type=current_node.token_value)
         self.symbol_table.append(entry)
 
     def declare_name(self, current_node, **kwargs):
-        name = current_node
+        name = current_node.token_value
         if self.prev_sym_entry is not None and name is not None:
             self.symbol_table[-1].name = name
 
@@ -81,7 +80,6 @@ class Semantics:
 
     def check_main(self):
         if self.symbol_table[-1].type != ck("void") or self.symbol_table[-1].name != "main" \
-                or "dec-type" not in self.symbol_table[-1].attributes \
                 or self.symbol_table[-1].attribures["dec-type"] != "function" \
                 or self.symbol_table[-1].attributes["param-len"] != 0:
             return False
