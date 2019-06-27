@@ -19,6 +19,7 @@ class Semantics:
     def handle_semantic_symbol(self, semantic_symbol, **kwargs):
         current_node = kwargs.pop('current_node', None)
         semantic_symbol_type = semantic_symbol.type
+        semantic_routine = None
         if current_node is None and semantic_symbol_type != "scope_end":
             if semantic_symbol_type == 'DECLARE_TYPE':
                 self.prev_sym_entry = None

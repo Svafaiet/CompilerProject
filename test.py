@@ -14,24 +14,24 @@ def test_epsilons(ll1_grammar):
     print("epsilons: {}", ll1_grammar.epsilons)
 
 
-rules = [
-    ["E", ["T", "A", Token(CTokenType.EOF)]],
-    ["A", [cs("+"), "T", "A"], epsilon],
-    ["T", ["F", "B"], epsilon],
-    ["B",
-     [cs("*"), "F", "B"],
-     epsilon
-     ],
-    ["F", [cs("("), "E", cs(")")], [Token(CTokenType.ID)]],
+# rules = [
+#     ["E", ["T", "A", Token(CTokenType.EOF)]],
+#     ["A", [cs("+"), "T", "A"], epsilon],
+#     ["T", ["F", "B"], epsilon],
+#     ["B",
+#      [cs("*"), "F", "B"],
+#      epsilon
+#      ],
+#     ["F", [cs("("), "E", cs(")")], [Token(CTokenType.ID)]],
     # ["C", epsilon]
     # ["left", [cs("*"), "left_a"], [cs("*"), "left_a", cs("+")]],
     # ["left_a", [cs("+")], epsilon],
     # ["R1", ["R2", cs("+")]],
     # ["R2", ["R1", cs("*")], epsilon]
-]
+# ]
 #
-grammar = LL1Grammar(Grammar.make_grammar(rules))
-test_rules(grammar.grammar)
+# grammar = LL1Grammar(Grammar.make_grammar(rules))
+# test_rules(grammar.grammar)
 #
 #
 # # test_epsilons(grammar)
@@ -60,3 +60,52 @@ test_rules(grammar.grammar)
 #     if get_next:
 #         tok = inp[count]
 #         count += 1
+
+import unittest
+
+class DirectiveSymbolIgnoringTest(unittest.TestCase):
+    pass
+
+from DirectiveSymbol import DirectiveSymbol
+class DirectiveSymbolTest(DirectiveSymbol):
+    def __init__(self, s):
+        self.s = s
+
+    def __str__(self):
+        return "dir:" + self.s
+
+def test_grammar_left_factoring():
+
+
+    directive = DirectiveSymbolTest
+    compressed_grammar_test = [
+        ["A", ["B", directive("1")], ["B", directive("1"), Token("c")], ["B", directive("2"), Token("d")]],
+        ["B", [directive("3"), Token("a")], [directive("3"), Token("b")]],
+        ["C", ["D", Token("h"), directive("4"),], ["D"]],
+        ["D", ["E", directive("5"), Token("t")],
+         ["E", Token("t1"), directive("6")],
+         ["G", Token("g"), directive("7")],
+         ["G", directive("8"), Token("g"), Token("g1")],
+         [directive("9")]],
+        ["E", [directive("10")]],
+        ["G", [Token("h"), directive("11")]]
+    ]
+    compressed_grammar_check = [
+        ["A", ["B", ], ["B", Token("c")], ["B", Token("d")]],
+        ["B", [Token("a")], [Token("b")]],
+        ["C", ["D", Token("h"), ], ["D"]],
+        ["D", ["E", Token("t")],
+         ["E", Token("t1"), ],
+         ["G", Token("g"), ],
+         ["G", Token("g"), Token("g1")],
+         epsilon],
+        ["E", epsilon],
+        ["G", [Token("h"), ]]
+    ]
+    grammar = Grammar.make_grammar(compressed_grammar_test)
+    grammar = LL1Grammar(grammar)
+    grammar.print()
+    grammar2 = Grammar.make_grammar(compressed_grammar_check)
+    grammar2 = LL1Grammar(grammar2)
+    grammar2.print()
+test_grammar_left_factoring()

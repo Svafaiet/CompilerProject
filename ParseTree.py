@@ -24,10 +24,10 @@ class ParseTree:
     def insert_rhs(self, rhs):
         top = self.top()
         new_node = None
-        if None:
+        if top is None:
             new_node = Node(self.root_none_terminal, rhs, None)
         else:
-            new_node = Node(top.rhs[top.index], rhs, top[top.index])
+            new_node = Node(top.rhs[top.index], rhs, top.rhs[top.index])
         self.stack.append(new_node)
         if self.root is None:
             self.root = self.stack[0]

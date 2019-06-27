@@ -11,6 +11,6 @@ class DirectiveHandler:
 
     def handle_directive(self, directive, cur_node):
         if isinstance(directive, SemanticSymbol):
-            self.semantics.handle_semantic_symbol(directive, cur_node=cur_node)
+            self.semantics.handle_semantic_symbol(directive, current_node=cur_node)
         elif isinstance(directive, ActionSymbol):
-            self.code_generator.handle_action_symbol(self.semantics, directive, cur_node=cur_node)
+            self.code_generator.handle_action_symbol(self.semantics, directive, current_node=cur_node)
