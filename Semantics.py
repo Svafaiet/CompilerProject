@@ -28,8 +28,8 @@ class Semantics:
 
         if semantic_symbol_type == 'DECLARE_TYPE':
             self.prev_sym_entry = current_node
-        semantic_routine = eval(semantic_symbol_type.lower())
-        semantic_routine(current_node, kwargs)
+        semantic_routine = eval("self." + semantic_symbol_type.lower())
+        semantic_routine(current_node, **kwargs)
 
     def scope_start(self, current_node, **kwargs):
         self.stack.append((len(self.symbol_table), current_node.non_terminal))
@@ -49,9 +49,8 @@ class Semantics:
             self.symbol_table[-1].name = name
 
     def declare_var_size(self, current_node, **kwargs):
-        var_size = current_node
-        if self.prev_sym_entry is not None and var_size is not None:
-            self.symbol_table[-1].attributes["var_size"] = var_size
+        if self.prev_sym_entry is not None and current_node is not None:
+            self.symbol_table[-1].attributes["var_size"] = current_node.token_value
             self.symbol_table[-1].attributes['dec-type'] = "variable"
 
     def add_param(self, current_node, **kwargs):

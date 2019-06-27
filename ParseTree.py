@@ -70,8 +70,9 @@ class Node:
             if not isinstance(self.rhs[self.index], DirectiveSymbol):
                 break
             else:
-                directive_handler.handle_directive(self.rhs[self.index], value)
+                directive_handler.handle_directive(self.rhs[self.index], self.last_node)
             self.index += 1
+        self.last_node = value
 
     def is_finished(self):
         return self.index == len(self.rhs)
