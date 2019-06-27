@@ -58,7 +58,7 @@ grammar = LL1Grammar(Grammar.make_grammar(compressed_grammar))
 #
 # for f in grammar.follow_sets["signed-factor-left"]:
 #     print(str(f))]
-print(grammar.grammar.compress())
+# print(grammar.grammar.compress())
 parser = Parser(grammar)
 parse_handler = ParserHandler(parser)
 compiler = Compiler(c_token_handler, parse_handler)

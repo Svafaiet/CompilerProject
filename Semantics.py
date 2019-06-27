@@ -17,15 +17,15 @@ class Semantics:
     #TODO CHECK MAIN
 
     def handle_semantic_symbol(self, **kwargs):
-        semantic_symbol = kwargs.get('semantic_symbol', default="SCOPE_START")
+        semantic_symbol = kwargs.pop('semantic_symbol', default="SCOPE_START")
+        current_node = kwargs.pop('current_node', None)
         semantic_symbol_type = semantic_symbol.type
-        semantic_routine = eval(semantic_symbol_type.lower())
-        semantic_routine(kwargs)
+        if current_node is None and semantic_symbol_type != "scope_end":
+            semantic_routine = eval(semantic_symbol_type.lower())
+        semantic_routine(current_node, kwargs)
 
-    def scope_start(self, **kwargs):
-        current_node = kwargs.get('current_node', None)
-        if current_node is not None:
-            self.stack.append((len(self.symbol_table), current_node.non_terminal))
+    def scope_start(self, current_node, **kwargs):
+        self.stack.append((len(self.symbol_table), current_node.non_terminal))
 
     def scope_end(self, **kwargs):
         self.symbol_table = self.symbol_table[:self.stack[-1]]
