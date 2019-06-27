@@ -32,7 +32,8 @@ class Semantics:
         semantic_routine(current_node, **kwargs)
 
     def scope_start(self, current_node, **kwargs):
-        self.stack.append((len(self.symbol_table), current_node.non_terminal))
+        non_terminal = kwargs.pop('current_non_terminal', None)
+        self.stack.append((len(self.symbol_table), non_terminal))
 
     def scope_end(self, *args, **kwargs):
         self.symbol_table = self.symbol_table[:self.stack[-1]]

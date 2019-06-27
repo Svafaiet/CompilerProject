@@ -56,7 +56,7 @@ compressed_grammar = [
      ["call", "term-left", "additive-expression-left", "simple-expression-left"]
      ],
     ["expression-right",
-     [cs("="), "expression"],
+     [cs("="),  "expression"],
      ["term-left", "additive-expression-left", "simple-expression-left"]
      ],
     ["var", [Token(CTokenType.ID), "var-left"]],
