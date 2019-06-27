@@ -42,6 +42,7 @@ class Semantics:
     def declare_type(self, current_node, **kwargs):
         entry = SymbolTableRecord(type=current_node.token_value)
         self.symbol_table.append(entry)
+        self.symbol_table[-1].attributes['dec-type'] = "variable"
 
     def declare_name(self, current_node, **kwargs):
         name = current_node.token_value
@@ -51,26 +52,32 @@ class Semantics:
     def declare_var_size(self, current_node, **kwargs):
         if self.prev_sym_entry is not None and current_node is not None:
             self.symbol_table[-1].attributes["var_size"] = current_node.token_value
-            self.symbol_table[-1].attributes['dec-type'] = "variable"
+
+    def function(self, *args, **kwargs):
+        self.symbol_table[-1].attributes['dec-type'] = "function"
 
     def add_param(self, current_node, **kwargs):
         param = current_node
+        ind = -1
+        func = self.symbol_table[ind]
+        while func.attributes['dec-type'] != "function":
+            ind -= 1
+            func = self.symbol_table[ind]
         if self.prev_sym_entry is not None and param is not None:
-            if 'param-len' in self.symbol_table[-1].attributes:
-                if self.symbol_table[-1].attributes["param-len"] == 0:
+            if 'param-len' in func.attributes:
+                if func.attributes["param-len"] == 0:
                     pass
                     #TODO check error
                 elif param == ck("void") or (hasattr(param, 'children') and param.chilren[0] == ck("void")):
                     pass
                     #TODO check error
                 else:
-                    self.symbol_table[-1].attributes["param-len"] += 1
+                    func.attributes["param-len"] += 1
             else:
                 if param == ck("int") or (hasattr(param, 'children') and param.chilren[0] == ck("int")):
-                    self.symbol_table[-1].attributes["param-len"] = 1
+                    func.attributes["param-len"] = 1
                 if param == ck("void") or (hasattr(param, 'children') and param.chilren[0] == ck("void")):
-                    self.symbol_table[-1].attributes["param-len"] = 0
-                self.symbol_table[-1].attributes['dec-type'] = "function"
+                    func.attributes["param-len"] = 0
 
     def check_break(self):
         for scope in self.stack[::-1]:

@@ -26,11 +26,11 @@ compressed_grammar = [
      [cs("["), Token(CTokenType.NUM), s("DECLARE_VAR_SIZE"), cs("]"), cs(";")]
      ],
     ["type-specifier", [ck("int"), s("DECLARE_TYPE"), ], [ck("void"),  s("DECLARE_TYPE"), ]],
-    ["fun-declaration", [cs("("), s("SCOPE_START"), "params", cs(")"), "compound-stmt", s("SCOPE_END")]],
+    ["fun-declaration", [cs("("), s("FUNCTION"), s("SCOPE_START"), "params", cs(")"), "compound-stmt", s("SCOPE_END")]],
     ["params", [ck("void"), s("ADD_PARAM")], [ck("void"), s("DECLARE_TYPE"), s("ADD_PARAM"), "param-left", "param-list"], [ck("int"), s("DECLARE_TYPE"), s("ADD_PARAM"), "param-left", "param-list"]],
     ["param-list", [cs(","), "param", "param-list"], epsilon],
     ["param", ["type-specifier", s("ADD_PARAM"), "param-left"]],
-    ["param-left", [Token(CTokenType.ID), s("DECLARE_NAME"), cs("["), cs("]")], [Token(CTokenType.ID, s("DECLARE_NAME"), )]],
+    ["param-left", [Token(CTokenType.ID), s("DECLARE_NAME"), cs("["), cs("]")], [Token(CTokenType.ID), s("DECLARE_NAME")]],
     ["compound-stmt", [cs("{"), s("SCOPE_START"), "declaration-list", "statement-list", s("SCOPE_END"), cs("}")]],
     ["statement-list", ["statement-list", "statement"], epsilon],
     ["statement", ["expression-stmt", ], ["compound-stmt", ], ["selection-stmt", ], ["iteration-stmt", ],
