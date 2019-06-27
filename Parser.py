@@ -41,10 +41,9 @@ class Parser:
         elif self.is_valid(next_token):
             for edge in curr.transitions:
                 if edge == epsilon[0] and next_token in self.grammar.follow_sets[self.current_fsm.name]:
-                    if self.current_fsm.current_state == self.current_fsm.start:
-                        self.parse_tree.insert_rhs(self.get_epsilon_or_directive(next_token))
+                    # if self.current_fsm.current_state == self.current_fsm.start:
+                    self.parse_tree.insert_rhs(self.get_epsilon_or_directive())
                     self.final_state_proc()
-                    self.parse_tree.iterate(epsilon[0])
                     return False, False, None
                 elif isinstance(edge, str):
                     if next_token in self.grammar.first_sets[edge] or edge in self.grammar.epsilons and \
@@ -127,7 +126,7 @@ class Parser:
                 if next_token == rhs_new[0]:
                     return rhs
 
-    def get_epsilon_or_directive(self, nest_token):
+    def get_epsilon_or_directive(self):
         production = self.grammar.grammar.prods[self.current_fsm.name]
         for rhs in production.rhses:
             rhs_new = list(filter(lambda x: not isinstance(x, DirectiveSymbol), rhs))
