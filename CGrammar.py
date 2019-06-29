@@ -40,7 +40,7 @@ compressed_grammar = [
                         ck("else"), s("SCOPE_START"), "statement", s("SCOPE_END")]],
     ["iteration-stmt", [ck("while"), cs("("), "expression", cs(")"), s("SCOPE_START"), "statement", s("SCOPE_END")]],
     ["return-stmt", [ck("return"), cs(";")], [ck("return"), "expression", cs(";")]],
-    ["switch-stmt", [ck("switch"), cs("("), "expression", cs(")"), cs("{"), s("SCOPE_START  "), "case-stmts", "default-stmt", s("SCOPE_END"), cs("}")]],
+    ["switch-stmt", [ck("switch"), cs("("), "expression", cs(")"), cs("{"), s("SCOPE_START"), "case-stmts", "default-stmt", s("SCOPE_END"), cs("}")]],
     ["case-stmts", ["case-stmts", "case-stmt"], epsilon, ],
     ["case-stmt", [ck("case"), Token(CTokenType.NUM), cs(":"), "statement-list"]],
     ["default-stmt",

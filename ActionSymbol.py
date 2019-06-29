@@ -2,8 +2,12 @@ from DirectiveSymbol import DirectiveSymbol
 
 
 class ActionSymbol(DirectiveSymbol):
-    def __init__(self, directives):
-        self.directives = directives
+    pass
+
+
+class ConstructiveActionSymbol(ActionSymbol):
+    def __init__(self, *args):
+        self.directives = args
 
 
 class ActionDirective:
@@ -11,30 +15,31 @@ class ActionDirective:
 
 
 class MemoryAccessDirectiveObj:
-    """
-    Different kinds of (@attr type):
-    "" : (@attr value)
-    "#" : mem[(@attr value)]
-    "@" : mem[mem[@attr value]]
-    (@attr value) is VariableDirectiveObj
-    """
-
-    def __init__(self, value, type=""):
-        self.type = type
+    def __init__(self, value, access_type=""):
+        """
+        :param access_type:
+            Different kinds of (:param type) specify how to access memory in code generation
+            "" : (:param value)
+            "#" : mem[(:param value)]
+            "@" : mem[mem[:param value]]
+        :param value: must be VariableDirectiveObj
+        """
+        self.access_type = access_type
         self.value = value
 
 
 class VariableDirectiveObj:
     """
-    "pc" : program_counter + offset (i + (@attr value))
-    "ss" : ss[top + (@attr value)]
-    "tv" : str of temp var name in (@attr value)
-    #todo
+    "pc" : program_counter + offset (i + (:param index))
+    "ss" : ss[top - (:param index)]
+    "tv" : str of temp var name in (:param value)
+    "ln" : if (:param index) is given, use(:param index)'th children of last node otherwise last node,
+        if result was token use it token_value other wise the node itself
     """
 
-    def __init__(self, value, type=""):
-        self.type = type
-        self.value = value
+    def __init__(self, var_type, **kwargs):
+        self.var_type = var_type
+        self.kwargs = kwargs
 
 
 class AddPC(ActionDirective):
@@ -46,6 +51,22 @@ class AddPC(ActionDirective):
         self.offset = offset
 
 
+class StackPush(ActionDirective):
+    """
+    push(value)
+    value is a VariableDirectiveObj
+    """
+
+    def __init__(self, value):
+        self.value = value
+
+
+class StackPop(ActionDirective):
+    """
+    push
+    """
+
+
 class TempGet(ActionDirective):
     """
     temp_name <- gettemp()
@@ -55,9 +76,10 @@ class TempGet(ActionDirective):
         self.temp_name = temp_name
 
 
-class AddressGet(ActionDirective):
+class PointerGet(ActionDirective):
     """
-    value_name <- gettemp(input)
+    value_name <- findptr(input)
+    #fixme
     """
 
     def __init__(self, value_name):
@@ -66,10 +88,10 @@ class AddressGet(ActionDirective):
 
 class PBAssign(ActionDirective):
     """
-    PB[i] <- (opp, args)
+    PB[pb_addr] <- (opp, args)
     """
 
-    def __init__(self, pb_addr, opp, args):
+    def __init__(self, pb_addr, opp, *args):
         self.pb_addr = pb_addr
         self.opp = opp
         self.args = args
