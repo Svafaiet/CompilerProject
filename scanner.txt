@@ -37,7 +37,7 @@ void main(void){
                 b = b + 2;
             case 4:
             {
-                u = 5;
+                int u = 5;
                 b = u * -123;
                 break;}
             default:

@@ -1,0 +1,2 @@
+40: Syntax Error! Unexpected CTokenType.SYMBOL
+40: Syntax Error! Missing var-func-declaration
