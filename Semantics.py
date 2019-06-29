@@ -9,7 +9,8 @@ class SymbolTableRecord:
 
 
 class Semantics:
-    def __init__(self):
+    def __init__(self, file_error):
+        self.file_error = file_error
         self.stack = []
         self.symbol_table = []
         self.prev_sym_entry = None
@@ -32,6 +33,19 @@ class Semantics:
             self.prev_sym_entry = current_node
         semantic_routine = eval("self." + semantic_symbol_type.lower())
         semantic_routine(current_node, **kwargs)
+
+    def err(self, error_type, id_tok_val=None):
+        with open(file=self.file_error, mode="a") as f:
+            error_types = {
+                "main":             "main function not found!",
+                "scoping":          "{} is not defined.".format(id_tok_val),
+                "variable_void":    "Illegal type of void.",
+                "arg_count":        "Mismatch in number of arguments of {}.".format(id_tok_val),
+                "continue":         "No 'while' found for 'continue'.",
+                "break":            "No 'while' or 'switch' found for 'break'.",
+                "operand_mismatch": "type mismatch in operands",
+            }
+            f.write(error_types.get(error_type))
 
     def scope_start(self, current_node, **kwargs):
         non_terminal = kwargs.pop('current_non_terminal', None)
