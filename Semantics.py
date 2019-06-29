@@ -31,7 +31,10 @@ class Semantics:
         if semantic_symbol_type == 'DECLARE_TYPE':
             self.prev_sym_entry = current_node
         semantic_routine = eval("self." + semantic_symbol_type.lower())
-        semantic_routine(current_node, **kwargs)
+        try:
+            semantic_routine(current_node, **kwargs)
+        except Exception as e:
+            print(e)
 
     def err(self, error_type, id_tok_val=None):
         error_types = {
@@ -119,8 +122,8 @@ class Semantics:
             self.err("scoping", name)
 
     def check_main(self, *args, **kwargs):
-        if self.symbol_table[-1].type != ck("void") or self.symbol_table[-1].name != "main" \
-                or self.symbol_table[-1].attribures["dec-type"] != "function" \
+        if self.symbol_table[-1].type != "void" or self.symbol_table[-1].name != "main" \
+                or self.symbol_table[-1].attributes["dec-type"] != "function" \
                 or self.symbol_table[-1].attributes["param-len"] != 0:
             self.err("main")
 
