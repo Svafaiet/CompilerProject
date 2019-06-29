@@ -5,12 +5,14 @@ from Semantics import Semantics
 
 
 class DirectiveHandler:
-    def __init__(self, semantics, code_generator):
-        self.semantics = semantics
-        self.code_generator = code_generator
+    def __init__(self, error_writer, file_out):
+        self.semantics = Semantics(error_writer=error_writer)
+        self.code_generator = CodeGenerator(self.semantics, file_out=file_out)
 
     def handle_directive(self, directive, cur_non_terminal, cur_node):
         if isinstance(directive, SemanticSymbol):
-            self.semantics.handle_semantic_symbol(directive, current_non_terminal=cur_non_terminal, current_node=cur_node)
+            self.semantics.handle_semantic_symbol(directive, current_non_terminal=cur_non_terminal,
+                                                  current_node=cur_node)
         elif isinstance(directive, ActionSymbol):
-            self.code_generator.handle_action_symbol(self.semantics, directive, current_non_terminal=cur_non_terminal, current_node=cur_node)
+            self.code_generator.handle_action_symbol(directive, current_non_terminal=cur_non_terminal,
+                                                     current_node=cur_node)

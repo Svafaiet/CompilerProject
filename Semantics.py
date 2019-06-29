@@ -9,12 +9,12 @@ class SymbolTableRecord:
 
 
 class Semantics:
-    def __init__(self, file_error):
-        self.file_error = file_error
+    def __init__(self, error_writer):
         self.stack = []
         self.symbol_table = []
         self.prev_sym_entry = None
         self.function_call_stack = []
+        self.error_writer = error_writer
     #TODO MAKE OUTPUT
 
     #TODO CHECK MAIN
@@ -44,8 +44,7 @@ class Semantics:
             "break":            "No 'while' or 'switch' found for 'break'.",
             "operand_mismatch": "type mismatch in operands",
         }
-        with open(file=self.file_error, mode="a") as f:
-            f.write(error_types.get(error_type))
+        self.error_writer.write(error_types.get(error_type))
 
     def scope_start(self, current_node, **kwargs):
         non_terminal = kwargs.pop('current_non_terminal', None)

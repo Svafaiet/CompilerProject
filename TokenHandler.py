@@ -7,11 +7,11 @@ class TokenHandler:
         self.dfa = dfa
         self.excluded_tokens = excluded_tokens
         self.file_in = None
-        self.file_error = None
+        self.error_writer = None
 
-    def set_files(self, file_in, file_error):
+    def set_io(self, file_in, error_writer):
         self.file_in = file_in
-        self.file_error = file_error
+        self.error_writer = error_writer
 
     def get_next_token(self):
         model = LexicalAnalyzer(self.file_in, self.dfa)
@@ -21,12 +21,12 @@ class TokenHandler:
             while True:
                 lexeme, tok, error = next(token)
                 line += lexeme.count("\n")
+                self.error_writer.update_line(line)
                 if not error:
                     if tok not in self.excluded_tokens:
-                        yield Token(token_type=tok, token_value=lexeme), line
+                        yield Token(token_type=tok, token_value=lexeme)
                 else:
                     lexeme = lexeme.lstrip()
-                    with open(self.file_error, mode="a") as err_file:
-                        err_file.write("{}. ({}, invalid input)\n".format(line, lexeme))
+                    self.error_writer.write("({}, invalid input)\n".format(lexeme))
         except StopIteration:
             pass

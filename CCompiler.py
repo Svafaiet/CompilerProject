@@ -1,6 +1,7 @@
 import CLexicalDFA
 from CodeGenerator import CodeGenerator
 from DirectiveHandler import DirectiveHandler
+from ErrorWriter import ErrorWriter
 from ParseHandler import ParserHandler
 from ParseTree import ParseTree
 from Semantics import Semantics
@@ -19,18 +20,17 @@ class Compiler:
 
     def compile(self, file_in, file_out, file_error):
         Compiler.empty_files(file_out, file_error)
-        self.token_handler.set_files(file_in=file_in, file_error=file_error)
-        self.parse_handler.set_files(file_error=file_error)
+        error_writer = ErrorWriter(file_error)
+        self.token_handler.set_io(file_in=file_in, error_writer=error_writer)
+        self.parse_handler.set_io(error_writer=error_writer)
         parse_tree = self.parse_handler.parser.parse_tree
-        semantics = Semantics(file_error=file_error)
-        code_generator = CodeGenerator()
-        directive_handler = DirectiveHandler(semantics, code_generator)
+        directive_handler = DirectiveHandler(error_writer=error_writer, file_out=file_out)
         parse_tree.set_handler(directive_handler)
         tok_gen = self.token_handler.get_next_token()
         is_terminated, error = False, False
         while not is_terminated:
-            tok, line = next(tok_gen)
-            is_terminated, error = self.parse_handler.parse_token(tok, line)
+            tok = next(tok_gen)
+            is_terminated, error = self.parse_handler.parse_token(tok)
 
         view = parser.parse_tree.view()
         with open(file=file_out, mode="w") as f:

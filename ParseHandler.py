@@ -4,12 +4,12 @@ from Token import CTokenType
 class ParserHandler:
     def __init__(self, parser):
         self.parser = parser
-        self.file_error = None
+        self.error_writer = None
 
-    def set_files(self, file_error):
-        self.file_error = file_error
+    def set_io(self, error_writer):
+        self.error_writer = error_writer
 
-    def parse_token(self, token, line):
+    def parse_token(self, token):
         """
 
         :param token:
@@ -20,7 +20,7 @@ class ParserHandler:
             error, next_token_needed, error_type = self.parser.parse(token)
             if error:
                 err_type, tok = error_type
-                self.handle_errors(err_type, line, tok)
+                self.handle_errors(err_type, tok)
                 if err_type == 3 or err_type == 4:
                     return True, True
 
@@ -32,15 +32,14 @@ class ParserHandler:
             if next_token_needed:
                 return False, error
 
-    def handle_errors(self, error_type, line, token):
-        with open(file=self.file_error, mode="a") as f:
-            if error_type == 0:
-                f.write("{}: Syntax Error! Missing {}\n".format(line, token.token_type))
-            elif error_type == 1:
-                f.write("{}: Syntax Error! Unexpected {}\n".format(line, token.token_type))
-            elif error_type == 2:
-                f.write("{}: Syntax Error! Missing {}\n".format(line, token))
-            elif error_type == 3:
-                f.write("{}: Syntax Error! Unexpected EndOfFile\n".format(line))
-            elif error_type == 4:
-                f.write("{}: Syntax Error! Malformed Input\n".format(line))
+    def handle_errors(self, error_type, token):
+        if error_type == 0:
+            self.error_writer.write("Syntax Error! Missing {}\n".format(token.token_type))
+        elif error_type == 1:
+            self.error_writer.write("Syntax Error! Unexpected {}\n".format(token.token_type))
+        elif error_type == 2:
+            self.error_writer.write("Syntax Error! Missing {}\n".format(token))
+        elif error_type == 3:
+            self.error_writer.write("Syntax Error! Unexpected EndOfFile\n")
+        elif error_type == 4:
+            self.error_writer.write("Syntax Error! Malformed Input\n")
