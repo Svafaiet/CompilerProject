@@ -20,7 +20,7 @@ compressed_grammar = [
     ["program", ["declaration-list", Token(CTokenType.EOF)]],
     ["declaration-list", ["declaration-list", "declaration"], epsilon],
     ["declaration", ["type-specifier", Token(CTokenType.ID), s("DECLARE_NAME"), "var-func-declaration"]],
-    ["var-func-declaration", ["var-declaration", ], ["fun-declaration"]],
+    ["var-func-declaration", ["var-declaration", s("CHECK_VAR_TYPE")], ["fun-declaration"]],
     ["var-declaration",
      [cs(";")],
      [cs("["), Token(CTokenType.NUM), s("DECLARE_VAR_SIZE"), cs("]"), cs(";")]
@@ -35,7 +35,7 @@ compressed_grammar = [
     ["statement-list", ["statement-list", "statement"], epsilon],
     ["statement", ["expression-stmt", ], ["compound-stmt", ], ["selection-stmt", ], ["iteration-stmt", ],
      ["return-stmt", ], ["switch-stmt", ]],
-    ["expression-stmt", ["expression", cs(";")], [ck("continue"), cs(";")], [ck("break"), cs(";")], [cs(";"), ]],
+    ["expression-stmt", ["expression", cs(";")], [ck("continue"), s("CHECK_CONTINUE"), cs(";")], [ck("break"), s("CHECK_BREAK"), cs(";")], [cs(";"), ]],
     ["selection-stmt", [ck("if"), cs("("), "expression", cs(")"), s("SCOPE_START"), "statement", s("SCOPE_END"),
                         ck("else"), s("SCOPE_START"), "statement", s("SCOPE_END")]],
     ["iteration-stmt", [ck("while"), cs("("), "expression", cs(")"), s("SCOPE_START"), "statement", s("SCOPE_END")]],
@@ -48,7 +48,7 @@ compressed_grammar = [
      epsilon
      ],
     ["expression",
-     [Token(CTokenType.ID), "expression-left"],
+     [Token(CTokenType.ID), s("CHECK_SCOPE"), "expression-left"],
      ["simple-expression"],
      ],
     ["expression-left",
@@ -59,7 +59,7 @@ compressed_grammar = [
      [cs("="),  "expression"],
      ["term-left", "additive-expression-left", "simple-expression-left"]
      ],
-    ["var", [Token(CTokenType.ID), "var-left"]],
+    ["var", [Token(CTokenType.ID), s("CHECK_SCOPE"), "var-left"]],
     ["var-left", [cs("["), "expression", cs("]")], epsilon],
     ["simple-expression", ["additive-expression-right", "simple-expression-left"]],
     ["simple-expression-left", ["relop", "additive-expression"], epsilon],
@@ -91,7 +91,7 @@ compressed_grammar = [
      [cs("-"), "factor"]
      ],
     ["factor",
-     [Token(CTokenType.ID), "var-call"],
+     [Token(CTokenType.ID), s("CHECK_SCOPE"), "var-call"],
      ["factor-left"]
      ],
     ["factor-left",
@@ -99,13 +99,13 @@ compressed_grammar = [
      [Token(CTokenType.NUM)]
      ],
     ["var-call", ["var-left"], ["call"]],
-    ["call", [cs("("), "args", cs(")")]],
+    ["call", [s("CHECK_FUNC_ARGS_BEGIN"), cs("("), "args", s("CHECK_FUNC_ARGS_END"), cs(")")]],
     ["args",
      ["arg-list"],
      epsilon,
      ],
     ["arg-list",
-     ["arg-list", cs(","), "expression"],
-     ["expression"],
+     ["arg-list", cs(","), "expression", s("ARG")],
+     ["expression", s("ARG")],
      ],
 ]

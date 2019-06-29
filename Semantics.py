@@ -1,5 +1,6 @@
 from CGrammar import ck, cs, s
 
+
 class SymbolTableRecord:
     def __init__(self, type, name=None):
         self.type = type
@@ -12,6 +13,7 @@ class Semantics:
         self.stack = []
         self.symbol_table = []
         self.prev_sym_entry = None
+        self.function_call_stack = []
     #TODO MAKE OUTPUT
 
     #TODO CHECK MAIN
@@ -79,10 +81,26 @@ class Semantics:
                 if param == ck("void") or (hasattr(param, 'children') and param.chilren[0] == ck("void")):
                     func.attributes["param-len"] = 0
 
-    def check_break(self):
+    def check_break(self, *args, **kwargs):
         for scope in self.stack[::-1]:
-            if scope[1] == "iteration_stmt" or scope[1] == "switch-stmt":
+            if scope[1] == "iteration-stmt" or scope[1] == "switch-stmt":
                 return True
+        ##Todo handle error
+        return False
+
+    def check_continue(self, *args, **kwargs):
+        for scope in self.stack[::-1]:
+            if scope[1] == "iteration_stmt":
+                return True
+        ##Todo handle error
+        return False
+
+    def check_scope(self, current_node, **kwargs):
+        name = current_node.token_value
+        for entry in self.symbol_table[::-1]:
+            if entry.name == name:
+                return True
+        ##Todo handle errors
         return False
 
     def check_main(self):
@@ -91,3 +109,27 @@ class Semantics:
                 or self.symbol_table[-1].attributes["param-len"] != 0:
             return False
         return True
+
+    def check_func_args_begin(self, current_node, **kwargs):
+        func_name = current_node.token_value
+        for entry in self.symbol_table[::-1]:
+            if entry.name == func_name and entry.attributes['dec-type'] == "function":
+                self.function_call_stack.append([entry, 0])
+                break
+
+    def check_func_args_end(self, *args, **kwargs):
+        if self.function_call_stack[-1][0].attributes['param-len'] != self.function_call_stack[-1][1]:
+            ##todo handle errors
+            self.function_call_stack.pop()
+            pass
+        else:
+            self.function_call_stack.pop()
+
+    def arg(self, *args, **kwargs):
+        self.function_call_stack[-1][1] += 1
+
+    def check_var_type(self, *args, **kwargs):
+        if self.symbol_table[-1].attributes['dec-type'] == "variable" and self.symbol_table[-1].type == "void":
+            self.symbol_table.pop()
+            #todo handle errors
+            pass
