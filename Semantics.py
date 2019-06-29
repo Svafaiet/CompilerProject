@@ -17,9 +17,6 @@ class Semantics:
         self.function_call_stack = []
         self.error_writer = error_writer
         self.expression_stack = []
-    #TODO MAKE OUTPUT
-
-    #TODO CHECK MAIN
 
     def handle_semantic_symbol(self, semantic_symbol, **kwargs):
         current_node = kwargs.pop('current_node', None)
@@ -38,13 +35,16 @@ class Semantics:
 
     def err(self, error_type, id_tok_val=None):
         error_types = {
-            "main":             "main function not found!",
-            "scoping":          "{} is not defined.".format(id_tok_val),
-            "variable_void":    "Illegal type of void.",
-            "arg_count":        "Mismatch in number of arguments of {}.".format(id_tok_val),
-            "continue":         "No 'while' found for 'continue'.",
-            "break":            "No 'while' or 'switch' found for 'break'.",
-            "operand_mismatch": "type mismatch in operands",
+            "main":             "Main function not found or is invalid!\n",
+            "scoping":          "{} is not defined.\n".format(id_tok_val),
+            "variable_void":    "Illegal type of void for variable {}.\n".format(id_tok_val),
+            "arg_count":        "Mismatch in number of arguments of {}.\n".format(id_tok_val),
+            "continue":         "No 'while' found for 'continue'.\n",
+            "break":            "No 'while' or 'switch' found for 'break'.\n",
+            "operand_mismatch": "Type mismatch in operands\n",
+            "invalid_parameters": "Invalid parameter of type void for function {}. function already has a parameter\n".format(id_tok_val),
+            "invalid_variable_indexing": "Variable {} is not an array and can not be indexed\n".format(id_tok_val),
+            "invalid_index": "Invalid index for array {}\n".format(id_tok_val)
         }
         self.error_writer.write(error_types.get(error_type))
 
@@ -86,11 +86,11 @@ class Semantics:
         if self.prev_sym_entry is not None and param is not None:
             if 'param-len' in func.attributes:
                 if func.attributes["param-len"] == 0:
-                    pass
-                    #TODO check error
+                    self.err('invalid_parameters', func.name)
+                    self.symbol_table.pop(ind)
                 elif param == ck("void") or (hasattr(param, 'children') and param.chilren[0] == ck("void")):
-                    pass
-                    #TODO check error
+                    self.err('invalid_parameters', func.name)
+                    self.symbol_table.pop(ind)
                 else:
                     func.attributes["param-len"] += 1
             else:
@@ -102,31 +102,27 @@ class Semantics:
     def check_break(self, *args, **kwargs):
         for scope in self.stack[::-1]:
             if scope[1] == "iteration-stmt" or scope[1] == "switch-stmt":
-                return True
-        ##Todo handle error
-        return False
+                break
+        else:
+            self.err("break")
 
     def check_continue(self, *args, **kwargs):
         for scope in self.stack[::-1]:
             if scope[1] == "iteration_stmt":
-                return True
-        ##Todo handle error
-        return False
+                break
+        else:
+            self.err("continue")
 
     def check_scope(self, current_node, **kwargs):
         name = current_node.token_value
-        if self.get_sym_table_entry(name) is not None:
-            return True
-        else:
-            #todo handle errors
-            return False
+        if self.get_sym_table_entry(name) is None:
+            self.err("scoping", name)
 
-    def check_main(self):
+    def check_main(self, *args, **kwargs):
         if self.symbol_table[-1].type != ck("void") or self.symbol_table[-1].name != "main" \
                 or self.symbol_table[-1].attribures["dec-type"] != "function" \
                 or self.symbol_table[-1].attributes["param-len"] != 0:
-            return False
-        return True
+            self.err("main")
 
     def check_func_args_begin(self, current_node, **kwargs):
         func_name = current_node.token_value
@@ -137,9 +133,8 @@ class Semantics:
 
     def check_func_args_end(self, *args, **kwargs):
         if self.function_call_stack[-1][0].attributes['param-len'] != self.function_call_stack[-1][1]:
-            ##todo handle errors
+            self.err("arg_count", self.function_call_stack[-1][0].name)
             self.function_call_stack.pop()
-            pass
         else:
             self.function_call_stack.pop()
 
@@ -148,9 +143,8 @@ class Semantics:
 
     def check_var_type(self, *args, **kwargs):
         if self.symbol_table[-1].attributes['dec-type'] == "variable" and self.symbol_table[-1].type == "void":
+            self.err("variable_void", self.symbol_table[-1].name)
             self.symbol_table.pop()
-            #todo handle errors
-            pass
 
     def get_sym_table_entry(self, name):
         for entry in self.symbol_table[::-1]:
@@ -168,42 +162,33 @@ class Semantics:
             item = ent[0]
             if item == Token(CTokenType.ID):
                 item = self.get_sym_table_entry(item.token_value)
-                if item.attributes['dec-type'] == 'function' and item.type == 'void' and len(expr) > 1:
-                    #todo handle errors
-                    self.expression_stack.pop()
-                    return
-                if 'var-size' in item.attributes and ent[1] is None:
-                    #todo handle errors
-                    self.expression_stack.pop()
-                    return
+                if item is not None:
+                    if item.attributes['dec-type'] == 'function' and item.type == 'void' and len(expr) > 1:
+                        self.err("operand_mismatch")
+                    if 'var-size' in item.attributes and ent[1] is None:
+                        self.err("operand_mismatch")
 
-        else:
-            self.expression_stack.pop()
-            return False
+        self.expression_stack.pop()
 
     def add_var_to_expression(self, current_node, **kwargs):
         self.expression_stack[-1].append([current_node, None])
 
     def check_array(self, current_node, **kwargs):
         entry = self.get_sym_table_entry(current_node.token_value)
-        if 'var-size' not in entry.attributes:
-            #todo handle erros
-            pass
-        else:
-            self.expression_stack[-1][-1][1] = 'array'
-            return False
+        if entry is not None:
+            if 'var-size' not in entry.attributes:
+                self.err("invalid_variable_indexing", entry.name)
+
+            else:
+                self.expression_stack[-1][-1][1] = 'array'
+                return False
 
     def check_expression_func(self, current_node, **kwargs):
         entry = self.get_sym_table_entry(current_node.token_value)
-        if entry.attributes['dec-type'] == 'function' and entry.type == 'void':
-            if len(self.expression_stack) > 1:
-                #todo handle errors
-                pass
-            elif len(self.expression_stack[-1]) > 1:
-                #todo handle errors
-                pass
-            else:
-                return False
+        if entry is not None:
+            if entry.attributes['dec-type'] == 'function' and entry.type == 'void':
+                if len(self.expression_stack) > 1 or len(self.expression_stack[-1]) > 1:
+                    self.err("operand_mismatch")
 
     def end_secondary_expression_check(self, *args, **kwargs):
         expr = self.expression_stack[-1]
@@ -211,15 +196,11 @@ class Semantics:
             item = ent[0]
             if item == Token(CTokenType.ID):
                 item = self.get_sym_table_entry(item.token_value)
-                if item.attributes['dec-type'] == 'function' and item.type == 'void':
-                    #todo handle errors
-                    self.expression_stack.pop()
-                    return
-                if 'var-size' in item.attributes and ent[1] is None:
-                    #todo handle errors
-                    self.expression_stack.pop()
-                    return
+                if item is not None:
+                    if item.attributes['dec-type'] == 'function' and item.type == 'void':
+                        self.err("operand_mismatch")
+                    if 'var-size' in item.attributes and ent[1] is None:
+                        self.err("invalid_index", item.name)
 
-        else:
-            self.expression_stack.pop()
-            return False
+        self.expression_stack.pop()
+

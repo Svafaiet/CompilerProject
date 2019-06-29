@@ -17,7 +17,7 @@ def s(semantic_type):
 
 
 compressed_grammar = [
-    ["program", ["declaration-list", Token(CTokenType.EOF)]],
+    ["program", ["declaration-list", s("CHECK_MAIN"), Token(CTokenType.EOF)]],
     ["declaration-list", ["declaration-list", "declaration"], epsilon],
     ["declaration", ["type-specifier", Token(CTokenType.ID), s("DECLARE_NAME"), "var-func-declaration"]],
     ["var-func-declaration", ["var-declaration", s("CHECK_VAR_TYPE")], ["fun-declaration"]],

@@ -1,2 +1,12 @@
-40: Syntax Error! Unexpected CTokenType.SYMBOL
-40: Syntax Error! Missing var-func-declaration
+8: Type mismatch in operands
+15: No 'while' or 'switch' found for 'break'.
+17: No 'while' found for 'continue'.
+20: Syntax Error! Missing CTokenType.KEYWORD
+24: Illegal type of void for variable a.
+25: a is not defined.
+26: a is not defined.
+26: a is not defined.
+26: Mismatch in number of arguments of foo.
+40: u is not defined.
+41: u is not defined.
+47: Main function not found or is invalid!
