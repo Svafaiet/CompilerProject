@@ -537,17 +537,18 @@ program
                           |- (
                           |- args
                            |- arg-list
-                            |- CTokenType.ID
-                            |- expression-left
-                             |- var-left
-                              |- __EPSILON__
-                             |- expression-right
-                              |- term-left
+                            |- expression
+                             |- CTokenType.ID
+                             |- expression-left
+                              |- var-left
                                |- __EPSILON__
-                              |- additive-expression-left
-                               |- __EPSILON__
-                              |- simple-expression-left
-                               |- __EPSILON__
+                              |- expression-right
+                               |- term-left
+                                |- __EPSILON__
+                               |- additive-expression-left
+                                |- __EPSILON__
+                               |- simple-expression-left
+                                |- __EPSILON__
                             |- arg-list.new
                              |- ,
                              |- expression
@@ -648,29 +649,30 @@ program
                       |- (
                       |- args
                        |- arg-list
-                        |- CTokenType.ID
-                        |- expression-left
-                         |- var-left
-                          |- [
-                          |- expression
-                           |- simple-expression
-                            |- additive-expression-right
-                             |- factor-left
-                              |- CTokenType.NUM
-                             |- term-left
+                        |- expression
+                         |- CTokenType.ID
+                         |- expression-left
+                          |- var-left
+                           |- [
+                           |- expression
+                            |- simple-expression
+                             |- additive-expression-right
+                              |- factor-left
+                               |- CTokenType.NUM
+                              |- term-left
+                               |- __EPSILON__
+                              |- additive-expression-left
+                               |- __EPSILON__
+                             |- simple-expression-left
                               |- __EPSILON__
-                             |- additive-expression-left
-                              |- __EPSILON__
-                            |- simple-expression-left
-                             |- __EPSILON__
-                          |- ]
-                         |- expression-right
-                          |- term-left
-                           |- __EPSILON__
-                          |- additive-expression-left
-                           |- __EPSILON__
-                          |- simple-expression-left
-                           |- __EPSILON__
+                           |- ]
+                          |- expression-right
+                           |- term-left
+                            |- __EPSILON__
+                           |- additive-expression-left
+                            |- __EPSILON__
+                           |- simple-expression-left
+                            |- __EPSILON__
                         |- arg-list.new
                          |- ,
                          |- expression
@@ -914,29 +916,28 @@ program
                               |- {
                               |- declaration-list
                                |- declaration-list.new
-                                |- __EPSILON__
+                                |- declaration
+                                 |- type-specifier
+                                  |- int
+                                 |- CTokenType.ID
+                                 |- var-func-declaration
+                                |- declaration-list.new
+                                 |- __EPSILON__
                               |- statement-list
                                |- statement-list.new
                                 |- statement
                                  |- expression-stmt
                                   |- expression
-                                   |- CTokenType.ID
-                                   |- expression-left
-                                    |- var-left
+                                   |- simple-expression
+                                    |- additive-expression-right
+                                     |- factor-left
+                                      |- CTokenType.NUM
+                                     |- term-left
+                                      |- __EPSILON__
+                                     |- additive-expression-left
+                                      |- __EPSILON__
+                                    |- simple-expression-left
                                      |- __EPSILON__
-                                    |- expression-right
-                                     |- =
-                                     |- expression
-                                      |- simple-expression
-                                       |- additive-expression-right
-                                        |- factor-left
-                                         |- CTokenType.NUM
-                                        |- term-left
-                                         |- __EPSILON__
-                                        |- additive-expression-left
-                                         |- __EPSILON__
-                                       |- simple-expression-left
-                                        |- __EPSILON__
                                   |- ;
                                 |- statement-list.new
                                  |- statement

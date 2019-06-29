@@ -1,4 +1,5 @@
 from CGrammar import ck, cs, s
+from Token import Token, CTokenType
 
 
 class SymbolTableRecord:
@@ -15,6 +16,7 @@ class Semantics:
         self.prev_sym_entry = None
         self.function_call_stack = []
         self.error_writer = error_writer
+        self.expression_stack = []
     #TODO MAKE OUTPUT
 
     #TODO CHECK MAIN
@@ -66,7 +68,10 @@ class Semantics:
 
     def declare_var_size(self, current_node, **kwargs):
         if self.prev_sym_entry is not None and current_node is not None:
-            self.symbol_table[-1].attributes["var_size"] = current_node.token_value
+                if current_node.token_value != '[':
+                    self.symbol_table[-1].attributes["var-size"] = current_node.token_value
+                else:
+                    self.symbol_table[-1].attributes["var-size"] = '0'
 
     def function(self, *args, **kwargs):
         self.symbol_table[-1].attributes['dec-type'] = "function"
@@ -110,11 +115,11 @@ class Semantics:
 
     def check_scope(self, current_node, **kwargs):
         name = current_node.token_value
-        for entry in self.symbol_table[::-1]:
-            if entry.name == name:
-                return True
-        ##Todo handle errors
-        return False
+        if self.get_sym_table_entry(name) is not None:
+            return True
+        else:
+            #todo handle errors
+            return False
 
     def check_main(self):
         if self.symbol_table[-1].type != ck("void") or self.symbol_table[-1].name != "main" \
@@ -146,3 +151,75 @@ class Semantics:
             self.symbol_table.pop()
             #todo handle errors
             pass
+
+    def get_sym_table_entry(self, name):
+        for entry in self.symbol_table[::-1]:
+            if entry.name == name:
+                return entry
+        else:
+            return None
+
+    def begin_expression_check(self, *args, **kwargs):
+        self.expression_stack.append([])
+
+    def end_expression_check(self, *args, **kwargs):
+        expr = self.expression_stack[-1]
+        for ent in expr:
+            item = ent[0]
+            if item == Token(CTokenType.ID):
+                item = self.get_sym_table_entry(item.token_value)
+                if item.attributes['dec-type'] == 'function' and item.type == 'void' and len(expr) > 1:
+                    #todo handle errors
+                    self.expression_stack.pop()
+                    return
+                if 'var-size' in item.attributes and ent[1] is None:
+                    #todo handle errors
+                    self.expression_stack.pop()
+                    return
+
+        else:
+            self.expression_stack.pop()
+            return False
+
+    def add_var_to_expression(self, current_node, **kwargs):
+        self.expression_stack[-1].append([current_node, None])
+
+    def check_array(self, current_node, **kwargs):
+        entry = self.get_sym_table_entry(current_node.token_value)
+        if 'var-size' not in entry.attributes:
+            #todo handle erros
+            pass
+        else:
+            self.expression_stack[-1][-1][1] = 'array'
+            return False
+
+    def check_expression_func(self, current_node, **kwargs):
+        entry = self.get_sym_table_entry(current_node.token_value)
+        if entry.attributes['dec-type'] == 'function' and entry.type == 'void':
+            if len(self.expression_stack) > 1:
+                #todo handle errors
+                pass
+            elif len(self.expression_stack[-1]) > 1:
+                #todo handle errors
+                pass
+            else:
+                return False
+
+    def end_secondary_expression_check(self, *args, **kwargs):
+        expr = self.expression_stack[-1]
+        for ent in expr:
+            item = ent[0]
+            if item == Token(CTokenType.ID):
+                item = self.get_sym_table_entry(item.token_value)
+                if item.attributes['dec-type'] == 'function' and item.type == 'void':
+                    #todo handle errors
+                    self.expression_stack.pop()
+                    return
+                if 'var-size' in item.attributes and ent[1] is None:
+                    #todo handle errors
+                    self.expression_stack.pop()
+                    return
+
+        else:
+            self.expression_stack.pop()
+            return False
