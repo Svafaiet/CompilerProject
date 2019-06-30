@@ -50,12 +50,14 @@ compressed_grammar = [
      [ck("continue"), s("CHECK_CONTINUE"), cs(";")], [ck("break"), s("CHECK_BREAK"), cs(";")], [cs(";"), ]
      ],
     ["selection-stmt",
-     [ck("if"), cs("("), s("BEGIN_EXPRESSION_CHECK"), "expression", s("END_EXPRESSION_CHECK"), cs(")"),
-      s("SCOPE_START"), "statement", s("SCOPE_END"), ck("else"), s("SCOPE_START"), "statement", s("SCOPE_END")]
+     [ck("if"), cs("("), s("BEGIN_EXPRESSION_CHECK"), "expression", s("END_EXPRESSION_CHECK"), a("SAVE"), cs(")"),
+      s("SCOPE_START"), "statement", s("SCOPE_END"), ck("else"), a("ELSE_START"), s("SCOPE_START"), "statement",
+      s("SCOPE_END"), a("ElSE_END")]
      ],
     ["iteration-stmt",
-     [ck("while"), a("LABEL"), cs("("), s("BEGIN_EXPRESSION_CHECK"), "expression", s("END_EXPRESSION_CHECK"), cs(")"),
-      s("SCOPE_START"), "statement", s("SCOPE_END")]],
+     [ck("while"), a("WHILE_START"), cs("("), s("BEGIN_EXPRESSION_CHECK"), "expression", s("END_EXPRESSION_CHECK"), a("SAVE"),
+      cs(")"),
+      s("SCOPE_START"), "statement", a("WHILE_SAVE"), s("SCOPE_END")]],
     ["return-stmt", [ck("return"), cs(";"), s("CHECK_VOID_FUNCTION")],
      [ck("return"), s("BEGIN_EXPRESSION_CHECK"), "expression", s("CHECK_NOT_VOID"),
       s("END_SECONDARY_EXPRESSION_CHECK"), cs(";")]],
