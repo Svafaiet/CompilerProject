@@ -74,6 +74,7 @@ compressed_grammar = [
     ["relop",
      [cs("<")],
      [cs("==")],
+     [cs(">")],
      ],
     ["additive-expression",
      ["term", "additive-expression-left"],
