@@ -21,8 +21,8 @@ class MemoryAccessDirectiveObj:
         """
         :param access_type:
             Different kinds of (:param type) specify how to access memory in code generation
-            "" : (:param value)
-            "#" : mem[(:param value)]
+            "#" : (:param value)
+            "" : mem[(:param value)]
             "@" : mem[mem[:param value]]
         :param value: must be VariableDirectiveObj
         """

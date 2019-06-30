@@ -28,7 +28,8 @@ compressed_grammar = [
     ["var-func-declaration", ["var-declaration", s("CHECK_VAR_TYPE"), a("ADD_LOCAL")], ["fun-declaration"]],
     ["var-declaration",
      [cs(";")],
-     [cs("["), Token(CTokenType.NUM), s("DECLARE_VAR_SIZE"), cs("]"), cs(";")]
+     [cs("["), Token(CTokenType.NUM), s("DECLARE_VAR_SIZE"), a("PUSH_NUM"), a("ADD_LOCAL_ARR_LEN"), cs("]"), cs(";")],
+     # [cs("["), "expression", s("DECLARE_VAR_SIZE"), cs("]"), cs(";")]
      ],
     ["type-specifier", [ck("int"), s("DECLARE_TYPE"), ], [ck("void"), s("DECLARE_TYPE"), ]],
     ["fun-declaration",
@@ -39,8 +40,9 @@ compressed_grammar = [
     ["param-list", [cs(","), "param", "param-list"], epsilon],
     ["param", ["type-specifier", s("ADD_PARAM"), "param-left"]],
     ["param-left",
-     [Token(CTokenType.ID), s("DECLARE_NAME"), s("CHECK_VAR_TYPE"), a("ADD_PARAM"), cs("["), s("DECLARE_VAR_SIZE"), cs("]")],
-     [Token(CTokenType.ID), s("DECLARE_NAME"), s("CHECK_VAR_TYPE"), a("ADD_PARAM"),]],
+     [Token(CTokenType.ID), s("DECLARE_NAME"), s("CHECK_VAR_TYPE"), a("ADD_PARAM"), cs("["), s("DECLARE_VAR_SIZE"),
+      cs("]")],
+     [Token(CTokenType.ID), s("DECLARE_NAME"), s("CHECK_VAR_TYPE"), a("ADD_PARAM"), ]],
     ["compound-stmt", [cs("{"), s("SCOPE_START"), "declaration-list", "statement-list", s("SCOPE_END"), cs("}")]],
     ["statement-list", ["statement-list", "statement"], epsilon],
     ["statement", ["expression-stmt", ], ["compound-stmt", ], ["selection-stmt", ], ["iteration-stmt", ],
@@ -55,7 +57,8 @@ compressed_grammar = [
       s("SCOPE_END"), a("ElSE_END")]
      ],
     ["iteration-stmt",
-     [ck("while"), a("WHILE_START"), cs("("), s("BEGIN_EXPRESSION_CHECK"), "expression", s("END_EXPRESSION_CHECK"), a("SAVE"),
+     [ck("while"), a("WHILE_START"), cs("("), s("BEGIN_EXPRESSION_CHECK"), "expression", s("END_EXPRESSION_CHECK"),
+      a("SAVE"),
       cs(")"),
       s("SCOPE_START"), "statement", a("WHILE_SAVE"), s("SCOPE_END")]],
     ["return-stmt", [ck("return"), cs(";"), s("CHECK_VOID_FUNCTION")],

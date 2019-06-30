@@ -1,5 +1,6 @@
 from ActionSymbol import MemoryAccessDirectiveObj
 
+#TODO fix those shit pcs
 
 def _m(value, access_type=""):
     return MemoryAccessDirectiveObj(value, access_type)
@@ -47,6 +48,10 @@ class CodeGenerator:
     """
     def add_continue(self):
         pass
+
+    def add_break(self):
+        pass
+        # self.while_switch_stack
 
     def get_top_ar(self):
         return self.ar_stack[-1]
@@ -138,7 +143,7 @@ class CodeGenerator:
         # todo
 
     def calc_arr(self, *args, **kwargs):
-        self.pb[self.pc] = "MULT", _m("4", "#"), _m(self.ss_i(0)), _m(self.ss_i(0))
+        self.pb[self.pc] = "MULT", _m(4, "#"), _m(self.ss_i(0)), _m(self.ss_i(0))
         self.pb[self.pc + 1] = "ADD", _m(self.ss_i(0)), _m(self.ss_i(1)), _m(self.ss_i(1))
         self.pop()
         self.pb[self.pc + 2] = "ASSIGN", _m(self.ss_i(0), "@"), _m(self.ss_i(0))
@@ -146,7 +151,11 @@ class CodeGenerator:
 
     def add_param(self, current_node, **kwargs):
         top_ar = self.get_top_ar()
-        top_ar.add_param(current_node.token_value)
+        top_ar.add_param()
+
+    def add_local_arr_len(self):
+        top_ar = self.get_top_ar()
+        top_ar.add_size(self)
 
 
     #todo handle local arrays
