@@ -167,7 +167,18 @@ program
                  |- term-left
                   |- __EPSILON__
                  |- additive-expression-left
-                  |- __EPSILON__
+                  |- addop
+                   |- +
+                  |- term
+                   |- signed-factor
+                    |- factor
+                     |- CTokenType.ID
+                     |- var-call
+                      |- __EPSILON__
+                   |- term-left
+                    |- __EPSILON__
+                  |- additive-expression-left
+                   |- __EPSILON__
                  |- simple-expression-left
                   |- __EPSILON__
            |- ;

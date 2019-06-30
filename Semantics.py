@@ -212,7 +212,7 @@ class Semantics:
                 if item is not None:
                     if item.attributes['dec-type'] == 'function' and item.type == 'void':
                         self.err("operand_mismatch")
-                    if 'var-size' in item.attributes and ent[1] is None:
+                    if 'var-size' in item.attributes and ent[1] is None and len(expr) > 1:
                         self.err("invalid_index", item.name)
 
         self.expression_stack.pop()
