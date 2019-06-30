@@ -25,8 +25,8 @@ class CodeGenerator:
     def push(self, value):
         self.ss.append(value)
 
-    def pop(self, count=0):
-        if count > 0:
+    def pop(self, count=1):
+        if count > 1:
             self.ss.pop()
             return self.pop(count - 1)
         return self.ss.pop()
@@ -49,8 +49,14 @@ class CodeGenerator:
         except Exception as e:
             print(e)
 
-    def op_push(self, current_node, **kwargs):
+    def push_tok(self, current_node, **kwargs):
         self.push(current_node.token_value)
+
+    def push_num(self, current_node, **kwargs):
+        t = self.get_temp()
+        self.pb[self.pc] = "ASSIGN", _m(current_node.token_value, "#"), _m(t)
+        self.add_pc(1)
+        self.push(t)
 
     def math_bin_op(self, current_node, **kwargs):
         tok_to_icg = {
@@ -66,7 +72,10 @@ class CodeGenerator:
             "+": "ADD",
             "-": "SUB",
         }
-        self.pb[self.pc] = tok_to_icg[self.ss_i(1)], _m(0, "#"), _m(self.ss_i(0)), _m(self.ss_i(0))
+        val = self.pop()
+        self.pb[self.pc] = tok_to_icg[self.ss_i(1)], _m(0, "#"), _m(val), _m(val)
+        self.pop()
+        self.push(val)
 
     def bool_op(self, current_node, **kwargs):
         tok_to_icg = {
@@ -86,7 +95,7 @@ class CodeGenerator:
 
     def if_save(self, current_node, **kwargs):
         self.pb[self.ss_i(0)] = "JPF", _m(self.pc)
-        self.pop(1)
+        self.pop()
 
     def while_start(self, current_node, **kwargs):
         pass
@@ -111,4 +120,7 @@ class CodeGenerator:
 
     def calc_arr(self, current_node, **kwargs):
         self.pb[self.pc] = "MULT", _m("4", "#"), _m(self.ss_i(0)), _m(self.ss_i(0))
-        #todo
+        self.pb[self.pc + 1] = "ADD", _m(self.ss_i(0)), _m(self.ss_i(1)), _m(self.ss_i(1))
+        self.pop()
+        self.pb[self.pc + 2] = "ASSIGN", _m(self.ss_i(0), "@"), _m(self.ss_i(0))
+        self.add_pc(3)
