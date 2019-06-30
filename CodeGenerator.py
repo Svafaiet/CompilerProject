@@ -93,8 +93,13 @@ class CodeGenerator:
         self.push(self.pc)
         self.add_pc(1)
 
-    def if_save(self, current_node, **kwargs):
-        self.pb[self.ss_i(0)] = "JPF", _m(self.pc)
+    def else_start(self, current_node, **kwargs):
+        self.pb[self.ss_i(0)] = "JPF", _m(self.ss_i(1)), _m(self.pc + 1)
+        self.pop(2)
+        self.label(current_node, **kwargs)
+
+    def else_end(self, current_node, **kwargs):
+        self.pb[self.ss_i(0)] = "JP", _m(self.pc)
         self.pop()
 
     def while_start(self, current_node, **kwargs):

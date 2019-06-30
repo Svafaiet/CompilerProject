@@ -54,7 +54,7 @@ compressed_grammar = [
       s("SCOPE_START"), "statement", s("SCOPE_END"), ck("else"), s("SCOPE_START"), "statement", s("SCOPE_END")]
      ],
     ["iteration-stmt",
-     [ck("while"), cs("("), s("BEGIN_EXPRESSION_CHECK"), "expression", s("END_EXPRESSION_CHECK"), cs(")"),
+     [ck("while"), a("LABEL"), cs("("), s("BEGIN_EXPRESSION_CHECK"), "expression", s("END_EXPRESSION_CHECK"), cs(")"),
       s("SCOPE_START"), "statement", s("SCOPE_END")]],
     ["return-stmt", [ck("return"), cs(";"), s("CHECK_VOID_FUNCTION")],
      [ck("return"), s("BEGIN_EXPRESSION_CHECK"), "expression", s("CHECK_NOT_VOID"),
