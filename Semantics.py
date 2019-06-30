@@ -73,7 +73,7 @@ class Semantics:
     def declare_name(self, current_node, **kwargs):
         name = current_node.token_value
         if self.prev_sym_entry is not None and name is not None:
-            if self.get_sym_table_entry(name) is None:
+            if self.get_sym_table_entry(name) is (None, None):
                 self.symbol_table[-1].name = name
             else:
                 self.err("second_declaration", name)
@@ -128,7 +128,7 @@ class Semantics:
 
     def check_scope(self, current_node, **kwargs):
         name = current_node.token_value
-        if self.get_sym_table_entry(name) is None:
+        if self.get_sym_table_entry(name) is (None, None):
             self.err("scoping", name)
 
     def check_main(self, *args, **kwargs):
@@ -160,11 +160,11 @@ class Semantics:
             self.symbol_table.pop()
 
     def get_sym_table_entry(self, name):
-        for entry in self.symbol_table[::-1]:
+        for i, entry in enumerate(self.symbol_table[::-1]):
             if entry.name == name:
-                return entry
+                return entry, i
         else:
-            return None
+            return None, None
 
     def begin_expression_check(self, *args, **kwargs):
         self.expression_stack.append([])
@@ -174,7 +174,7 @@ class Semantics:
         for ent in expr:
             item = ent[0]
             if item == Token(CTokenType.ID):
-                item = self.get_sym_table_entry(item.token_value)
+                item, _ = self.get_sym_table_entry(item.token_value)
                 if item is not None:
                     if item.attributes['dec-type'] == 'function' and item.type == 'void' and len(expr) > 1:
                         self.err("operand_mismatch")
@@ -187,7 +187,7 @@ class Semantics:
         self.expression_stack[-1].append([current_node, None])
 
     def check_array(self, current_node, **kwargs):
-        entry = self.get_sym_table_entry(current_node.token_value)
+        entry, _ = self.get_sym_table_entry(current_node.token_value)
         if entry is not None:
             if 'var-size' not in entry.attributes:
                 self.err("invalid_variable_indexing", entry.name)
@@ -197,7 +197,7 @@ class Semantics:
                 return False
 
     def check_expression_func(self, current_node, **kwargs):
-        entry = self.get_sym_table_entry(current_node.token_value)
+        entry, _ = self.get_sym_table_entry(current_node.token_value)
         if entry is not None:
             if entry.attributes['dec-type'] == 'function' and entry.type == 'void':
                 if len(self.expression_stack) > 1 or len(self.expression_stack[-1]) > 1:
@@ -208,7 +208,7 @@ class Semantics:
         for ent in expr:
             item = ent[0]
             if item == Token(CTokenType.ID):
-                item = self.get_sym_table_entry(item.token_value)
+                item, _ = self.get_sym_table_entry(item.token_value)
                 if item is not None:
                     if item.attributes['dec-type'] == 'function' and item.type == 'void':
                         self.err("operand_mismatch")
@@ -234,6 +234,6 @@ class Semantics:
 
     def check_func(self, current_node, **kwargs):
         name = current_node.token_value
-        entry = self.get_sym_table_entry(name)
+        entry, _ = self.get_sym_table_entry(name)
         if entry.attributes['dec-type'] != "function":
             self.err("non-function", name)
