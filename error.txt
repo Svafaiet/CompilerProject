@@ -1,2 +1,4 @@
+5: Function foo2 is of type void but is returning value
+17: Function foo returns nothing
+40: u is not defined.
 41: u is not defined.
-42: u is not defined.

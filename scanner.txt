@@ -20,7 +20,6 @@ int foo(int d, int e){
     return f + b;
 }
 int arr[3];
-
 void main(void){
     int a;
     a = -1 + +11;

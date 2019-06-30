@@ -17,6 +17,7 @@ class Semantics:
         self.function_call_stack = []
         self.error_writer = error_writer
         self.expression_stack = []
+        self.function_stack = []
 
     def handle_semantic_symbol(self, semantic_symbol, **kwargs):
         current_node = kwargs.pop('current_node', None)
@@ -47,7 +48,12 @@ class Semantics:
             "operand_mismatch": "Type mismatch in operands\n",
             "invalid_parameters": "Invalid parameter of type void for function {}. function already has a parameter\n".format(id_tok_val),
             "invalid_variable_indexing": "Variable {} is not an array and can not be indexed\n".format(id_tok_val),
-            "invalid_index": "Invalid index for array {}\n".format(id_tok_val)
+            "invalid_index": "Invalid index for array {}\n".format(id_tok_val),
+            "second_declaration": "This is a second declaration of {}\n".format(id_tok_val),
+            "int_function_no_ret_val": "Function {} returns nothing\n".format(id_tok_val),
+            "void_function_ret_val": "Function {} is of type void but is returning value\n".format(id_tok_val),
+            "return": "No function found for return\n",
+            "non-function": "{} is not a function\n".format(id_tok_val),
         }
         self.error_writer.write(error_types.get(error_type))
 
@@ -67,7 +73,10 @@ class Semantics:
     def declare_name(self, current_node, **kwargs):
         name = current_node.token_value
         if self.prev_sym_entry is not None and name is not None:
-            self.symbol_table[-1].name = name
+            if self.get_sym_table_entry(name) is None:
+                self.symbol_table[-1].name = name
+            else:
+                self.err("second_declaration", name)
 
     def declare_var_size(self, current_node, **kwargs):
         if self.prev_sym_entry is not None and current_node is not None:
@@ -78,6 +87,7 @@ class Semantics:
 
     def function(self, *args, **kwargs):
         self.symbol_table[-1].attributes['dec-type'] = "function"
+        self.function_stack.append(self.symbol_table[-1])
 
     def add_param(self, current_node, **kwargs):
         param = current_node
@@ -207,3 +217,23 @@ class Semantics:
 
         self.expression_stack.pop()
 
+    def check_void_function(self, *args, **kwargs):
+        if self.function_stack[-1].type != "void":
+            self.err("int_function_no_ret_val", self.function_stack[-1].name)
+        elif len(self.function_stack) == 0:
+            self.err("return")
+
+    def end_function(self, *args, **kwargs):
+        self.function_stack.pop()
+
+    def check_not_void(self, *args, **kwargs):
+        if self.function_stack[-1].type == "void":
+            self.err("void_function_ret_val", self.function_stack[-1].name)
+        elif len(self.function_stack) == 0:
+            self.err("return")
+
+    def check_func(self, current_node, **kwargs):
+        name = current_node.token_value
+        entry = self.get_sym_table_entry(name)
+        if entry.attributes['dec-type'] != "function":
+            self.err("non-function", name)
