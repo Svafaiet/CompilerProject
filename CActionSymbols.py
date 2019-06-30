@@ -15,7 +15,7 @@ def _v(var_type, **kwargs):
 
 
 OP_PUSH = _c(StackPush(_v("ln", index=None))) #todo add final indices
-ADDOP = _c(PBAssign(_m(_v("pc", index=0)), _m(_v("ss", index=1)), _m(_v("ss", index=0)), _m(_v("ss", index=1))))
+ADDOP = _c(PBAssign(_m(_v("pc", index=2)), _m(_v("ss", index=0)), _m(_v("ss", index=0)), _m(_v("ss", index=1)), _m(_v("ss", index=2))))
 # MULT = _c(PBAssign(_v))
 
 

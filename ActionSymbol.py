@@ -2,11 +2,13 @@ from DirectiveSymbol import DirectiveSymbol
 
 
 class ActionSymbol(DirectiveSymbol):
-    pass
+    def __init__(self, t):
+        self.type = t
 
 
 class ConstructiveActionSymbol(ActionSymbol):
     def __init__(self, *args):
+        super().__init__("HANDLE_CONSTRUCTIVE_ACTION_SYMBOL")
         self.directives = args
 
 
