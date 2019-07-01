@@ -9,7 +9,7 @@ def _m(value, access_type=""):
 class CodeGenerator:
     INIT_PC_VALUE = 0
     INIT_MEMORY_VALUE = 500
-    REGISTER_SIZE = 2000
+    REGISTER_SIZE = 200
 
     def __init__(self, semantics, file_out):
         self.semantics = semantics
@@ -175,7 +175,27 @@ class CodeGenerator:
         # todo for arr decleration
         # fixme
 
-    def math_bin_op(self, current_node, **kwargs):
+    def pid(self, *args, **kwargs):
+        """
+        pop id_tok_value from stack and put a temp which contains id_tok_value address in memory
+        """
+        self.push(self.get_top_ar().find_ptr(self.pop(1), self))
+
+    def val_at(self, *args, **kwargs):
+        """
+        take address at top of stack and put value of address in address temp
+        """
+        self.add_pc(1)
+        self.pb[self.pc - 1] = "ASSIGN", _m(self.ss_i(0), "@"), _m(self.ss_i(0))
+
+    def assignment(self, *args, **kwargs):
+        self.add_pc(1)
+        t = self.ss_i(0)
+        self.pb[self.pc - 1] = "ASSIGN", _m(self.ss_i(0)), _m(self.ss_i(1), "@")
+        self.pop(2)
+        self.push(t)
+
+    def math_bin_op(self, *args, **kwargs):
         tok_to_icg = {
             "+": "ADD",
             "-": "SUB",
@@ -185,7 +205,7 @@ class CodeGenerator:
         self.pb[self.pc - 1] = tok_to_icg[self.ss_i(1)], _m(self.ss_i(2)), _m(self.ss_i(0)), _m(self.ss_i(2))
         self.pop(2)
 
-    def math_unary_op(self, current_node, **kwargs):
+    def math_unary_op(self, *args, **kwargs):
         tok_to_icg = {
             "+": "ADD",
             "-": "SUB",
@@ -196,7 +216,7 @@ class CodeGenerator:
         self.pop()
         self.push(val)
 
-    def bool_op(self, current_node, **kwargs):
+    def bool_op(self, *args, **kwargs):
         tok_to_icg = {
             "==": "EQ",
             "<": "LT",
@@ -244,7 +264,7 @@ class CodeGenerator:
         self.add_pc(3)
         self.pb[self.pc - 3] = "MULT", _m(4, "#"), _m(self.ss_i(0)), _m(self.ss_i(0))
         self.pb[self.pc - 2] = "ADD", _m(self.ss_i(0)), _m(self.ss_i(1)), _m(self.ss_i(1))
-        self.pop()
+        self.pop(1)
         self.pb[self.pc - 1] = "ASSIGN", _m(self.ss_i(0), "@"), _m(self.ss_i(0))
 
     def add_param(self, current_node, **kwargs):
@@ -297,7 +317,7 @@ class CodeGenerator:
         al_loc = ActivationRecord.control_link
         self.pb[self.pc - 6] = "ADD", _m(al_loc * 4, "#"), _m(self.top_sp), _m(after_sp_ptr, "@")
         self.pb[self.pc - 5] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
-        _, al_size = self.semantics.get_int_vars(self.ss_i(0)) + 1  # fixme
+        al_size = self.semantics.get_int_vars(self.ss_i(0)) + 1
         self.pop(1)
         self.pb[self.pc - 4] = "ASSIGN", _m(al_size, "#"), _m(after_sp_ptr, "@")
         self.pb[self.pc - 3] = "ADD", _m(after_sp_ptr), _m(4 * (ar.params + ar.locals + 1), "#"), _m(after_sp_ptr)
@@ -310,7 +330,7 @@ class CodeGenerator:
         self.temp_set = set()
 
     def end_function(self, *args, **kwargs):
-        ar = self.get_top_ar()
+        ar = self.ar_stack.pop()
         ar.arr_memory(self)
         # self.get_top_ar().after_local()
         # self.pb[self.ss_i(0)] = "ADD", _m(self.top_sp), _m(len(self.get_top_ar().temps), "#"), _m(self.top_sp)

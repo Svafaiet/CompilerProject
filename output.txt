@@ -23,9 +23,6 @@ program
          |- CTokenType.ID
          |- var-func-declaration
           |- var-declaration
-           |- [
-           |- CTokenType.NUM
-           |- ]
            |- ;
         |- declaration-list.new
          |- declaration
@@ -39,16 +36,56 @@ program
             |- ]
             |- ;
          |- declaration-list.new
-          |- __EPSILON__
+          |- declaration
+           |- type-specifier
+            |- int
+           |- CTokenType.ID
+           |- var-func-declaration
+            |- var-declaration
+             |- [
+             |- CTokenType.NUM
+             |- ]
+             |- ;
+          |- declaration-list.new
+           |- __EPSILON__
       |- statement-list
        |- statement-list.new
         |- statement
-         |- return-stmt
-          |- return
-          |- return-stmt.return
-           |- ;
+         |- expression-stmt
+          |- expression
+           |- CTokenType.ID
+           |- expression-left
+            |- var-left
+             |- __EPSILON__
+            |- expression-right
+             |- =
+             |- expression
+              |- CTokenType.ID
+              |- expression-left
+               |- var-left
+                |- __EPSILON__
+               |- expression-right
+                |- =
+                |- expression
+                 |- simple-expression
+                  |- additive-expression-right
+                   |- factor-left
+                    |- CTokenType.NUM
+                   |- term-left
+                    |- __EPSILON__
+                   |- additive-expression-left
+                    |- __EPSILON__
+                  |- simple-expression-left
+                   |- __EPSILON__
+          |- ;
         |- statement-list.new
-         |- __EPSILON__
+         |- statement
+          |- return-stmt
+           |- return
+           |- return-stmt.return
+            |- ;
+         |- statement-list.new
+          |- __EPSILON__
       |- }
   |- declaration-list.new
    |- __EPSILON__

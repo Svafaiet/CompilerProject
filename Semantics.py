@@ -24,17 +24,17 @@ class Semantics:
         self.stack.append([0, "__global__"])
 
     def get_sym_table_funcless_entry(self, name):
-        for i, entry in enumerate(
-                list(map(lambda x: (x.attributes['dec-type'] != "function"), self.symbol_table[::-1]))):
+        func_less_list = list(filter(lambda x: (x.attributes['dec-type'] != "function"), self.symbol_table[::-1]))
+        for i, entry in enumerate(func_less_list):
             if entry.name == name:
-                return entry, i
+                return entry, len(func_less_list) - i - 1
         else:
             return None, None
 
     def get_sym_table_entry(self, name):
         for i, entry in enumerate(self.symbol_table[::-1]):
             if entry.name == name:
-                return entry, i
+                return entry, len(self.symbol_table) - i - 1
         else:
             return None, None
 

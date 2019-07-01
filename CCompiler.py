@@ -58,8 +58,8 @@ grammar = LL1Grammar(Grammar.make_grammar(compressed_grammar))
 # for prod in grammar.grammar.prods:
 #     print("{}->{}".format(grammar.grammar.prods[prod].non_terminal, grammar.grammar.prods[prod].rhses))
 #
-for f in grammar.first_sets["simple-expression"]:
-    print(str(f))
+# for f in grammar.first_sets["simple-expression"]:
+#     print(str(f))
 # print(grammar.grammar.compress())
 parser = Parser(grammar)
 parse_handler = ParserHandler(parser)

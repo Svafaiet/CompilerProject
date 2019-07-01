@@ -82,12 +82,12 @@ compressed_grammar = [ #TODO FIX CHECK MAIN
      ["simple-expression"],
      ],
     ["expression-left",
-     ["var-left", "expression-right"],
+     ["var-left", a("PID"), "expression-right"],
      ["call", "term-left", "additive-expression-left", "simple-expression-left"]
      ],
     ["expression-right",
-     [cs("="), "expression"],
-     ["term-left", "additive-expression-left", "simple-expression-left"]
+     [cs("="), "expression", a("ASSIGNMENT")],
+     [a("VAL_AT"), "term-left", "additive-expression-left", "simple-expression-left"]
      ],
     ["var", [Token(CTokenType.ID), s("CHECK_SCOPE"), a("PUSH_TOK"), a("PID"), "var-left"]],
     ["var-left", [s("CHECK_ARRAY"), cs("["), s("BEGIN_EXPRESSION_CHECK"),
@@ -127,7 +127,7 @@ compressed_grammar = [ #TODO FIX CHECK MAIN
      ],
     ["factor-left",
      [cs("("), "expression", cs(")")],
-     [Token(CTokenType.NUM), s("ADD_VAR_TO_EXPRESSION"), a("PUSH_TOK")] #todo check push tok
+     [Token(CTokenType.NUM), s("ADD_VAR_TO_EXPRESSION"), a("PUSH_NUM")] #todo check push tok
      ],
     ["var-call", ["var-left"], ["call"]],
     ["call", [s("CHECK_EXPRESSION_FUNC"), s("CHECK_FUNC_ARGS_BEGIN"), s("CHECK_FUNC"), a("CALL_START"), cs("("), "args",
