@@ -19,24 +19,24 @@ class Semantics:
         self.expression_stack = []
         self.function_stack = []
 
-    def handle_semantic_symbol(self, semantic_symbol, **kwargs):
-        current_node = kwargs.pop('current_node', None)
-        semantic_symbol_type = semantic_symbol.type
-        semantic_routine = None
-        if current_node is None and semantic_symbol_type != "scope_end":
-            if semantic_symbol_type == 'DECLARE_TYPE':
-                self.prev_sym_entry = None
-            #Todo handle errors
-            return
+    def get_sym_table_funcless_entry(self, name):
+        for i, entry in enumerate(list(map(lambda x: (x.attributes['dec-type'] != "function"), self.symbol_table[::-1]))):
+            if entry.name == name:
+                return entry, i
+        else:
+            return None, None
 
-        if semantic_symbol_type == 'DECLARE_TYPE':
-            self.prev_sym_entry = current_node
-        semantic_routine = eval("self." + semantic_symbol_type.lower())
-        # semantic_routine(current_node, **kwargs)
-        try:
-            semantic_routine(current_node, **kwargs)
-        except Exception as e:
-            print(e)
+    def get_sym_table_entry(self, name):
+        for i, entry in enumerate(self.symbol_table[::-1]):
+            if entry.name == name:
+                return entry, i
+        else:
+            return None, None
+
+    def set_ar(self, ar):
+        for entry in self.symbol_table[::-1]:
+            if entry.attributes['dec-type'] == 'function' and entry.name == ar.func_name:
+                entry.attributes['ar'] = ar
 
     def err(self, error_type, id_tok_val=None):
         error_types = {
@@ -57,6 +57,25 @@ class Semantics:
             "non-function": "{} is not a function\n".format(id_tok_val),
         }
         self.error_writer.write(error_types.get(error_type))
+
+    def handle_semantic_symbol(self, semantic_symbol, **kwargs):
+        current_node = kwargs.pop('current_node', None)
+        semantic_symbol_type = semantic_symbol.type
+        semantic_routine = None
+        if current_node is None and semantic_symbol_type != "scope_end":
+            if semantic_symbol_type == 'DECLARE_TYPE':
+                self.prev_sym_entry = None
+            #Todo handle errors
+            return
+
+        if semantic_symbol_type == 'DECLARE_TYPE':
+            self.prev_sym_entry = current_node
+        semantic_routine = eval("self." + semantic_symbol_type.lower())
+        # semantic_routine(current_node, **kwargs)
+        try:
+            semantic_routine(current_node, **kwargs)
+        except Exception as e:
+            print(e)
 
     def scope_start(self, current_node, **kwargs):
         non_terminal = kwargs.pop('current_non_terminal', None)
@@ -160,20 +179,6 @@ class Semantics:
         if self.symbol_table[-1].attributes['dec-type'] == "variable" and self.symbol_table[-1].type == "void":
             self.err("variable_void", self.symbol_table[-1].name)
             self.symbol_table.pop()
-
-    def get_sym_table_funcless_entry(self, name):
-        for i, entry in enumerate(list(map(lambda x: (x.attributes['dec-type'] != "function"), self.symbol_table[::-1]))):
-            if entry.name == name:
-                return entry, i
-        else:
-            return None, None
-
-    def get_sym_table_entry(self, name):
-        for i, entry in enumerate(self.symbol_table[::-1]):
-            if entry.name == name:
-                return entry, i
-        else:
-            return None, None
 
     def begin_expression_check(self, *args, **kwargs):
         self.expression_stack.append([])

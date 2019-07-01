@@ -261,22 +261,62 @@ class CodeGenerator:
         self.ar_stack.pop()
 
     def jp_save(self, *args, **kwargs):
+        """
+            first jumps by 2
+            saves the previous address(pushes to stack)
+            later fills the saved address with a jump to the end of switch
+        :param args:
+        :param kwargs:
+        :return:
+        """
         self.add_pc(2)
-        self.pb[self.pc - 2] = "JP", self.pc
+        self.pb[self.pc - 2] = "JP", _m(self.pc)
         self.push(self.pc - 1)
 
     def comp_save(self, *args, **kwargs):
+        """
+            compares the switch expression with case NUM
+            saves current address and the result of comparison (pushes to stack)
+            later fills the saved address with a jumpF to the next case
+        :param args:
+        :param kwargs:
+        :return:
+        """
         self.add_pc(2)
         t = self.get_temp()
         self.pb[self.pc - 2] = "EQ", _m(self.ss_i(0)), _m(self.ss_i(1)), _m(t)
         self.pop(1)
+        self.push(t)
         self.push(self.pc - 1)
 
     def back_patch(self, *args, **kwargs):
-        self.pb[self.ss_i(0)] = "JPF", _m(self.ss_i(1)), self.pc
+        """
+            fills the saved address from a case with a jump false
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        self.pb[self.ss_i(0)] = "JPF", _m(self.ss_i(1)), _m(self.pc)
         self.pop(2)
 
     def end_switch(self, *args, **kwargs):
+        """
+            fills the address saved before switch with a jump to current address (outside switch)
+        :param args:
+        :param kwargs:
+        :return:
+        """
         self.pb[self.ss_i(1)] = "JP", _m(self.pc)
         self.pop(2)
 
+    def print_code(self):
+        with open(file=self.file_out) as f:
+            for i, instruction in enumerate(self.pb):
+                inst = "{}  ".format(i)
+                for operand in instruction:
+                    if isinstance(operand, str):
+                        inst += "({}".format(operand)
+                    elif isinstance(operand, MemoryAccessDirectiveObj):
+                        inst += ", {}{}".format(operand.access_type, operand.value)
+
+                f.write(inst)
