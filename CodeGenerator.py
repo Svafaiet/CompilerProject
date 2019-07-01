@@ -43,6 +43,17 @@ class CodeGenerator:
     def make_output(self):
         pass
 
+    def print_code(self):
+        with open(file=self.file_out) as f:
+            for i, instruction in enumerate(self.pb):
+                inst = "{}  ".format(i)
+                for operand in instruction:
+                    if isinstance(operand, str):
+                        inst += "({}".format(operand)
+                    elif isinstance(operand, MemoryAccessDirectiveObj):
+                        inst += ", {}{}".format(operand.access_type, operand.value)
+
+                f.write(inst)
 
     def add_pc(self, offset):
         self.pb += [None] * offset
@@ -309,14 +320,4 @@ class CodeGenerator:
         self.pb[self.ss_i(1)] = "JP", _m(self.pc)
         self.pop(2)
 
-    def print_code(self):
-        with open(file=self.file_out) as f:
-            for i, instruction in enumerate(self.pb):
-                inst = "{}  ".format(i)
-                for operand in instruction:
-                    if isinstance(operand, str):
-                        inst += "({}".format(operand)
-                    elif isinstance(operand, MemoryAccessDirectiveObj):
-                        inst += ", {}{}".format(operand.access_type, operand.value)
 
-                f.write(inst)
