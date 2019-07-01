@@ -34,7 +34,7 @@ compressed_grammar = [
      ],
     ["type-specifier", [ck("int"), s("DECLARE_TYPE"), ], [ck("void"), s("DECLARE_TYPE"), ]],
     ["fun-declaration",
-     [a("make_ar"), cs("("), s("FUNCTION"), s("SCOPE_START"), "params", cs(")"), "compound-stmt", s("SCOPE_END"),
+     [cs("("), s("FUNCTION"), s("SCOPE_START"), "params", cs(")"), "compound-stmt", a("END_FUNCTION"), s("SCOPE_END"),
       s("END_FUNCTION")]],
     ["params", [ck("void"), s("ADD_PARAM")],
      [ck("void"), s("DECLARE_TYPE"), s("ADD_PARAM"), "param-left", "param-list"],
@@ -122,22 +122,22 @@ compressed_grammar = [
      [cs("-"), a("PUSH_TOK"), "factor", a("MATH_UNARY_OP")]
      ],
     ["factor",
-     [Token(CTokenType.ID), s("CHECK_SCOPE"), s("ADD_VAR_TO_EXPRESSION"), "var-call"],
+     [Token(CTokenType.ID), s("CHECK_SCOPE"), s("ADD_VAR_TO_EXPRESSION"), a("PUSH_TOK"), "var-call"],
      ["factor-left"]
      ],
     ["factor-left",
      [cs("("), "expression", cs(")")],
-     [Token(CTokenType.NUM), s("ADD_VAR_TO_EXPRESSION"), a("PUSH_TOK")]
+     [Token(CTokenType.NUM), s("ADD_VAR_TO_EXPRESSION"), a("PUSH_TOK")] #todo check push tok
      ],
     ["var-call", ["var-left"], ["call"]],
-    ["call", [s("CHECK_EXPRESSION_FUNC"), s("CHECK_FUNC_ARGS_BEGIN"), s("CHECK_FUNC"), cs("("), "args",
+    ["call", [s("CHECK_EXPRESSION_FUNC"), s("CHECK_FUNC_ARGS_BEGIN"), s("CHECK_FUNC"), a("CALL"), cs("("), "args",
               s("CHECK_FUNC_ARGS_END"), cs(")")]],
     ["args",
      ["arg-list"],
      epsilon,
      ],
     ["arg-list",
-     ["arg-list", cs(","), s("BEGIN_EXPRESSION_CHECK"), "expression", s("END_SECONDARY_EXPRESSION_CHECK"), s("ARG")],
-     [s("BEGIN_EXPRESSION_CHECK"), "expression", s("END_SECONDARY_EXPRESSION_CHECK"), s("ARG")],
+     ["arg-list", cs(","), s("BEGIN_EXPRESSION_CHECK"), "expression", s("END_SECONDARY_EXPRESSION_CHECK"), s("ARG"), a("CALL_ARG")],
+     [s("BEGIN_EXPRESSION_CHECK"), "expression", s("END_SECONDARY_EXPRESSION_CHECK"), s("ARG"), a("CALL_ARG")],
      ],
 ]
