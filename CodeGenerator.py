@@ -1,3 +1,4 @@
+from ActivationRecord import ActivationRecord
 from ActionSymbol import MemoryAccessDirectiveObj
 
 
@@ -7,6 +8,7 @@ def _m(value, access_type=""):
 
 class CodeGenerator:
     INIT_PC_VALUE = 0
+    INIT_MEMORY_VALUE = 500
 
     def __init__(self, semantics, file_out):
         self.semantics = semantics
@@ -14,6 +16,8 @@ class CodeGenerator:
         self.ss = []
         self.pb = [None] * CodeGenerator.INIT_PC_VALUE
         self.pc = CodeGenerator.INIT_PC_VALUE
+        self.top_sp = CodeGenerator.INIT_MEMORY_VALUE
+        # todo write code for initializing top_sp with INIT_MEMORY_VALUE
         self.ar_stack = []
 
         """
@@ -49,9 +53,8 @@ class CodeGenerator:
     def add_continue(self):
         pass
 
-    def add_break(self):
-        pass
-        # self.while_switch_stack
+    def add_break(self, *args, **kwargs):
+        self.while_switch_stack[len(self.while_switch_stack) - 1].append()
 
     def get_top_ar(self):
         return self.ar_stack[-1]
@@ -65,11 +68,14 @@ class CodeGenerator:
                 self.prev_sym_entry = None
             # Todo handle errors
             return
-        # action_routine = eval("self." + action_symbol_type.lower())
+        action_routine = eval("self." + action_symbol_type.lower())
         try:
             action_routine(current_node, **kwargs)
         except Exception as e:
             print(e)
+
+    def pop_tok(self, *args, **kwargs):
+        self.pop(1)
 
     def push_tok(self, current_node, **kwargs):
         self.push(current_node.token_value)
@@ -79,6 +85,8 @@ class CodeGenerator:
         self.add_pc(1)
         self.pb[self.pc - 1] = "ASSIGN", _m(current_node.token_value, "#"), _m(t)
         self.push(t)
+        # todo for arr decleration
+        # fixme
 
     def math_bin_op(self, current_node, **kwargs):
         tok_to_icg = {
@@ -160,9 +168,37 @@ class CodeGenerator:
         top_ar = self.get_top_ar()
         top_ar.add_local(self)
 
-    def add_local_arr_len(self):
+    def add_local_arr_len(self, *args, **kwargs):
         top_ar = self.get_top_ar()
         top_ar.add_size(self)
 
+    def make_ar(self, *args, **kwargs):
+        ar = self.get_top_ar()
+        self.add_pc(6)
+        after_sp_ptr = ar.get_temp()
+        self.pb[self.pc - 6] = "ADD", _m(self.top_sp), _m(4, "#"), _m(after_sp_ptr)
+        self.pb[self.pc - 5] = "ASSIGN", _m(self.pc, "#"), _m(after_sp_ptr)
+        self.pb[self.pc - 4] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
+        al_loc = ActivationRecord.control_link
+        self.pb[self.pc - 3] = "ADD", _m(al_loc * 4, "#"), _m(self.top_sp), _m(after_sp_ptr)
+        self.pb[self.pc - 2] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
+        _, al_size = self.semantics.get_sym_table_entry(self.ss_i(0)) + 1
+        self.pop(1)
+        self.pb[self.pc - 1] = "ASSIGN", _m(al_size, "#"), _m(after_sp_ptr)
+        self.ar_stack.append(ActivationRecord(self.ss_i(0)))
+
     # todo handle local arrays
 
+    def func_end(self, *args, **kwargs):
+        self.pb[self.ss_i(0)] = "ADD", _m(self.top_sp), _m(len(self.get_top_ar().temps), "#"), _m(self.top_sp)
+        self.pop(1)
+        for code in self.pb:
+            if code:
+                for value in code:
+                    for temp in self.get_top_ar().temps():
+                        if temp in value:
+                            offset = int(temp[4:])
+
+
+
+        self.ar_stack.pop()

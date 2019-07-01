@@ -1,22 +1,22 @@
-from CodeGenerator import _m
+from ActionSymbol import MemoryAccessDirectiveObj
+
+
+def _m(value, access_type=""):
+    return MemoryAccessDirectiveObj(value, access_type)
 
 
 class ActivationRecord:
-    def __init__(self, top_sp, table):
-        self.control_link = 1
-        self.access_link = 2
+    control_link = 1
+    access_link = 2
+
+    def __init__(self, func_name):
+        self.func_name = func_name
         self.params = 0
         self.locals = 0
         self.temps = []
         self.array_stack = []
         # self.top_sp = top_sp
         # self.create_table()
-
-    def find_ptr(self, code_generator):
-        semantics = code_generator.semantics
-        pc = code_generator.pc
-        pb = code_generator.pb
-        symtable = semantics.symbol_table
 
     def get_temp(self):
         new_temp = "TEMP" + str(len(self.temps))
@@ -29,29 +29,30 @@ class ActivationRecord:
     def add_local(self, cg):
         self.locals += 1
         entry = cg.semantics.symbol_table[-1]
-a
+
+    def after_local(self):
+        pass
+
     def add_size(self, cg):
         pass
 
-    def get_pointer(self, name, cg):
+    def find_ptr(self, name, cg):
         _, i = cg.semantics.symbol_table.get_sym_table_entry(name)
-        al_loc = self.control_link + self.access_link - 1
+        al_loc = ActivationRecord.control_link
         t = self.get_temp()
+        t2 = self.get_temp()
         al = self.get_temp()
-        cg.add_pc(7)
-        cg.pb[cg.pc - 7] = "ADD", _m(al_loc * 4, "#"), _m(cg.top_sp), _m(al)
-        cg.pb[cg.pc - 6] = "JP", _m(cg.pc + 2)
-        cg.pb[cg.pc - 5] = "ASSIGN", _m(al, "@"), _m(al)
-        cg.pb[cg.pc - 4] = "ADD", _m(4, "#"), _m(al), _m(t)
-        cg.pb[cg.pc - 3] = "ASSIGN", _m(t, "@"), _m(t)
-        cg.pb[cg.pc - 2] = "LT", _m(t), _m(i, "#"), _m(t)
-        cg.pb[cg.pc - 1] = "JPF", _m(t), _m(cg.pc - 5)
+        cg.add_pc(9)
+        cg.pb[cg.pc - 9] = "ADD", _m(al_loc * 4, "#"), _m(cg.top_sp), _m(al)
+        cg.pb[cg.pc - 8] = "JP", _m(cg.pc + 2)
+        cg.pb[cg.pc - 7] = "ASSIGN", _m(al, "@"), _m(al)
+        cg.pb[cg.pc - 6] = "ADD", _m(4, "#"), _m(al), _m(t)
+        cg.pb[cg.pc - 5] = "ASSIGN", _m(t, "@"), _m(t)
+        cg.pb[cg.pc - 4] = "LT", _m(t), _m(i, "#"), _m(t2)
+        cg.pb[cg.pc - 3] = "JPF", _m(t2), _m(cg.pc - 5)
+        cg.pb[cg.pc - 2] = "SUB", _m(i + (al_loc + ActivationRecord.access_link), "#"), _m(t), _m(t)
+        cg.pb[cg.pc - 1] = "ADD", _m(cg.top_sp), _m(t), _m(t)
         # maybe free t?
         return t
 
-
-
-
-
-
-#TODO end function handle arr pointers/
+# TODO end function handle arr pointers/

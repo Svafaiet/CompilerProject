@@ -1,5 +1,5 @@
-5: Function foo2 is of type void but is returning value
-12: Syntax Error! Unexpected CTokenType.ID
-17: Function foo returns nothing
-40: u is not defined.
-41: u is not defined.
+7: This is a second declaration of f
+9: Function foo2 is of type void but is returning value
+21: Function foo returns nothing
+44: u is not defined.
+45: u is not defined.
