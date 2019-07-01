@@ -8,6 +8,7 @@ class ActivationRecord:
         self.params = 0
         self.locals = 0
         self.temps = []
+        self.array_stack = []
         # self.top_sp = top_sp
         # self.create_table()
 
@@ -25,9 +26,10 @@ class ActivationRecord:
     def add_param(self):
         self.params += 1
 
-    def add_local(self):
+    def add_local(self, cg):
         self.locals += 1
-
+        entry = cg.semantics.symbol_table[-1]
+a
     def add_size(self, cg):
         pass
 
@@ -46,6 +48,10 @@ class ActivationRecord:
         cg.pb[cg.pc - 1] = "JPF", _m(t), _m(cg.pc - 5)
         # maybe free t?
         return t
+
+
+
+
 
 
 #TODO end function handle arr pointers/

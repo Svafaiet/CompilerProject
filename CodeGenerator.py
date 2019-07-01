@@ -156,8 +156,13 @@ class CodeGenerator:
         top_ar = self.get_top_ar()
         top_ar.add_param()
 
+    def add_local(self, *args, **kwargs):
+        top_ar = self.get_top_ar()
+        top_ar.add_local(self)
+
     def add_local_arr_len(self):
         top_ar = self.get_top_ar()
         top_ar.add_size(self)
 
     # todo handle local arrays
+

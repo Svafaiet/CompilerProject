@@ -78,6 +78,7 @@ class Semantics:
                 self.symbol_table[-1].name = name
             else:
                 self.err("second_declaration", name)
+                self.symbol_table.pop()
 
     def declare_var_size(self, current_node, **kwargs):
         if self.prev_sym_entry is not None and current_node is not None:
@@ -192,7 +193,6 @@ class Semantics:
         if entry is not None:
             if 'var-size' not in entry.attributes:
                 self.err("invalid_variable_indexing", entry.name)
-
             else:
                 self.expression_stack[-1][-1][1] = 'array'
                 return False
