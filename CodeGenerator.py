@@ -65,7 +65,7 @@ class CodeGenerator:
                 self.prev_sym_entry = None
             # Todo handle errors
             return
-        action_routine = eval("self." + action_symbol_type.lower())
+        # action_routine = eval("self." + action_symbol_type.lower())
         try:
             action_routine(current_node, **kwargs)
         except Exception as e:
@@ -156,6 +156,7 @@ class CodeGenerator:
     def add_local_arr_len(self):
         top_ar = self.get_top_ar()
         top_ar.add_size(self)
+
 
 
     #todo handle local arrays

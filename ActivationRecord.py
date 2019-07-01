@@ -7,8 +7,6 @@ class ActivationRecord:
         self.access_link = 2
         self.params = 0
         self.locals = 0
-        self.size_place = 1
-        self.size = 0
         self.temps = []
         # self.top_sp = top_sp
         # self.create_table()
@@ -31,9 +29,23 @@ class ActivationRecord:
         self.locals += 1
 
     def add_size(self, cg):
-        cg.pb[cg.pc] = "MULT", _m(cg.ss_i(0)), _m(4, "#"), _m(cg.ss_i(0))
+        pass
+
+    def get_pointer(self, name, cg):
+        _, i = cg.semantics.symbol_table.get_sym_table_entry(name)
+        al_loc = self.control_link + self.access_link - 1
         t = self.get_temp()
-        size_pointer = self.control_link + self.access_link + self.params + self.locals
-        cg.pb[cg.pc + 1] = "ADD", _m(cg.top_sp, "@"), _m(
-            size_pointer, "#"), t
-        cg.pb[cg.pc + 2] = "ADD", _m(t), _m(cg.ss_i(0)), _m(t)
+        al = self.get_temp()
+        cg.add_pc(7)
+        cg.pb[cg.pc - 7] = "ADD", _m(al_loc * 4, "#"), _m(cg.top_sp), _m(al)
+        cg.pb[cg.pc - 6] = "JP", _m(cg.pc + 2)
+        cg.pb[cg.pc - 5] = "ASSIGN", _m(al, "@"), _m(al)
+        cg.pb[cg.pc - 4] = "ADD", _m(4, "#"), _m(al), _m(t)
+        cg.pb[cg.pc - 3] = "ASSIGN", _m(t, "@"), _m(t)
+        cg.pb[cg.pc - 2] = "LT", _m(t), _m(i, "#"), _m(t)
+        cg.pb[cg.pc - 1] = "JPF", _m(t), _m(cg.pc - 5)
+        # maybe free t?
+        return t
+
+
+#TODO end function handle arr pointers/
