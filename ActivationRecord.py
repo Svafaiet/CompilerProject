@@ -12,6 +12,7 @@ class ActivationRecord:
 
     def __init__(self, func_name):
         self.func_name = func_name
+        self.state_machine = 2000
         self.params = 0
         self.locals = 0
         self.array_stack = []
@@ -58,6 +59,9 @@ class ActivationRecord:
         cg.pb[cg.pc - 1] = "ADD", _m(cg.top_sp), _m(t), _m(t)
         # maybe free t?
         return t
+
+    def const_size(self):
+        return self.access_link + self.control_link + self.state_machine
 
     # def organize_temps(self, cg):
     #     self.pb[self.ss_i(0)] = "ADD", _m(self.top_sp), _m(len(self.get_top_ar().temps), "#"), _m(self.top_sp)
