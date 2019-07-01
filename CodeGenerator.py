@@ -309,18 +309,17 @@ class CodeGenerator:
         # 8 pc passed, one poped
         entry, _ = self.semantics.get_sym_table_entry(self.ss_i(0))
         ar = entry.attributes['ar']
-        self.add_pc(9)
+        self.add_pc(8)
         after_sp_ptr = self.get_temp()
-        self.pb[self.pc - 9] = "ADD", _m(self.top_sp), _m(4, "#"), _m(after_sp_ptr)
-        self.pb[self.pc - 8] = "ASSIGN", _m(control_link, "#"), _m(after_sp_ptr, "@")
-        self.pb[self.pc - 7] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
+        self.pb[self.pc - 8] = "ADD", _m(self.top_sp), _m(4, "#"), _m(after_sp_ptr)
+        self.pb[self.pc - 7] = "ASSIGN", _m(control_link, "#"), _m(after_sp_ptr, "@")
+        self.pb[self.pc - 6] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
         al_loc = ActivationRecord.control_link
-        self.pb[self.pc - 6] = "ADD", _m(al_loc * 4, "#"), _m(self.top_sp), _m(after_sp_ptr, "@")
-        self.pb[self.pc - 5] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
-        al_size = self.semantics.get_int_vars(self.ss_i(0)) + 1
-        self.pop(1)
-        self.pb[self.pc - 4] = "ASSIGN", _m(al_size, "#"), _m(after_sp_ptr, "@")
-        self.pb[self.pc - 3] = "ADD", _m(after_sp_ptr), _m(4 * (ar.params + ar.locals + 1), "#"), _m(after_sp_ptr)
+        self.pb[self.pc - 5] = "ADD", _m(al_loc * 4, "#"), _m(self.top_sp), _m(after_sp_ptr, "@")
+        self.pb[self.pc - 4] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
+        al_size = len(self.get_int_vars("__global__")) - len(self.get_int_vars(self.ss_i(0)))
+        self.pb[self.pc - 3] = "ASSIGN", _m(al_size, "#"), _m(after_sp_ptr, "@")
+        self.pb[self.pc - 2] = "ADD", _m(after_sp_ptr), _m(4 * (ar.params + ar.locals + 1), "#"), _m(after_sp_ptr)
         self.pb[self.pc - 1] = "ASSIGN", _m(after_sp_ptr), _m(self.top_sp)
 
     def start_function(self, *args, **kwargs):
