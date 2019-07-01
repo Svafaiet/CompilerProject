@@ -96,6 +96,12 @@ class CodeGenerator:
         _, i = self.semantics.get_sym_table_entry(func_name)
         return list(filter(lambda x: (x.attributes['dec-type'] != "function"), self.semantics.symbol_table[i:]))
 
+    # add 1 pc, push address of temp
+    def get_temp(self):
+        counter_reg = CodeGenerator.INIT_MEMORY_VALUE + 4
+
+        self.pb[self.pc]
+
     def add_ar(self, name):
         self.reset_temp()
         self.ar_stack.append(ActivationRecord(name, self.temp_set))
@@ -311,3 +317,64 @@ class CodeGenerator:
         #                     offset = int(temp[4:])
 
         # self.ar_stack.pop()
+
+    def jp_save(self, *args, **kwargs):
+        """
+            first jumps by 2
+            saves the previous address(pushes to stack)
+            later fills the saved address with a jump to the end of switch
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        self.add_pc(2)
+        self.pb[self.pc - 2] = "JP", _m(self.pc)
+        self.push(self.pc - 1)
+
+    def comp_save(self, *args, **kwargs):
+        """
+            compares the switch expression with case NUM
+            saves current address and the result of comparison (pushes to stack)
+            later fills the saved address with a jumpF to the next case
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        self.add_pc(2)
+        t = self.get_temp()
+        self.pb[self.pc - 2] = "EQ", _m(self.ss_i(0)), _m(self.ss_i(1)), _m(t)
+        self.pop(1)
+        self.push(t)
+        self.push(self.pc - 1)
+
+    def back_patch(self, *args, **kwargs):
+        """
+            fills the saved address from a case with a jump false
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        self.pb[self.ss_i(0)] = "JPF", _m(self.ss_i(1)), _m(self.pc)
+        self.pop(2)
+
+    def end_switch(self, *args, **kwargs):
+        """
+            fills the address saved before switch with a jump to current address (outside switch)
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        self.pb[self.ss_i(1)] = "JP", _m(self.pc)
+        self.pop(2)
+
+    def print_code(self):
+        with open(file=self.file_out) as f:
+            for i, instruction in enumerate(self.pb):
+                inst = "{}  ".format(i)
+                for operand in instruction:
+                    if isinstance(operand, str):
+                        inst += "({}".format(operand)
+                    elif isinstance(operand, MemoryAccessDirectiveObj):
+                        inst += ", {}{}".format(operand.access_type, operand.value)
+
+                f.write(inst)

@@ -22,7 +22,7 @@ class ActivationRecord:
     def add_param(self):
         self.params += 1
 
-    def add_local(self, cg):
+    def add_local(self):
         self.locals += 1
 
     def after_local(self, cg):
@@ -39,7 +39,6 @@ class ActivationRecord:
                 cg.pb[cg.pc - 1] = "ADD", _m(cg.top_sp), _m(entry.attributes['var-size'], '#'), _m(cg.top_sp)
         cg.add_pc(1)
         cg.pb[cg.pc - 1] = "ASSIGN", _m(fp), cg.top_sp
-
 
     def find_ptr(self, name, cg):
         _, i = cg.semantics.symbol_table.get_sym_table_funcless_entry(name)
