@@ -1,6 +1,5 @@
 from ActionSymbol import MemoryAccessDirectiveObj
 
-#TODO fix those shit pcs
 
 def _m(value, access_type=""):
     return MemoryAccessDirectiveObj(value, access_type)
@@ -46,6 +45,7 @@ class CodeGenerator:
     """
     while_switch_stack methods
     """
+
     def add_continue(self):
         pass
 
@@ -65,7 +65,7 @@ class CodeGenerator:
                 self.prev_sym_entry = None
             # Todo handle errors
             return
-        action_routine = eval("self." + action_symbol_type.lower())
+        # action_routine = eval("self." + action_symbol_type.lower())
         try:
             action_routine(current_node, **kwargs)
         except Exception as e:
@@ -76,8 +76,8 @@ class CodeGenerator:
 
     def push_num(self, current_node, **kwargs):
         t = self.get_temp()
-        self.pb[self.pc] = "ASSIGN", _m(current_node.token_value, "#"), _m(t)
         self.add_pc(1)
+        self.pb[self.pc - 1] = "ASSIGN", _m(current_node.token_value, "#"), _m(t)
         self.push(t)
 
     def math_bin_op(self, current_node, **kwargs):
@@ -86,7 +86,8 @@ class CodeGenerator:
             "-": "SUB",
             "*": "MULT",
         }
-        self.pb[self.pc] = tok_to_icg[self.ss_i(1)], _m(self.ss_i(2)), _m(self.ss_i(0)), _m(self.ss_i(2))
+        self.add_pc(1)
+        self.pb[self.pc - 1] = tok_to_icg[self.ss_i(1)], _m(self.ss_i(2)), _m(self.ss_i(0)), _m(self.ss_i(2))
         self.pop(2)
 
     def math_unary_op(self, current_node, **kwargs):
@@ -95,7 +96,8 @@ class CodeGenerator:
             "-": "SUB",
         }
         val = self.pop()
-        self.pb[self.pc] = tok_to_icg[self.ss_i(1)], _m(0, "#"), _m(val), _m(val)
+        self.add_pc(1)
+        self.pb[self.pc - 1] = tok_to_icg[self.ss_i(1)], _m(0, "#"), _m(val), _m(val)
         self.pop()
         self.push(val)
 
@@ -105,10 +107,11 @@ class CodeGenerator:
             "<": "LT",
             ">": "LT"
         }
+        self.add_pc(1)
         if self.ss_i(1) == ">":
-            self.pb[self.pc] = tok_to_icg[self.ss_i(1)], _m(self.ss_i(0)), _m(self.ss_i(2)), _m(self.ss_i(2))
+            self.pb[self.pc - 1] = tok_to_icg[self.ss_i(1)], _m(self.ss_i(0)), _m(self.ss_i(2)), _m(self.ss_i(2))
         else:
-            self.pb[self.pc] = tok_to_icg[self.ss_i(1)], _m(self.ss_i(2)), _m(self.ss_i(0)), _m(self.ss_i(2))
+            self.pb[self.pc - 1] = tok_to_icg[self.ss_i(1)], _m(self.ss_i(2)), _m(self.ss_i(0)), _m(self.ss_i(2))
         self.pop(2)
 
     def save(self, current_node, **kwargs):
@@ -133,8 +136,8 @@ class CodeGenerator:
 
     def while_save(self, current_node, **kwargs):
         self.pb[self.ss_i(0)] = "JPF", _m(self.ss_i(1)), _m(self.pc + 1)
-        self.pb[self.pc] = "JP", _m(self.ss_i(2))
         self.add_pc(1)
+        self.pb[self.pc - 1] = "JP", _m(self.ss_i(2))
         self.pop(3)
 
     def switch_start(self):
@@ -143,11 +146,11 @@ class CodeGenerator:
         # todo
 
     def calc_arr(self, *args, **kwargs):
-        self.pb[self.pc] = "MULT", _m(4, "#"), _m(self.ss_i(0)), _m(self.ss_i(0))
-        self.pb[self.pc + 1] = "ADD", _m(self.ss_i(0)), _m(self.ss_i(1)), _m(self.ss_i(1))
-        self.pop()
-        self.pb[self.pc + 2] = "ASSIGN", _m(self.ss_i(0), "@"), _m(self.ss_i(0))
         self.add_pc(3)
+        self.pb[self.pc - 3] = "MULT", _m(4, "#"), _m(self.ss_i(0)), _m(self.ss_i(0))
+        self.pb[self.pc - 2] = "ADD", _m(self.ss_i(0)), _m(self.ss_i(1)), _m(self.ss_i(1))
+        self.pop()
+        self.pb[self.pc - 1] = "ASSIGN", _m(self.ss_i(0), "@"), _m(self.ss_i(0))
 
     def add_param(self, current_node, **kwargs):
         top_ar = self.get_top_ar()
@@ -157,5 +160,4 @@ class CodeGenerator:
         top_ar = self.get_top_ar()
         top_ar.add_size(self)
 
-
-    #todo handle local arrays
+    # todo handle local arrays
