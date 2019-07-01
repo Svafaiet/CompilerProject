@@ -4,6 +4,7 @@ int foo(int d, int e){
     void foo2(int k[]) {
         return k[0] + k[1];
     }
+    int foo;
     int fff[2];
     fff[0] = d;
     fff[1] = d + 1;

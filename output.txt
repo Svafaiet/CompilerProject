@@ -129,12 +129,20 @@ program
             |- CTokenType.ID
             |- var-func-declaration
              |- var-declaration
-              |- [
-              |- CTokenType.NUM
-              |- ]
               |- ;
            |- declaration-list.new
-            |- __EPSILON__
+            |- declaration
+             |- type-specifier
+              |- int
+             |- CTokenType.ID
+             |- var-func-declaration
+              |- var-declaration
+               |- [
+               |- CTokenType.NUM
+               |- ]
+               |- ;
+            |- declaration-list.new
+             |- __EPSILON__
        |- statement-list
         |- statement-list.new
          |- statement
@@ -167,18 +175,7 @@ program
                  |- term-left
                   |- __EPSILON__
                  |- additive-expression-left
-                  |- addop
-                   |- +
-                  |- term
-                   |- signed-factor
-                    |- factor
-                     |- CTokenType.ID
-                     |- var-call
-                      |- __EPSILON__
-                   |- term-left
-                    |- __EPSILON__
-                  |- additive-expression-left
-                   |- __EPSILON__
+                  |- __EPSILON__
                  |- simple-expression-left
                   |- __EPSILON__
            |- ;

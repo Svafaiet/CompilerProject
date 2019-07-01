@@ -14,5 +14,6 @@ class DirectiveHandler:
             self.semantics.handle_semantic_symbol(directive, current_non_terminal=cur_non_terminal,
                                                   current_node=cur_node)
         elif isinstance(directive, ActionSymbol):
-            self.code_generator.handle_action_symbol(directive, current_non_terminal=cur_non_terminal,
-                                                     current_node=cur_node)
+            pass
+            # self.code_generator.handle_action_symbol(directive, current_non_terminal=cur_non_terminal,
+            #                                          current_node=cur_node)

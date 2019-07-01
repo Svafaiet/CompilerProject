@@ -32,6 +32,7 @@ class Semantics:
         if semantic_symbol_type == 'DECLARE_TYPE':
             self.prev_sym_entry = current_node
         semantic_routine = eval("self." + semantic_symbol_type.lower())
+        # semantic_routine(current_node, **kwargs)
         try:
             semantic_routine(current_node, **kwargs)
         except Exception as e:
@@ -73,7 +74,7 @@ class Semantics:
     def declare_name(self, current_node, **kwargs):
         name = current_node.token_value
         if self.prev_sym_entry is not None and name is not None:
-            if self.get_sym_table_entry(name) is (None, None):
+            if self.get_sym_table_entry(name) == (None, None):
                 self.symbol_table[-1].name = name
             else:
                 self.err("second_declaration", name)
@@ -128,7 +129,7 @@ class Semantics:
 
     def check_scope(self, current_node, **kwargs):
         name = current_node.token_value
-        if self.get_sym_table_entry(name) is (None, None):
+        if self.get_sym_table_entry(name) == (None, None):
             self.err("scoping", name)
 
     def check_main(self, *args, **kwargs):
