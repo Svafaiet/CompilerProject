@@ -85,8 +85,21 @@ class CodeGenerator:
         _, i = self.semantics.get_sym_table_entry(func_name)
         return list(filter(lambda x: (x.attributes['dec-type'] != "function"), self.semantics.symbol_table[i:]))
 
+    # add 1 pc, push address of temp
     def get_temp(self):
-        pass
+        counter_reg = CodeGenerator.INIT_MEMORY_VALUE + 4
+
+        self.pb[self.pc]
+
+    def add_ar(self, name):
+        self.reset_temp()
+        self.ar_stack.append(ActivationRecord(name))
+
+
+    def reset_temp(self):
+
+        self.add_pc(1)
+        # self.pb[]
 
     def handle_action_symbol(self, action_symbol, **kwargs):
         current_node = kwargs.pop('current_node', None)
@@ -201,7 +214,10 @@ class CodeGenerator:
         top_ar = self.get_top_ar()
         top_ar.add_size(self)
 
-    # def after_l
+    def after_local(self):
+        # set fp
+        self.add_pc(1)
+        self.pb[self.pc - 1] = "SUB", _m(self.top_sp), _m(self.get_top_ar().get_const_size(), "#"), _m(self.top_sp, "@")
 
     def call(self, *args, **kwargs):
         self.make_ar(self.pc + 9)
@@ -212,7 +228,10 @@ class CodeGenerator:
         self.pop(1)
         self.pb[self.pc - 1] = "ADD", _m(self.top_sp), _m()
 
+    # todo handle local arrays
+
     def make_ar(self, control_link):
+
         self.add_pc(9)
         after_sp_ptr = self.get_temp()
         self.pb[self.pc - 9] = "ADD", _m(self.top_sp), _m(4, "#"), _m(after_sp_ptr)
@@ -227,8 +246,6 @@ class CodeGenerator:
         self.pb[self.pc - 3] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
         self.pb[self.pc - 1] = "ASSIGN", _m(after_sp_ptr), _m(self.top_sp)
         self.ar_stack.append(ActivationRecord(self.ss_i(0)))
-
-    # todo handle local arrays
 
     def end_function(self, *args, **kwargs):
         self.get_top_ar().after_local()
