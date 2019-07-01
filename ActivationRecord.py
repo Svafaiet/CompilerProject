@@ -2,20 +2,28 @@ from CodeGenerator import _m
 
 
 class ActivationRecord:
-    def __init__(self, top_sp, table):
-        self.control_link = 1
-        self.access_link = 2
+    control_link = 1
+    access_link = 2
+
+    def __init__(self):
         self.params = 0
         self.locals = 0
         self.temps = []
         # self.top_sp = top_sp
         # self.create_table()
 
-    def find_ptr(self, code_generator):
-        semantics = code_generator.semantics
-        pc = code_generator.pc
-        pb = code_generator.pb
-        symtable = semantics.symbol_table
+    def make_from_ar(self, ar):
+        self.add_pc()
+        after_sp_ptr = ar.get_temp()
+        self.pb[self.pc] = "ADD", _m(self.top_sp), _m(4, "#"), _m(after_sp_ptr)
+        self.pb[self.pc] = "ASSIGN", _m(self.pc, "#"), _m(after_sp_ptr)
+        self.pb[self.pc] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
+        al_loc = ActivationRecord.control_link + ActivationRecord.access_link - 1
+        self.pb[self.pc] = "ADD", _m(al_loc * 4, "#"), _m(self.top_sp), _m(after_sp_ptr)
+        self.pb[self.pc] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
+        _, al_size = self.semantics.get_sym_table_entry(self.ss_i(0)) + 1
+        self.pop(1)
+        self.pb[self.pc] = "ASSIGN", _m(al_size, "#"), _m(after_sp_ptr)
 
     def get_temp(self):
         new_temp = "TEMP" + str(len(self.temps))
@@ -28,12 +36,15 @@ class ActivationRecord:
     def add_local(self):
         self.locals += 1
 
+    def after_local(self):
+        pass
+
     def add_size(self, cg):
         pass
 
-    def get_pointer(self, name, cg):
+    def find_ptr(self, name, cg):
         _, i = cg.semantics.symbol_table.get_sym_table_entry(name)
-        al_loc = self.control_link + self.access_link - 1
+        al_loc = ActivationRecord.control_link + ActivationRecord.access_link - 1
         t = self.get_temp()
         al = self.get_temp()
         cg.add_pc(7)

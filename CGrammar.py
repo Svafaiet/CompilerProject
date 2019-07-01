@@ -24,8 +24,8 @@ def a(action_type):
 compressed_grammar = [
     ["program", ["declaration-list", s("CHECK_MAIN"), Token(CTokenType.EOF)]],
     ["declaration-list", ["declaration-list", "declaration"], epsilon],
-    ["declaration", ["type-specifier", Token(CTokenType.ID), s("DECLARE_NAME"), "var-func-declaration"]],
-    ["var-func-declaration", ["var-declaration", s("CHECK_VAR_TYPE"), a("ADD_LOCAL")], ["fun-declaration"]],
+    ["declaration", ["type-specifier", Token(CTokenType.ID), s("DECLARE_NAME"), a("PUSH_TOK"), "var-func-declaration"]],
+    ["var-func-declaration", ["var-declaration", s("CHECK_VAR_TYPE"), a("ADD_LOCAL"), a("POP_TOK")], ["fun-declaration"]],
     ["var-declaration",
      [cs(";")],
      [cs("["), Token(CTokenType.NUM), s("DECLARE_VAR_SIZE"), a("PUSH_NUM"), a("ADD_LOCAL_ARR_LEN"), cs("]"), cs(";")],
