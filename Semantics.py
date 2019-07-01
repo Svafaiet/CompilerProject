@@ -161,6 +161,13 @@ class Semantics:
             self.err("variable_void", self.symbol_table[-1].name)
             self.symbol_table.pop()
 
+    def get_sym_table_funcless_entry(self, name):
+        for i, entry in enumerate(list(map(lambda x: (x.attributes['dec-type'] != "function"), self.symbol_table[::-1]))):
+            if entry.name == name:
+                return entry, i
+        else:
+            return None, None
+
     def get_sym_table_entry(self, name):
         for i, entry in enumerate(self.symbol_table[::-1]):
             if entry.name == name:

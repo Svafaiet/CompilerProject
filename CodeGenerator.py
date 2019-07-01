@@ -9,6 +9,7 @@ def _m(value, access_type=""):
 class CodeGenerator:
     INIT_PC_VALUE = 0
     INIT_MEMORY_VALUE = 500
+    REGISTER_SIZE = 2000
 
     def __init__(self, semantics, file_out):
         self.semantics = semantics
@@ -17,7 +18,6 @@ class CodeGenerator:
         self.pb = [None] * CodeGenerator.INIT_PC_VALUE
         self.pc = CodeGenerator.INIT_PC_VALUE
         self.top_sp = CodeGenerator.INIT_MEMORY_VALUE
-        # todo write code for initializing top_sp with INIT_MEMORY_VALUE
         self.ar_stack = []
 
         """
@@ -26,6 +26,23 @@ class CodeGenerator:
             ("switch", []: a list of breaks belong to this switch, None)
         """
         self.while_switch_stack = []
+
+    def init_cg(self):
+        """
+        initial memory organization
+        output
+        call main
+        :return:
+        """
+        self.add_pc(1)
+        self.pb[self.pc - 1] = "ASSIGN", _m(CodeGenerator.REGISTER_SIZE + CodeGenerator.INIT_MEMORY_VALUE ,"#")
+        self.make_output()
+        self.save() # control_link at end of
+        self.save() # for j main
+
+    def make_output(self):
+        pass
+
 
     def add_pc(self, offset):
         self.pb += [None] * offset
@@ -51,13 +68,25 @@ class CodeGenerator:
     """
 
     def add_continue(self):
-        pass
+        for entry in self.while_switch_stack[::-1]:
+            if entry[0] == "while":
+                self.add_pc(1)
+                self.pb[self.pc - 1] = "JP", _m(entry[2])
+                break
 
     def add_break(self, *args, **kwargs):
-        self.while_switch_stack[len(self.while_switch_stack) - 1].append()
+        self.add_pc(1)
+        self.while_switch_stack[len(self.while_switch_stack) - 1][1].append(self.pc - 1)
 
     def get_top_ar(self):
         return self.ar_stack[-1]
+
+    def get_int_vars(self, func_name):
+        _, i = self.semantics.get_sym_table_entry(func_name)
+        return list(filter(lambda x: (x.attributes['dec-type'] != "function"), self.semantics.symbol_table[i:]))
+
+    def get_temp(self):
+        pass
 
     def handle_action_symbol(self, action_symbol, **kwargs):
         current_node = kwargs.pop('current_node', None)
@@ -122,11 +151,11 @@ class CodeGenerator:
             self.pb[self.pc - 1] = tok_to_icg[self.ss_i(1)], _m(self.ss_i(2)), _m(self.ss_i(0)), _m(self.ss_i(2))
         self.pop(2)
 
-    def save(self, current_node, **kwargs):
+    def save(self, *args, **kwargs):
         self.push(self.pc)
         self.add_pc(1)
 
-    def label(self, current_node, **kwargs):
+    def label(self, *args, **kwargs):
         self.push(self.pc)
 
     def else_start(self, current_node, **kwargs):
@@ -172,24 +201,37 @@ class CodeGenerator:
         top_ar = self.get_top_ar()
         top_ar.add_size(self)
 
-    def make_ar(self, *args, **kwargs):
-        ar = self.get_top_ar()
-        self.add_pc(6)
-        after_sp_ptr = ar.get_temp()
-        self.pb[self.pc - 6] = "ADD", _m(self.top_sp), _m(4, "#"), _m(after_sp_ptr)
-        self.pb[self.pc - 5] = "ASSIGN", _m(self.pc, "#"), _m(after_sp_ptr)
-        self.pb[self.pc - 4] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
-        al_loc = ActivationRecord.control_link
-        self.pb[self.pc - 3] = "ADD", _m(al_loc * 4, "#"), _m(self.top_sp), _m(after_sp_ptr)
-        self.pb[self.pc - 2] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
-        _, al_size = self.semantics.get_sym_table_entry(self.ss_i(0)) + 1
+    # def after_l
+
+    def call(self, *args, **kwargs):
+        self.make_ar(self.pc + 9)
+
+    def call_arg(self, *args, **kwargs):
+        self.add_pc(2)
+        self.pb[self.pc - 2] = "ASSIGN", _m(self.top_sp), _m(self.ss_i(0))
         self.pop(1)
-        self.pb[self.pc - 1] = "ASSIGN", _m(al_size, "#"), _m(after_sp_ptr)
+        self.pb[self.pc - 1] = "ADD", _m(self.top_sp), _m()
+
+    def make_ar(self, control_link):
+        self.add_pc(9)
+        after_sp_ptr = self.get_temp()
+        self.pb[self.pc - 9] = "ADD", _m(self.top_sp), _m(4, "#"), _m(after_sp_ptr)
+        self.pb[self.pc - 8] = "ASSIGN", _m(control_link, "#"), _m(after_sp_ptr, "@")
+        self.pb[self.pc - 7] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
+        al_loc = ActivationRecord.control_link
+        self.pb[self.pc - 6] = "ADD", _m(al_loc * 4, "#"), _m(self.top_sp), _m(after_sp_ptr, "@")
+        self.pb[self.pc - 5] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
+        _, al_size = self.semantics.get_int_vars(self.ss_i(0)) + 1
+        self.pop(1)
+        self.pb[self.pc - 4] = "ASSIGN", _m(al_size, "#"), _m(after_sp_ptr, "@")
+        self.pb[self.pc - 3] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
+        self.pb[self.pc - 1] = "ASSIGN", _m(after_sp_ptr), _m(self.top_sp)
         self.ar_stack.append(ActivationRecord(self.ss_i(0)))
 
     # todo handle local arrays
 
-    def func_end(self, *args, **kwargs):
+    def end_function(self, *args, **kwargs):
+        self.get_top_ar().after_local()
         self.pb[self.ss_i(0)] = "ADD", _m(self.top_sp), _m(len(self.get_top_ar().temps), "#"), _m(self.top_sp)
         self.pop(1)
         for code in self.pb:
@@ -202,3 +244,4 @@ class CodeGenerator:
 
 
         self.ar_stack.pop()
+

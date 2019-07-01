@@ -8,41 +8,44 @@ def _m(value, access_type=""):
 class ActivationRecord:
     control_link = 1
     access_link = 2
+    temp_count = 0
 
     def __init__(self, func_name):
         self.func_name = func_name
         self.params = 0
         self.locals = 0
-        self.temps = []
         self.array_stack = []
         # self.top_sp = top_sp
         # self.create_table()
-
-    def get_temp(self):
-        new_temp = "TEMP" + str(len(self.temps))
-        self.temps.append(new_temp)
-        return new_temp
 
     def add_param(self):
         self.params += 1
 
     def add_local(self, cg):
         self.locals += 1
-        entry = cg.semantics.symbol_table[-1]
 
+    def after_local(self, cg):
+        table = cg.get_int_vars(self.func_name)
+        fp = self.get_temp()
+        cg.add_pc(1)
+        cg.pb[cg.pc - 1] = "ASSIGN", _m(cg.top_sp), fp
+        t = self.get_temp()
+        for i, entry in table:
+            if 'var-size' in entry.attributes:
+                cg.add_pc(3)
+                cg.pb[cg.pc - 3] = "ADD", _m(cg.top_sp), _m(i + ActivationRecord.control_link + ActivationRecord.access_link, "#"), _m(t)
+                cg.pb[cg.pc - 2] = "ASSIGN", _m(cg.top_sp), _m(t)
+                cg.pb[cg.pc - 1] = "ADD", _m(cg.top_sp), _m(entry.attributes['var-size'], '#'), _m(cg.top_sp)
+        cg.add_pc(1)
+        cg.pb[cg.pc - 1] = "ASSIGN", _m(fp), cg.top_sp
 
-    def after_local(self):
-        pass
-
-    def add_size(self, cg):
-        pass
 
     def find_ptr(self, name, cg):
-        _, i = cg.semantics.symbol_table.get_sym_table_entry(name)
+        _, i = cg.semantics.symbol_table.get_sym_table_funcless_entry(name)
         al_loc = ActivationRecord.control_link
-        t = self.get_temp()
-        t2 = self.get_temp()
-        al = self.get_temp()
+        t = cg.get_temp()
+        t2 = cg.get_temp()
+        al = cg.get_temp()
         cg.add_pc(9)
         cg.pb[cg.pc - 9] = "ADD", _m(al_loc * 4, "#"), _m(cg.top_sp), _m(al)
         cg.pb[cg.pc - 8] = "JP", _m(cg.pc + 2)
@@ -56,4 +59,14 @@ class ActivationRecord:
         # maybe free t?
         return t
 
-# TODO end function handle arr pointers/
+    # def organize_temps(self, cg):
+    #     self.pb[self.ss_i(0)] = "ADD", _m(self.top_sp), _m(len(self.get_top_ar().temps), "#"), _m(self.top_sp)
+    #     self.pop(1)
+    #     for code in self.pb:
+    #         if code:
+    #             for value in code:
+    #                 for temp in self.get_top_ar().temps():
+    #                     if temp in value:
+    #                         offset = int(temp[4:])
+
+
