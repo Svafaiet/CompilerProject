@@ -29,6 +29,8 @@ class CodeGenerator:
         """
         self.while_switch_stack = []
 
+        self.init_cg()
+
     def init_cg(self):
         """
         initial memory organization
@@ -36,11 +38,19 @@ class CodeGenerator:
         call main
         :return:
         """
+        self.init_global_func()
         self.add_pc(1)
-        self.pb[self.pc - 1] = "ASSIGN", _m(CodeGenerator.REGISTER_SIZE + CodeGenerator.INIT_MEMORY_VALUE, "#")
-        self.make_output()
+        self.pb[self.pc - 1] = "ASSIGN", _m(CodeGenerator.REGISTER_SIZE + CodeGenerator.INIT_MEMORY_VALUE, "#"), _m(self.top_sp)
         self.save()  # control_link at end of
         self.save()  # for j main
+        self.make_output()
+
+    def init_global_func(self):
+        self.push("__global__")
+        global_ar = ActivationRecord("__global__", -1)
+        self.semantics.set_ar(global_ar)
+        self.ar_stack.append(global_ar)
+
 
     def make_output(self):
         pass
@@ -50,8 +60,8 @@ class CodeGenerator:
         self.pc += offset
 
     def get_temp(self):
-        for i in range(int(CodeGenerator.REGISTER_SIZE / 4)):
-            reg = CodeGenerator.INIT_MEMORY_VALUE + 4 * i
+        for i in range(1, int(CodeGenerator.REGISTER_SIZE / 4)):
+            reg = CodeGenerator.INIT_MEMORY_VALUE + 4 * (i + 1)
             if not (reg in self.temp_set):
                 self.temp_set.add(reg)
                 return reg
@@ -96,16 +106,6 @@ class CodeGenerator:
         _, i = self.semantics.get_sym_table_entry(func_name)
         return list(filter(lambda x: (x.attributes['dec-type'] != "function"), self.semantics.symbol_table[i:]))
 
-    # add 1 pc, push address of temp
-    def get_temp(self):
-        counter_reg = CodeGenerator.INIT_MEMORY_VALUE + 4
-
-        self.pb[self.pc]
-
-    def add_ar(self, name):
-        self.reset_temp()
-        self.ar_stack.append(ActivationRecord(name, self.temp_set))
-
     def reset_temp(self):
         """
         with assumption of fp not being in fp, put all Reg_size in SP
@@ -113,8 +113,8 @@ class CodeGenerator:
         i = self.get_temp()
         t = self.get_temp()
         self.add_pc(6)
-        self.pb[self.pc - 6] = "ASSIGN", _m(CodeGenerator.INIT_MEMORY_VALUE + 4, "#"), _m(i)
-        self.pb[self.pc - 5] = "ADD", _m(i), _m(CodeGenerator.INIT_MEMORY_VALUE + 4, "#"), _m(i)
+        self.pb[self.pc - 6] = "ASSIGN", _m(CodeGenerator.INIT_MEMORY_VALUE, "#"), _m(i)
+        self.pb[self.pc - 5] = "ADD", _m(i), _m(4, "#"), _m(i)
         self.pb[self.pc - 4] = "ASSIGN", _m(i), _m(self.top_sp, "@")
         self.pb[self.pc - 3] = "ADD", _m(self.top_sp), _m(4, "#"), _m(self.top_sp)
         self.pb[self.pc - 2] = "LT", _m(CodeGenerator.INIT_MEMORY_VALUE + CodeGenerator.REGISTER_SIZE, "#"), _m(i), _m(
@@ -155,12 +155,13 @@ class CodeGenerator:
             # Todo handle errors
             return
         action_routine = eval("self." + action_symbol_type.lower())
+        action_routine(current_node, **kwargs)
         try:
-            action_routine(current_node, **kwargs)
+            pass
         except Exception as e:
             print(e)
 
-    def pop_tok(self, *args, **kwargs):
+    def pop_ss(self, *args, **kwargs):
         self.pop(1)
 
     def push_tok(self, current_node, **kwargs):
@@ -252,11 +253,12 @@ class CodeGenerator:
 
     def add_local(self, *args, **kwargs):
         top_ar = self.get_top_ar()
-        top_ar.add_local(self)
+        top_ar.add_local()
 
     def add_local_arr_len(self, *args, **kwargs):
-        top_ar = self.get_top_ar()
-        top_ar.add_size(self)
+        # top_ar = self.get_top_ar()
+        # top_ar.add_size(self)
+        pass
 
     def after_local(self):
         # set fp
@@ -269,8 +271,11 @@ class CodeGenerator:
         self.temp_set = set()
 
     def call_end(self, *args, **kwargs):
+        self.add_pc(1)
+        self.pb[self.pc - 1] = "JP", _m(self.semantics.get_sym_table_entry(self.ss_i(0))[0].attributes["ar"].func_line)
+        self.pop(1)
         self.temp_set = self.call_stack.pop()
-        self.reset_temp()
+        self.retrieve_temp()
 
     def call_arg(self, *args, **kwargs):
         self.add_pc(2)
@@ -281,7 +286,9 @@ class CodeGenerator:
     # todo handle local arrays
 
     def use_ar(self, control_link):
-        ar = None  # TODO
+        # 8 pc passed, one poped
+        entry, _ = self.semantics.get_sym_table_entry(self.ss_i(0))
+        ar = entry.attributes['ar']
         self.add_pc(9)
         after_sp_ptr = self.get_temp()
         self.pb[self.pc - 9] = "ADD", _m(self.top_sp), _m(4, "#"), _m(after_sp_ptr)
@@ -296,8 +303,8 @@ class CodeGenerator:
         self.pb[self.pc - 3] = "ADD", _m(after_sp_ptr), _m(4 * (ar.params + ar.locals + 1), "#"), _m(after_sp_ptr)
         self.pb[self.pc - 1] = "ASSIGN", _m(after_sp_ptr), _m(self.top_sp)
 
-    def start_function(self):
-        ar = ActivationRecord(self.ss_i(0))
+    def start_function(self, *args, **kwargs):
+        ar = ActivationRecord(self.ss_i(0), self.pc)
         self.ar_stack.append(ar)
         self.semantics.set_ar(ar)
         self.temp_set = set()
@@ -367,13 +374,15 @@ class CodeGenerator:
         self.pop(2)
 
     def print_code(self):
-        with open(file=self.file_out) as f:
+        with open(file=self.file_out, mode="w") as f:
             for i, instruction in enumerate(self.pb):
+                if not instruction: #todo
+                    continue
                 inst = "{}  ".format(i)
                 for operand in instruction:
                     if isinstance(operand, str):
                         inst += "({}".format(operand)
                     elif isinstance(operand, MemoryAccessDirectiveObj):
                         inst += ", {}{}".format(operand.access_type, operand.value)
-
+                inst += ")\n"
                 f.write(inst)

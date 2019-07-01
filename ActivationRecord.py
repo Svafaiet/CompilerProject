@@ -10,8 +10,9 @@ class ActivationRecord:
     access_link = 2
     temp_count = 0
 
-    def __init__(self, func_name):
+    def __init__(self, func_name, func_line):
         self.func_name = func_name
+        self.func_line = func_line
         self.state_machine = 2000
         self.params = 0
         self.locals = 0
@@ -27,18 +28,19 @@ class ActivationRecord:
 
     def arr_memory(self, cg):
         table = cg.get_int_vars(self.func_name)
-        fp = self.get_temp()
+        fp = cg.get_temp()
         cg.add_pc(1)
-        cg.pb[cg.pc - 1] = "ASSIGN", _m(cg.top_sp), fp
-        t = self.get_temp()
-        for i, entry in table:
+        cg.pb[cg.pc - 1] = "ASSIGN", _m(cg.top_sp, "@"), _m(fp)
+        t = cg.get_temp()
+        for i, entry in enumerate(table):
             if 'var-size' in entry.attributes:
                 cg.add_pc(3)
-                cg.pb[cg.pc - 3] = "ADD", _m(cg.top_sp), _m(i + ActivationRecord.control_link + ActivationRecord.access_link, "#"), _m(t)
-                cg.pb[cg.pc - 2] = "ASSIGN", _m(cg.top_sp), _m(t)
-                cg.pb[cg.pc - 1] = "ADD", _m(cg.top_sp), _m(entry.attributes['var-size'], '#'), _m(cg.top_sp)
+                cg.pb[cg.pc - 3] = "ADD", _m(cg.top_sp, "@"), _m(4 * (i + self.pre_var_size()), "#"), _m(t)
+                cg.pb[cg.pc - 2] = "ASSIGN", _m(cg.top_sp), _m(t, "@")
+                cg.pb[cg.pc - 1] = "ADD", _m(cg.top_sp), _m(4 * int(entry.attributes['var-size']), '#'), _m(cg.top_sp)
         cg.add_pc(1)
-        cg.pb[cg.pc - 1] = "ASSIGN", _m(fp), cg.top_sp
+        cg.pb[cg.pc - 1] = "ASSIGN", _m(fp), _m(cg.top_sp, "@")
+        cg.free_temp(fp)
 
     def find_ptr(self, name, cg):
         _, i = cg.semantics.symbol_table.get_sym_table_funcless_entry(name)
@@ -59,7 +61,10 @@ class ActivationRecord:
         # maybe free t?
         return t
 
-    def const_size(self):
+    def pre_var_size(self):
+        return ActivationRecord.access_link + ActivationRecord.control_link
+
+    def variable_size(self):
         return self.params + self.locals
 
     # def organize_temps(self, cg):
@@ -71,5 +76,3 @@ class ActivationRecord:
     #                 for temp in self.get_top_ar().temps():
     #                     if temp in value:
     #                         offset = int(temp[4:])
-
-

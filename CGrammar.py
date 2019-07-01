@@ -21,20 +21,20 @@ def a(action_type):
     return ActionSymbol(action_type)
 
 
-compressed_grammar = [
-    ["program", ["declaration-list", s("CHECK_MAIN"), Token(CTokenType.EOF)]],
+compressed_grammar = [ #TODO FIX CHECK MAIN
+    ["program", ["declaration-list", Token(CTokenType.EOF)]],
     ["declaration-list", ["declaration-list", "declaration"], epsilon],
     ["declaration", ["type-specifier", Token(CTokenType.ID), s("DECLARE_NAME"), a("PUSH_TOK"), "var-func-declaration"]],
-    ["var-func-declaration", ["var-declaration", s("CHECK_VAR_TYPE"), a("ADD_LOCAL"), a("POP_TOK")],
+    ["var-func-declaration", ["var-declaration", s("CHECK_VAR_TYPE"), a("ADD_LOCAL"), a("POP_SS")],
      ["fun-declaration"]],
     ["var-declaration",
      [cs(";")],
-     [cs("["), Token(CTokenType.NUM), s("DECLARE_VAR_SIZE"), a("PUSH_NUM"), a("ADD_LOCAL_ARR_LEN"), cs("]"), cs(";")],
-     # [cs("["), "expression", s("DECLARE_VAR_SIZE"), cs("]"), cs(";")]
+     [cs("["), Token(CTokenType.NUM), s("DECLARE_VAR_SIZE"), a("ADD_LOCAL_ARR_LEN"), cs("]"), cs(";")],
+     # [cs("["), "expression", s("DECLARE_VAR_SIZE"), cs("]"), cs(";")] #todo if this was not comment add push_num to prev-RHS
      ],
     ["type-specifier", [ck("int"), s("DECLARE_TYPE"), ], [ck("void"), s("DECLARE_TYPE"), ]],
     ["fun-declaration",
-     [cs("("), s("FUNCTION"), a("START_FUNCTION"), s("SCOPE_START"), "params", cs(")"), "compound-stmt", a("END_FUNCTION"), s("SCOPE_END"),
+     [cs("("), s("FUNCTION"), a("START_FUNCTION"), s("SCOPE_START"), "params", cs(")"), "compound-stmt", s("SCOPE_END"),
       s("END_FUNCTION")]],
     ["params", [ck("void"), s("ADD_PARAM")],
      [ck("void"), s("DECLARE_TYPE"), s("ADD_PARAM"), "param-left", "param-list"],
@@ -46,13 +46,13 @@ compressed_grammar = [
       cs("]")],
      [Token(CTokenType.ID), s("DECLARE_NAME"), s("CHECK_VAR_TYPE"), a("ADD_PARAM"), ]],
     ["compound-stmt",
-     [cs("{"), s("SCOPE_START"), "declaration-list", a("SAVE"), "statement-list", a("FUNC_END"), s("SCOPE_END"),
+     [cs("{"), s("SCOPE_START"), "declaration-list", a("END_FUNCTION"), "statement-list", s("SCOPE_END"),
       cs("}")]],
     ["statement-list", ["statement-list", "statement"], epsilon],
     ["statement", ["expression-stmt", ], ["compound-stmt", ], ["selection-stmt", ], ["iteration-stmt", ],
      ["return-stmt", ], ["switch-stmt", ]],
     ["expression-stmt",
-     [s("BEGIN_EXPRESSION_CHECK"), "expression", s("END_EXPRESSION_CHECK"), cs(";")],
+     [s("BEGIN_EXPRESSION_CHECK"), "expression", s("END_EXPRESSION_CHECK"), a("POP_SS"), cs(";")],
      [ck("continue"), s("CHECK_CONTINUE"), cs(";")], [ck("break"), s("CHECK_BREAK"), a("ADD_BREAK"), cs(";")], [cs(";"), ]
      ],
     ["selection-stmt",
@@ -78,7 +78,7 @@ compressed_grammar = [
      epsilon
      ],
     ["expression",
-     [Token(CTokenType.ID), s("CHECK_SCOPE"), s("ADD_VAR_TO_EXPRESSION"), "expression-left"],
+     [Token(CTokenType.ID), s("CHECK_SCOPE"), s("ADD_VAR_TO_EXPRESSION"), a("PUSH_TOK"), "expression-left"],
      ["simple-expression"],
      ],
     ["expression-left",
@@ -89,7 +89,7 @@ compressed_grammar = [
      [cs("="), "expression"],
      ["term-left", "additive-expression-left", "simple-expression-left"]
      ],
-    ["var", [Token(CTokenType.ID), s("CHECK_SCOPE"), "var-left"]],
+    ["var", [Token(CTokenType.ID), s("CHECK_SCOPE"), a("PUSH_TOK"), a("PID"), "var-left"]],
     ["var-left", [s("CHECK_ARRAY"), cs("["), s("BEGIN_EXPRESSION_CHECK"),
                   "expression", s("END_SECONDARY_EXPRESSION_CHECK"), a("CALC_ARR"), cs("]")], epsilon],
     ["simple-expression", ["additive-expression-right", "simple-expression-left"]],
@@ -131,7 +131,7 @@ compressed_grammar = [
      ],
     ["var-call", ["var-left"], ["call"]],
     ["call", [s("CHECK_EXPRESSION_FUNC"), s("CHECK_FUNC_ARGS_BEGIN"), s("CHECK_FUNC"), a("CALL_START"), cs("("), "args",
-              s("CHECK_FUNC_ARGS_END"), cs(")"), "CALL_END"]],
+              s("CHECK_FUNC_ARGS_END"), cs(")"), a("CALL_END")]],
     ["args",
      ["arg-list"],
      epsilon,

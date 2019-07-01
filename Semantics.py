@@ -19,8 +19,13 @@ class Semantics:
         self.expression_stack = []
         self.function_stack = []
 
+        self.symbol_table.append(SymbolTableRecord("void", "__global__"))
+        self.symbol_table[-1].attributes = {"dec-type": "function"}
+        self.stack.append([0, "__global__"])
+
     def get_sym_table_funcless_entry(self, name):
-        for i, entry in enumerate(list(map(lambda x: (x.attributes['dec-type'] != "function"), self.symbol_table[::-1]))):
+        for i, entry in enumerate(
+                list(map(lambda x: (x.attributes['dec-type'] != "function"), self.symbol_table[::-1]))):
             if entry.name == name:
                 return entry, i
         else:
@@ -40,14 +45,15 @@ class Semantics:
 
     def err(self, error_type, id_tok_val=None):
         error_types = {
-            "main":             "Main function not found or is invalid!\n",
-            "scoping":          "{} is not defined.\n".format(id_tok_val),
-            "variable_void":    "Illegal type of void for variable {}.\n".format(id_tok_val),
-            "arg_count":        "Mismatch in number of arguments of {}.\n".format(id_tok_val),
-            "continue":         "No 'while' found for 'continue'.\n",
-            "break":            "No 'while' or 'switch' found for 'break'.\n",
+            "main": "Main function not found or is invalid!\n",
+            "scoping": "{} is not defined.\n".format(id_tok_val),
+            "variable_void": "Illegal type of void for variable {}.\n".format(id_tok_val),
+            "arg_count": "Mismatch in number of arguments of {}.\n".format(id_tok_val),
+            "continue": "No 'while' found for 'continue'.\n",
+            "break": "No 'while' or 'switch' found for 'break'.\n",
             "operand_mismatch": "Type mismatch in operands\n",
-            "invalid_parameters": "Invalid parameter of type void for function {}. function already has a parameter\n".format(id_tok_val),
+            "invalid_parameters": "Invalid parameter of type void for function {}. function already has a parameter\n".format(
+                id_tok_val),
             "invalid_variable_indexing": "Variable {} is not an array and can not be indexed\n".format(id_tok_val),
             "invalid_index": "Invalid index for array {}\n".format(id_tok_val),
             "second_declaration": "This is a second declaration of {}\n".format(id_tok_val),
@@ -65,7 +71,7 @@ class Semantics:
         if current_node is None and semantic_symbol_type != "scope_end":
             if semantic_symbol_type == 'DECLARE_TYPE':
                 self.prev_sym_entry = None
-            #Todo handle errors
+            # Todo handle errors
             return
 
         if semantic_symbol_type == 'DECLARE_TYPE':
@@ -101,10 +107,10 @@ class Semantics:
 
     def declare_var_size(self, current_node, **kwargs):
         if self.prev_sym_entry is not None and current_node is not None:
-                if current_node.token_value != '[':
-                    self.symbol_table[-1].attributes["var-size"] = current_node.token_value
-                else:
-                    self.symbol_table[-1].attributes["var-size"] = '0'
+            if current_node.token_value != '[':
+                self.symbol_table[-1].attributes["var-size"] = current_node.token_value
+            else:
+                self.symbol_table[-1].attributes["var-size"] = '0'
 
     def function(self, *args, **kwargs):
         self.symbol_table[-1].attributes['dec-type'] = "function"
