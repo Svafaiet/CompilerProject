@@ -38,9 +38,9 @@ class CodeGenerator:
         call main
         :return:
         """
-        self.init_global_func()
         self.add_pc(1)
         self.pb[self.pc - 1] = "ASSIGN", _m(CodeGenerator.REGISTER_SIZE + CodeGenerator.INIT_MEMORY_VALUE, "#"), _m(self.top_sp)
+        self.init_global_func()
         self.save()  # control_link at end of
         self.save()  # for j main
         self.make_output()
@@ -50,6 +50,7 @@ class CodeGenerator:
         global_ar = ActivationRecord("__global__", -1)
         self.semantics.set_ar(global_ar)
         self.ar_stack.append(global_ar)
+        self.use_ar(0)
 
 
     def make_output(self):
@@ -288,6 +289,7 @@ class CodeGenerator:
     def call_start(self, *args, **kwargs):
         self.call_stack.append(self.temp_set)
         self.use_ar(self.pc + 9)
+        self.reset_temp()
         self.temp_set = set()
 
     def call_end(self, *args, **kwargs):
@@ -319,7 +321,7 @@ class CodeGenerator:
         self.pb[self.pc - 4] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
         al_size = len(self.get_int_vars("__global__")) - len(self.get_int_vars(self.ss_i(0)))
         self.pb[self.pc - 3] = "ASSIGN", _m(al_size, "#"), _m(after_sp_ptr, "@")
-        self.pb[self.pc - 2] = "ADD", _m(after_sp_ptr), _m(4 * (ar.params + ar.locals + 1), "#"), _m(after_sp_ptr)
+        self.pb[self.pc - 2] = "ADD", _m(after_sp_ptr), _m(4 * (ar.variable_size() + 1), "#"), _m(after_sp_ptr)
         self.pb[self.pc - 1] = "ASSIGN", _m(after_sp_ptr), _m(self.top_sp)
 
     def start_function(self, *args, **kwargs):
@@ -342,6 +344,32 @@ class CodeGenerator:
         #                     offset = int(temp[4:])
 
         # self.ar_stack.pop()
+
+    """return"""
+    def remove_ar(self, *args, **kwargs):
+        self.add_pc(1)
+        self.pb[self.pc - 1] = "ASSIGN", _m(self.top_sp, "@"), _m(self.top_sp)
+        pass
+
+    def set_void_return(self, *args, **kwargs):
+        t = self.get_temp()
+        self.add_pc(2)
+        self.pb[self.pc - 2] = "ASSIGN", _m(self.top_sp, "@"), _m(t)
+        self.pb[self.pc - 1] = "SUB", _m(self.top_sp), _m(4, "#"), _m(self.top_sp)
+        self.free_temp(t) #danger
+        self.add_pc(1)
+        self.pb[self.pc - 1] = "JP", _m(t, "@")
+        pass
+
+    def set_int_return(self, *args, **kwargs):
+        t = self.get_temp()
+        self.add_pc(3)
+        self.pb[self.pc - 3] = "ASSIGN", _m(self.top_sp, "@"), _m(t)
+        self.pb[self.pc - 2] = "ASSIGN", _m(self.ss_i(0)), _m(self.top_sp, "@")
+        self.pb[self.pc - 1] = "SUB", _m(self.top_sp), _m(4, "#"), _m(self.top_sp)
+        self.free_temp(t)  # danger
+        self.add_pc(1)
+        self.pb[self.pc - 1] = "JP", _m(t, "@")
 
     def jp_save(self, *args, **kwargs):
         """

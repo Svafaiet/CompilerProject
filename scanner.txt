@@ -1,9 +1,9 @@
-void f(int a) {
+void f(void) {
     //int c;
     //int a[10];
     //int b[20];
     //a[2];
     //a[1] = 2;
-    f(1);
+    //f(1);
     return;
 }
