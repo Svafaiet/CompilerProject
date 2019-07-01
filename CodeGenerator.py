@@ -53,9 +53,8 @@ class CodeGenerator:
     def add_continue(self):
         pass
 
-    def add_break(self):
-        pass
-        # self.while_switch_stack
+    def add_break(self, *args, **kwargs):
+        self.while_switch_stack[len(self.while_switch_stack) - 1].append()
 
     def get_top_ar(self):
         return self.ar_stack[-1]
@@ -186,7 +185,7 @@ class CodeGenerator:
         _, al_size = self.semantics.get_sym_table_entry(self.ss_i(0)) + 1
         self.pop(1)
         self.pb[self.pc - 1] = "ASSIGN", _m(al_size, "#"), _m(after_sp_ptr)
-        self.ar_stack.append(ActivationRecord())
+        self.ar_stack.append(ActivationRecord(self.ss_i(0)))
 
     # todo handle local arrays
 

@@ -5,7 +5,8 @@ class ActivationRecord:
     control_link = 1
     access_link = 2
 
-    def __init__(self):
+    def __init__(self, func_name):
+        self.func_name = func_name
         self.params = 0
         self.locals = 0
         self.temps = []
