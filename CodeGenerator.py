@@ -1,4 +1,4 @@
-from ActivationRecord import ActivationRecord
+    from ActivationRecord import ActivationRecord
 from ActionSymbol import MemoryAccessDirectiveObj
 
 
@@ -199,6 +199,26 @@ class CodeGenerator:
                         if temp in value:
                             offset = int(temp[4:])
 
-
-
         self.ar_stack.pop()
+
+    def jp_save(self, *args, **kwargs):
+        self.add_pc(2)
+        self.pb[self.pc - 2] = "JP", self.pc
+        self.push(self.pc - 1)
+
+    def comp_save(self, *args, **kwargs):
+        self.add_pc(2)
+        t = self.get_temp()
+        self.pb[self.pc - 2] = "EQ", _m(self.ss_i(0)), _m(self.ss_i(1)), _m(t)
+        self.pop(1)
+        self.push(self.pc - 1)
+
+    def back_patch(self, *args, **kwargs):
+        self.pb[self.ss_i(0)] = "JPF", _m(self.ss_i(1)), self.pc
+        self.pop(2)
+
+    def end_switch(self, *args, **kwargs):
+        self.pb[self.ss_i(1)] = "JP", _m(self.pc)
+        self.pop(2)
+
+

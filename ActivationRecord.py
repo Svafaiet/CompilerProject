@@ -26,13 +26,8 @@ class ActivationRecord:
     def add_param(self):
         self.params += 1
 
-    def add_local(self, cg):
+    def add_local(self):
         self.locals += 1
-        entry = cg.semantics.symbol_table[-1]
-
-
-    def after_local(self):
-        pass
 
     def add_size(self, cg):
         pass

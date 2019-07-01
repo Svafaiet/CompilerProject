@@ -53,7 +53,7 @@ compressed_grammar = [
      ["return-stmt", ], ["switch-stmt", ]],
     ["expression-stmt",
      [s("BEGIN_EXPRESSION_CHECK"), "expression", s("END_EXPRESSION_CHECK"), cs(";")],
-     [ck("continue"), s("CHECK_CONTINUE"), cs(";")], [ck("break"), s("CHECK_BREAK"), cs(";")], [cs(";"), ]
+     [ck("continue"), s("CHECK_CONTINUE"), cs(";")], [ck("break"), s("CHECK_BREAK"), a("ADD_BREAK"), cs(";")], [cs(";"), ]
      ],
     ["selection-stmt",
      [ck("if"), cs("("), s("BEGIN_EXPRESSION_CHECK"), "expression", s("END_EXPRESSION_CHECK"), a("SAVE"), cs(")"),
@@ -69,10 +69,10 @@ compressed_grammar = [
      [ck("return"), s("BEGIN_EXPRESSION_CHECK"), "expression", s("CHECK_NOT_VOID"),
       s("END_SECONDARY_EXPRESSION_CHECK"), cs(";")]],
     ["switch-stmt",
-     [ck("switch"), cs("("), s("BEGIN_EXPRESSION_CHECK"), "expression", s("END_EXPRESSION_CHECK"), cs(")"),
-      cs("{"), s("SCOPE_START  "), "case-stmts", "default-stmt", s("SCOPE_END"), cs("}")]],
+     [ck("switch"), a("JP_SAVE"), cs("("), s("BEGIN_EXPRESSION_CHECK"), "expression", s("END_EXPRESSION_CHECK"), cs(")"),
+      cs("{"), s("SCOPE_START"), "case-stmts", "default-stmt", s("SCOPE_END"), cs("}"), a("END_SWITCH")]],
     ["case-stmts", ["case-stmts", "case-stmt"], epsilon, ],
-    ["case-stmt", [ck("case"), Token(CTokenType.NUM), cs(":"), "statement-list"]],
+    ["case-stmt", [ck("case"), Token(CTokenType.NUM), a("COMP_SAVE"), cs(":"), "statement-list", a("BACK_PATCH")]],
     ["default-stmt",
      [ck("default"), cs(":"), "statement-list"],
      epsilon
