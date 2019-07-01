@@ -36,18 +36,7 @@ program
             |- ]
             |- ;
          |- declaration-list.new
-          |- declaration
-           |- type-specifier
-            |- int
-           |- CTokenType.ID
-           |- var-func-declaration
-            |- var-declaration
-             |- [
-             |- CTokenType.NUM
-             |- ]
-             |- ;
-          |- declaration-list.new
-           |- __EPSILON__
+          |- __EPSILON__
       |- statement-list
        |- statement-list.new
         |- statement
@@ -56,27 +45,26 @@ program
            |- CTokenType.ID
            |- expression-left
             |- var-left
-             |- __EPSILON__
-            |- expression-right
-             |- =
+             |- [
              |- expression
-              |- CTokenType.ID
-              |- expression-left
-               |- var-left
+              |- simple-expression
+               |- additive-expression-right
+                |- factor-left
+                 |- CTokenType.NUM
+                |- term-left
+                 |- __EPSILON__
+                |- additive-expression-left
+                 |- __EPSILON__
+               |- simple-expression-left
                 |- __EPSILON__
-               |- expression-right
-                |- =
-                |- expression
-                 |- simple-expression
-                  |- additive-expression-right
-                   |- factor-left
-                    |- CTokenType.NUM
-                   |- term-left
-                    |- __EPSILON__
-                   |- additive-expression-left
-                    |- __EPSILON__
-                  |- simple-expression-left
-                   |- __EPSILON__
+             |- ]
+            |- expression-right
+             |- term-left
+              |- __EPSILON__
+             |- additive-expression-left
+              |- __EPSILON__
+             |- simple-expression-left
+              |- __EPSILON__
           |- ;
         |- statement-list.new
          |- statement

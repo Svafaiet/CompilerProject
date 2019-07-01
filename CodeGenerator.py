@@ -261,11 +261,11 @@ class CodeGenerator:
         # todo
 
     def calc_arr(self, *args, **kwargs):
-        self.add_pc(3)
-        self.pb[self.pc - 3] = "MULT", _m(4, "#"), _m(self.ss_i(0)), _m(self.ss_i(0))
-        self.pb[self.pc - 2] = "ADD", _m(self.ss_i(0)), _m(self.ss_i(1)), _m(self.ss_i(1))
+        self.add_pc(2)
+        self.pb[self.pc - 2] = "MULT", _m(4, "#"), _m(self.ss_i(0)), _m(self.ss_i(0))
+        self.pb[self.pc - 1] = "ADD", _m(self.ss_i(0)), _m(self.ss_i(1)), _m(self.ss_i(1))
         self.pop(1)
-        self.pb[self.pc - 1] = "ASSIGN", _m(self.ss_i(0), "@"), _m(self.ss_i(0))
+        # self.pb[self.pc - 1] = "ASSIGN", _m(self.ss_i(0), "@"), _m(self.ss_i(0))
 
     def add_param(self, current_node, **kwargs):
         top_ar = self.get_top_ar()

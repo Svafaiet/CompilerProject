@@ -82,7 +82,7 @@ compressed_grammar = [ #TODO FIX CHECK MAIN
      ["simple-expression"],
      ],
     ["expression-left",
-     ["var-left", a("PID"), "expression-right"],
+     [a("PID"), "var-left", "expression-right"],
      ["call", "term-left", "additive-expression-left", "simple-expression-left"]
      ],
     ["expression-right",
