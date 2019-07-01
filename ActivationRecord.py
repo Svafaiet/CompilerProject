@@ -25,7 +25,7 @@ class ActivationRecord:
     def add_local(self):
         self.locals += 1
 
-    def after_local(self, cg):
+    def arr_memory(self, cg):
         table = cg.get_int_vars(self.func_name)
         fp = self.get_temp()
         cg.add_pc(1)

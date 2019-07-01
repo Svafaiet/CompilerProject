@@ -133,7 +133,7 @@ class CodeGenerator:
         j = self.get_temp()
         t = self.get_temp()
         self.add_pc(6)
-        self.pb[self.pc - 6] = "ADD", _m(self.top_sp), _m( + 4, "#"), _m(j)
+        self.pb[self.pc - 6] = "ADD", _m(self.top_sp), _m(+ 4, "#"), _m(j)
         self.pb[self.pc - 6] = "ASSIGN", _m(CodeGenerator.INIT_MEMORY_VALUE + 4, "#"), _m(i)
         self.pb[self.pc - 5] = "ADD", _m(i), _m(CodeGenerator.INIT_MEMORY_VALUE + 4, "#"), _m(i)
         self.pb[self.pc - 4] = "ASSIGN", _m(i), _m(self.top_sp, "@")
@@ -268,11 +268,9 @@ class CodeGenerator:
         self.use_ar(self.pc + 9)
         self.temp_set = set()
 
-
     def call_end(self, *args, **kwargs):
         self.temp_set = self.call_stack.pop()
         self.reset_temp()
-
 
     def call_arg(self, *args, **kwargs):
         self.add_pc(2)
@@ -283,7 +281,7 @@ class CodeGenerator:
     # todo handle local arrays
 
     def use_ar(self, control_link):
-        ar = None #TODO
+        ar = None  # TODO
         self.add_pc(9)
         after_sp_ptr = self.get_temp()
         self.pb[self.pc - 9] = "ADD", _m(self.top_sp), _m(4, "#"), _m(after_sp_ptr)
@@ -292,20 +290,21 @@ class CodeGenerator:
         al_loc = ActivationRecord.control_link
         self.pb[self.pc - 6] = "ADD", _m(al_loc * 4, "#"), _m(self.top_sp), _m(after_sp_ptr, "@")
         self.pb[self.pc - 5] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
-        _, al_size = self.semantics.get_int_vars(self.ss_i(0)) + 1 #fixme
+        _, al_size = self.semantics.get_int_vars(self.ss_i(0)) + 1  # fixme
         self.pop(1)
         self.pb[self.pc - 4] = "ASSIGN", _m(al_size, "#"), _m(after_sp_ptr, "@")
         self.pb[self.pc - 3] = "ADD", _m(after_sp_ptr), _m(4 * (ar.params + ar.locals + 1), "#"), _m(after_sp_ptr)
         self.pb[self.pc - 1] = "ASSIGN", _m(after_sp_ptr), _m(self.top_sp)
 
-
     def start_function(self):
-        self.ar_stack.append(ActivationRecord(self.ss_i(0)))
+        ar = ActivationRecord(self.ss_i(0))
+        self.ar_stack.append(ar)
+        self.semantics.set_ar(ar)
         self.temp_set = set()
 
     def end_function(self, *args, **kwargs):
-        pass
-
+        ar = self.get_top_ar()
+        ar.arr_memory(self)
         # self.get_top_ar().after_local()
         # self.pb[self.ss_i(0)] = "ADD", _m(self.top_sp), _m(len(self.get_top_ar().temps), "#"), _m(self.top_sp)
         # self.pop(1)
