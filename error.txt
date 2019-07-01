@@ -1,5 +1,0 @@
-5: Function foo2 is of type void but is returning value
-7: This is a second declaration of foo
-18: Function foo returns nothing
-41: u is not defined.
-42: u is not defined.

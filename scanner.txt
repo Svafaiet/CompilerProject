@@ -1,3 +1,8 @@
+int f(int a) {
+    int b;
+    a = f(10);
+    int c;
+}
 int b;
 int foo(int d, int e){
     int f;

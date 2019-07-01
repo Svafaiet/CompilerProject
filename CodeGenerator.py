@@ -169,21 +169,38 @@ class CodeGenerator:
         top_ar = self.get_top_ar()
         top_ar.add_local()
 
-    def add_local_arr_len(self):
+    def add_local_arr_len(self, *args, **kwargs):
         top_ar = self.get_top_ar()
         top_ar.add_size(self)
 
-    def make_from_ar(self, ar):
+    def make_ar(self, *args, **kwargs):
+        ar = self.get_top_ar()
         self.add_pc(6)
         after_sp_ptr = ar.get_temp()
         self.pb[self.pc - 6] = "ADD", _m(self.top_sp), _m(4, "#"), _m(after_sp_ptr)
         self.pb[self.pc - 5] = "ASSIGN", _m(self.pc, "#"), _m(after_sp_ptr)
         self.pb[self.pc - 4] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
-        al_loc = ActivationRecord.control_link + ActivationRecord.access_link - 1
+        al_loc = ActivationRecord.control_link
         self.pb[self.pc - 3] = "ADD", _m(al_loc * 4, "#"), _m(self.top_sp), _m(after_sp_ptr)
         self.pb[self.pc - 2] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
         _, al_size = self.semantics.get_sym_table_entry(self.ss_i(0)) + 1
         self.pop(1)
         self.pb[self.pc - 1] = "ASSIGN", _m(al_size, "#"), _m(after_sp_ptr)
+        self.ar_stack.append(ActivationRecord())
 
     # todo handle local arrays
+
+    def func_end(self, *args, **kwargs):
+        self.pb[self.ss_i(0)] = "ADD", _m(self.top_sp), _m(len(self.get_top_ar().temps), "#"), _m(self.top_sp)
+        self.pop(1)
+        for code in self.pb:
+            if code:
+                for value in code:
+                    for temp in self.get_top_ar().temps():
+                        if temp in value:
+                            offset = int(temp[4:])
+
+
+
+
+        self.ar_stack.pop()
