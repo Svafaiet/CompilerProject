@@ -30,6 +30,7 @@ class ActivationRecord:
         self.locals += 1
         entry = cg.semantics.symbol_table[-1]
 
+
     def after_local(self):
         pass
 
