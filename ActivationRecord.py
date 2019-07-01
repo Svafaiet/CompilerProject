@@ -61,7 +61,7 @@ class ActivationRecord:
         return t
 
     def const_size(self):
-        return self.access_link + self.control_link + self.state_machine
+        return self.params + self.locals
 
     # def organize_temps(self, cg):
     #     self.pb[self.ss_i(0)] = "ADD", _m(self.top_sp), _m(len(self.get_top_ar().temps), "#"), _m(self.top_sp)
