@@ -25,7 +25,7 @@ class CodeGenerator:
         """
         with entries:
             ("while", []: a list of break and continues belong to this while, while_condition_label),
-            ("switch", []: a list of breaks belong to this switch, None)
+            ("switch", []: a list of breaks belong to this switch)
         """
         self.while_switch_stack = []
 
@@ -378,7 +378,7 @@ class CodeGenerator:
     """return"""
     def remove_ar(self, *args, **kwargs):
         self.add_pc(1)
-        self.pb[self.pc - 1] = "ASSIGN", _m(self.top_sp, "@"), _m(self.ss_i(0))
+        self.pb[self.pc - 1] = "ASSIGN", _m(self.ss_i(0)), _m(self.top_sp, "@")
         self.pop(1)
         self.add_pc(1)
         self.pb[self.pc - 1] = "ADD", _m(self.top_sp, "@"), _m(self.get_top_ar().return_cnt * 4, "#"), _m(self.top_sp)
