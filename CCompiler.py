@@ -24,7 +24,7 @@ class Compiler:
         self.token_handler.set_io(file_in=file_in, error_writer=error_writer)
         self.parse_handler.set_io(error_writer=error_writer)
         parse_tree = self.parse_handler.parser.parse_tree
-        directive_handler = DirectiveHandler(error_writer=error_writer, file_out=file_out)
+        directive_handler = DirectiveHandler(error_writer=error_writer, file_out="code.txt")
         parse_tree.set_handler(directive_handler)
         tok_gen = self.token_handler.get_next_token()
         is_terminated, error = False, False
@@ -36,6 +36,8 @@ class Compiler:
         with open(file=file_out, mode="w") as f:
             f.write(grammar.grammar.start_symbol + "\n")
             f.write(view)
+
+        directive_handler.code_generator.print_code()
 
     @staticmethod
     def empty_files(file_out, file_error):
@@ -56,8 +58,8 @@ grammar = LL1Grammar(Grammar.make_grammar(compressed_grammar))
 # for prod in grammar.grammar.prods:
 #     print("{}->{}".format(grammar.grammar.prods[prod].non_terminal, grammar.grammar.prods[prod].rhses))
 #
-# for f in grammar.follow_sets["signed-factor-left"]:
-#     print(str(f))]
+# for f in grammar.first_sets["simple-expression"]:
+#     print(str(f))
 # print(grammar.grammar.compress())
 parser = Parser(grammar)
 parse_handler = ParserHandler(parser)

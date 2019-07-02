@@ -10,8 +10,9 @@ class ActivationRecord:
     access_link = 2
     temp_count = 0
 
-    def __init__(self, func_name):
+    def __init__(self, func_name, func_line):
         self.func_name = func_name
+        self.func_line = func_line
         self.state_machine = 2000
         self.params = 0
         self.locals = 0
@@ -25,41 +26,48 @@ class ActivationRecord:
     def add_local(self):
         self.locals += 1
 
-    def after_local(self, cg):
+    def arr_memory(self, cg):
+        """set arr and fp"""
         table = cg.get_int_vars(self.func_name)
-        fp = self.get_temp()
+        fp = cg.get_temp()
         cg.add_pc(1)
-        cg.pb[cg.pc - 1] = "ASSIGN", _m(cg.top_sp), fp
-        t = self.get_temp()
-        for i, entry in table:
+        cg.pb[cg.pc - 1] = "SUB", _m(cg.top_sp), _m(self.pre_var_size() + self.variable_size()), _m(fp)
+        t = cg.get_temp()
+        for i, entry in enumerate(table):
             if 'var-size' in entry.attributes:
                 cg.add_pc(3)
-                cg.pb[cg.pc - 3] = "ADD", _m(cg.top_sp), _m(i + ActivationRecord.control_link + ActivationRecord.access_link, "#"), _m(t)
-                cg.pb[cg.pc - 2] = "ASSIGN", _m(cg.top_sp), _m(t)
-                cg.pb[cg.pc - 1] = "ADD", _m(cg.top_sp), _m(entry.attributes['var-size'], '#'), _m(cg.top_sp)
+                cg.pb[cg.pc - 3] = "ADD", _m(cg.top_sp, "@"), _m(4 * (i + self.pre_var_size()), "#"), _m(t)
+                cg.pb[cg.pc - 2] = "ASSIGN", _m(cg.top_sp), _m(t, "@")
+                cg.pb[cg.pc - 1] = "ADD", _m(cg.top_sp), _m(4 * int(entry.attributes['var-size']), '#'), _m(cg.top_sp)
         cg.add_pc(1)
-        cg.pb[cg.pc - 1] = "ASSIGN", _m(fp), cg.top_sp
+        cg.pb[cg.pc - 1] = "ASSIGN", _m(fp), _m(cg.top_sp, "@")
+        cg.free_temp(fp)
 
     def find_ptr(self, name, cg):
-        _, i = cg.semantics.symbol_table.get_sym_table_funcless_entry(name)
+        _, i = cg.semantics.get_sym_table_funcless_entry(name)
         al_loc = ActivationRecord.control_link
         t = cg.get_temp()
         t2 = cg.get_temp()
         al = cg.get_temp()
         cg.add_pc(9)
-        cg.pb[cg.pc - 9] = "ADD", _m(al_loc * 4, "#"), _m(cg.top_sp), _m(al)
-        cg.pb[cg.pc - 8] = "JP", _m(cg.pc + 2)
-        cg.pb[cg.pc - 7] = "ASSIGN", _m(al, "@"), _m(al)
-        cg.pb[cg.pc - 6] = "ADD", _m(4, "#"), _m(al), _m(t)
-        cg.pb[cg.pc - 5] = "ASSIGN", _m(t, "@"), _m(t)
-        cg.pb[cg.pc - 4] = "LT", _m(t), _m(i, "#"), _m(t2)
-        cg.pb[cg.pc - 3] = "JPF", _m(t2), _m(cg.pc - 5)
-        cg.pb[cg.pc - 2] = "SUB", _m(i + (al_loc + ActivationRecord.access_link), "#"), _m(t), _m(t)
-        cg.pb[cg.pc - 1] = "ADD", _m(cg.top_sp), _m(t), _m(t)
-        # maybe free t?
+        cg.pb[cg.pc - 10] = "ADD", _m(al_loc * 4, "#"), _m(cg.top_sp), _m(al)
+        cg.pb[cg.pc - 9] = "JP", _m(cg.pc - 7)
+        cg.pb[cg.pc - 8] = "ASSIGN", _m(al, "@"), _m(al)
+        cg.pb[cg.pc - 7] = "ADD", _m(4, "#"), _m(al), _m(t)
+        cg.pb[cg.pc - 6] = "ASSIGN", _m(t, "@"), _m(t)
+        cg.pb[cg.pc - 5] = "LT", _m(i, "#"), _m(t), _m(t2)
+        cg.pb[cg.pc - 4] = "JPF", _m(t2), _m(cg.pc - 8)
+        cg.pb[cg.pc - 3] = "SUB", _m(i + ActivationRecord.access_link, "#"), _m(t), _m(t)
+        cg.pb[cg.pc - 2] = "MULT", _m(4, "#"), _m(t), _m(t)
+        cg.pb[cg.pc - 1] = "ADD", _m(al), _m(t), _m(t)
+        cg.free_temp(al)
+        cg.free_temp(t2)
         return t
 
-    def const_size(self):
+    def pre_var_size(self):
+        return ActivationRecord.access_link + ActivationRecord.control_link
+
+    def variable_size(self):
         return self.params + self.locals
 
     # def organize_temps(self, cg):
@@ -71,5 +79,3 @@ class ActivationRecord:
     #                 for temp in self.get_top_ar().temps():
     #                     if temp in value:
     #                         offset = int(temp[4:])
-
-
