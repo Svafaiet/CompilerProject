@@ -50,7 +50,6 @@ class CodeGenerator:
         self.make_output()
 
     def init_global_func(self):
-        self.save()
         self.push("__global__")
         self.start_function()
 
@@ -80,22 +79,21 @@ class CodeGenerator:
         self.pb[self.pc - 1] = "ADD", _m(self.top_sp, "@"), _m(self.get_top_ar().return_cnt * 4, "#"), _m(self.top_sp)
         self.set_return()
         self.end_function()
-        self.pb[self.ss_i(0)] = "JP", _m(self.pc)
-        self.pop(1)
         self.call_global()
 
 
 
     def make_output(self):
         self.push("output")
-        output_ar = ActivationRecord("output", self.pc)
+        output_ar = ActivationRecord("output", self.pc + 1)
         self.ar_stack.append(output_ar)
         #save ignored
         self.add_param()
         self.semantics.set_ar(output_ar)
         # output_ar.arr_memory(self)
         ra = self.get_temp()
-        self.add_pc(6)
+        self.add_pc(7)
+        self.pb[self.pc - 7] = "JP", _m(self.pc)
         self.pb[self.pc - 6] = "SUB", _m(self.top_sp), _m(4, "#"), _m(self.top_sp)
         self.pb[self.pc - 5] = "PRINT", _m(self.top_sp, "@")
         self.pb[self.pc - 4] = "SUB", _m(self.top_sp), _m(
@@ -167,9 +165,9 @@ class CodeGenerator:
         """
         with assumption of fp not being in fp, put all Reg_size in SP
         """
-        i = self.get_temp()
-        t = self.get_temp()
-        fp = self.get_temp()
+        i = CodeGenerator.RESERVED_REGISTER_LOCATION_1
+        t = CodeGenerator.RESERVED_REGISTER_LOCATION_2
+        fp = CodeGenerator.RESERVED_REGISTER_LOCATION_3
         self.add_pc(1)
         self.pb[self.pc - 1] = "ASSIGN", _m(self.top_sp, "@"), _m(fp)
         self.add_pc(6)
@@ -182,9 +180,6 @@ class CodeGenerator:
         self.pb[self.pc - 1] = "JPF", _m(t), _m(self.pc - 5)
         self.add_pc(1)
         self.pb[self.pc - 1] = "ASSIGN", _m(fp), _m(self.top_sp, "@")
-        self.free_temp(fp)
-        self.free_temp(t)
-        self.free_temp(i)
         # self.pb[]
 
     def retrieve_temp(self):
@@ -357,6 +352,9 @@ class CodeGenerator:
 
     def call_end(self, *args, **kwargs):
         entry = self.semantics.get_sym_table_entry(self.ss_i(1))[0]
+        ar = entry.attributes["ar"]
+        self.add_pc(1)
+        self.pb[self.pc - 1] = "SUB", _m(self.top_sp), _m(4 * (ar.pre_val_size + ar.params), "#"), _m(self.top_sp, "@")
         self.add_pc(1)
         self.pb[self.pc - 1] = "JP", _m(entry.attributes["ar"].func_line)
         self.pb[self.ss_i(0)] = "ASSIGN", _m(self.pc, "#"), _m(self.top_sp, "@")
@@ -408,23 +406,27 @@ class CodeGenerator:
                                                               )
 
     def start_function(self, *args, **kwargs):
-        ar = ActivationRecord(self.ss_i(0), self.pc)
+        ar = ActivationRecord(self.ss_i(0), self.pc + 1)
         self.ar_stack.append(ar)
         self.semantics.set_ar(ar)
         self.save(*args, **kwargs)
-
-    def end_local(self, *args, **kwargs):
-        ar = self.ar_stack[-1]
-        self.pb[self.ss_i(0)] = "JP", _m(self.pc)
-        self.pop(1)
-        ar.arr_memory(self)
         self.reset_temp()
         self.call_stack.append(self.temp_set)
         self.temp_set = set()
 
+    def start_scope(self):
+        pass
+
+    def end_scope(self, *args, **kwargs):
+        ar = self.ar_stack[-1]
+        ar.arr_memory(self)
+
+
     def end_function(self, *args, **kwargs):
         self.ar_stack.pop()
         self.temp_set = self.call_stack.pop()
+        self.pb[self.ss_i(0)] = "JP", _m(self.pc)
+        self.pop(1)
         self.pop(1)
 
     """return"""

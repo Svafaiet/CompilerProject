@@ -42,6 +42,19 @@ class Semantics:
         else:
             return None, None
 
+    def get_size_from_start(self, name):
+        """
+        start from start of table
+        for each variable, add 1 to result
+        if it was an array add its length to result
+        until you reach name,
+        (don't count name)
+        :return result + 1
+        :param name:
+        :return:
+        """
+        pass
+
     def set_ar(self, ar):
         for entry in self.symbol_table[::-1]:
             if entry.attributes['dec-type'] == 'function' and entry.name == ar.func_name:
