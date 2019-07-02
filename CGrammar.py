@@ -21,8 +21,8 @@ def a(action_type):
     return ActionSymbol(action_type)
 
 
-compressed_grammar = [ #TODO FIX CHECK MAIN
-    ["program", ["declaration-list", Token(CTokenType.EOF)]],
+compressed_grammar = [
+    ["program", ["declaration-list", s("CHECK_MAIN"), a("CALL_MAIN"), Token(CTokenType.EOF)]],
     ["declaration-list", ["declaration-list", "declaration"], epsilon],
     ["declaration", ["type-specifier", Token(CTokenType.ID), s("DECLARE_NAME"), a("PUSH_TOK"), "var-func-declaration"]],
     ["var-func-declaration", ["var-declaration", s("CHECK_VAR_TYPE"), a("ADD_LOCAL"), a("POP_SS")],

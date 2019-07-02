@@ -25,7 +25,7 @@ class CodeGenerator:
         """
         with entries:
             ("while", []: a list of break and continues belong to this while, while_condition_label),
-            ("switch", []: a list of breaks belong to this switch, None)
+            ("switch", []: a list of breaks belong to this switch)
         """
         self.while_switch_stack = []
 
@@ -42,7 +42,7 @@ class CodeGenerator:
         self.pb[self.pc - 1] = "ASSIGN", _m(CodeGenerator.REGISTER_SIZE + CodeGenerator.INIT_MEMORY_VALUE, "#"), _m(
             self.top_sp)
         self.init_global_func()
-        self.save()  # control_link at end of
+        # self.save()  # control_link at end of
         self.save()  # for j main
         self.make_output()
 
@@ -53,6 +53,7 @@ class CodeGenerator:
         self.ar_stack.append(global_ar)
         self.use_ar()
         self.pb[self.ss_i(0)] = "ASSIGN", _m(self.pc, "#"), _m(self.top_sp, "@")
+        self.pop(1)
 
     def make_output(self):
         self.push("output")
@@ -61,8 +62,6 @@ class CodeGenerator:
         self.semantics.set_ar(output_ar)
         self.ar_stack.append(output_ar)
         self.add_param()
-        #todo maybe uncomment this
-        # self.pb[self.ss_i(0)] = "ASSIGN", _m(self.pc, "#"), _m(self.top_sp, "@")
         self.add_pc(1)
         # todo  fix fp
         self.pb[self.pc - 1] = "PRINT", _m(self.top_sp, "@")
@@ -284,10 +283,10 @@ class CodeGenerator:
         self.pb[self.pc - 1] = "JP", _m(self.ss_i(2))
         self.pop(3)
 
-    def switch_start(self):
-        self.push(self.pc)
-        self.add_pc(1)
-        # todo
+    # def switch_start(self):
+    #     self.push(self.pc)
+    #     self.add_pc(1)
+    #     # todo
 
     def calc_arr(self, *args, **kwargs):
         self.add_pc(2)
@@ -309,10 +308,10 @@ class CodeGenerator:
         # top_ar.add_size(self)
         pass
 
-    def after_local(self):
-        # set fp
-        self.add_pc(1)
-        self.pb[self.pc - 1] = "SUB", _m(self.top_sp), _m(self.get_top_ar().get_const_size(), "#"), _m(self.top_sp, "@")
+    # def after_local(self):
+    #     # set fp
+    #     self.add_pc(1)
+    #     self.pb[self.pc - 1] = "SUB", _m(self.top_sp), _m(self.get_top_ar().get_const_size(), "#"), _m(self.top_sp, "@")
 
     def call_start(self, *args, **kwargs):
         self.use_ar()
@@ -374,11 +373,12 @@ class CodeGenerator:
     def end_function(self, *args, **kwargs):
         self.ar_stack.pop()
         self.temp_set = self.call_stack.pop()
+        self.pop(1)
 
     """return"""
     def remove_ar(self, *args, **kwargs):
         self.add_pc(1)
-        self.pb[self.pc - 1] = "ASSIGN", _m(self.top_sp, "@"), _m(self.ss_i(0))
+        self.pb[self.pc - 1] = "ASSIGN", _m(self.ss_i(0)), _m(self.top_sp, "@")
         self.pop(1)
         self.add_pc(1)
         self.pb[self.pc - 1] = "ADD", _m(self.top_sp, "@"), _m(self.get_top_ar().return_cnt * 4, "#"), _m(self.top_sp)
@@ -465,3 +465,11 @@ class CodeGenerator:
             for i in entry[1]:
                 self.pb[i] = "JP", _m(self.pc)
         self.while_switch_stack.pop()
+
+
+    def call_main(self, *args, **kwargs):
+        self.pb[self.ss_i(0)] = "JP", _m(self.pc)
+        self.pop(1)
+        self.push("main")
+        self.call_start(*args, **kwargs)
+        self.call_end(*args, **kwargs)
