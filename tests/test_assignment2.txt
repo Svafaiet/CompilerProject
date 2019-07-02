@@ -1,0 +1,9 @@
+int b;
+void main void() {
+    int a;
+    int c;
+    a = 4;
+    b = 3;
+    c = a + b;
+    output(c);
+}

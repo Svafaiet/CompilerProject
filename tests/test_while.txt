@@ -1,0 +1,11 @@
+int a;
+void main(void){
+    int b;
+    int u;
+    a = 6;
+    b = 10;
+    while (a > 0) {
+        output(b);
+        a = a - 1;
+    }
+}

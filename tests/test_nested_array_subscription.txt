@@ -1,0 +1,19 @@
+int a;
+void main(void){
+    int b[10];
+    int c[12]
+    int u;
+    a = 6;
+    b[2] = 3;
+    c[b[2]] = 4;
+    while (a > 0) {
+        if a < 3 {
+            a = a - 1;
+            continue;
+        }
+        else {
+            output(c[3]);
+            a = a - 1;
+        }
+    }
+}

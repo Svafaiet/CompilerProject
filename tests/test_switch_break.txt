@@ -1,0 +1,23 @@
+int a;
+void main(void){
+    int b;
+    int u;
+    a = 2;
+    switch (a) {
+        case 2:
+            b = b + 1;
+        case 3:
+            b = b + 2;
+        case 4: {
+            u = 2 + 3 * a;
+            output(u);
+            b = b + 3;
+            break;
+        }
+        case 5:
+            b = b + 3;
+        default:
+            b = b - -1;
+    }
+    output(b);
+}
