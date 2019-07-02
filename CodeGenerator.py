@@ -161,6 +161,13 @@ class CodeGenerator:
         _, i = self.semantics.get_sym_table_entry(func_name)
         return list(filter(lambda x: (x.attributes['dec-type'] != "function"), self.semantics.symbol_table[i:]))
 
+    def get_last_scope_vars(self):
+        """
+        returns list of not function entries in last_scop
+        :return:
+        """
+        return list(filter(lambda x: (x.attributes['dec-type'] != "function"), self.semantics.symbol_table[self.semantics.stack[-1][0]:]))
+
     def reset_temp(self):
         """
         with assumption of fp not being in fp, put all Reg_size in SP
@@ -354,7 +361,7 @@ class CodeGenerator:
         entry = self.semantics.get_sym_table_entry(self.ss_i(1))[0]
         ar = entry.attributes["ar"]
         self.add_pc(1)
-        self.pb[self.pc - 1] = "SUB", _m(self.top_sp), _m(4 * (ar.pre_val_size + ar.params), "#"), _m(self.top_sp, "@")
+        self.pb[self.pc - 1] = "SUB", _m(self.top_sp), _m(4 * (ar.pre_var_size() + ar.params), "#"), _m(self.top_sp, "@")
         self.add_pc(1)
         self.pb[self.pc - 1] = "JP", _m(entry.attributes["ar"].func_line)
         self.pb[self.ss_i(0)] = "ASSIGN", _m(self.pc, "#"), _m(self.top_sp, "@")
@@ -417,7 +424,7 @@ class CodeGenerator:
     def start_scope(self):
         pass
 
-    def end_scope(self, *args, **kwargs):
+    def end_dec(self, *args, **kwargs):
         ar = self.ar_stack[-1]
         ar.arr_memory(self)
 

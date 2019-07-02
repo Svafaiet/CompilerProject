@@ -22,10 +22,10 @@ def a(action_type):
 
 
 compressed_grammar = [
-    ["program", ["declaration-list", s("CHECK_MAIN"), a("END_LOCAL"), a("END_AND_USE_GLOBAL"), Token(CTokenType.EOF)]],
+    ["program", ["declaration-list", s("CHECK_MAIN"), a("END_DEC"), a("END_AND_USE_GLOBAL"), Token(CTokenType.EOF)]],
     ["declaration-list", ["declaration-list", "declaration"], epsilon],
     ["declaration", ["type-specifier", Token(CTokenType.ID), s("DECLARE_NAME"), a("PUSH_TOK"), "var-func-declaration"]],
-    ["var-func-declaration", ["var-declaration", s("CHECK_VAR_TYPE"), a("ADD_LOCAL"), a("POP_SS")],
+    ["var-func-declaration", ["var-declaration", s("CHECK_VAR_TYPE"), a("POP_SS")],
      ["fun-declaration"]],
     ["var-declaration",
      [cs(";")],
@@ -46,7 +46,7 @@ compressed_grammar = [
       cs("]")],
      [Token(CTokenType.ID), s("DECLARE_NAME"), s("CHECK_VAR_TYPE"), a("ADD_PARAM"), ]],
     ["compound-stmt",
-     [cs("{"), s("SCOPE_START"), "declaration-list", a("END_LOCAL"), "statement-list", a("END_FUNCTION"), s("SCOPE_END"),
+     [cs("{"), s("SCOPE_START"), "declaration-list", a("END_DEC"), "statement-list", a("END_FUNCTION"), s("SCOPE_END"),
       cs("}")]],
     ["statement-list", ["statement-list", "statement"], epsilon],
     ["statement", ["expression-stmt", ], ["compound-stmt", ], ["selection-stmt", ], ["iteration-stmt", ],

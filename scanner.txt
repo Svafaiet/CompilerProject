@@ -9,9 +9,10 @@ void g(int a){
 */
 void main(void){
     //g(2);
-    //int a;
+    int a;
     //a = 1;
     //output(a);
+    /*
     if (1) {
         int a;
         output(2);
@@ -22,5 +23,6 @@ void main(void){
        }
         output(1);
     }
+    */
     return;
 }
