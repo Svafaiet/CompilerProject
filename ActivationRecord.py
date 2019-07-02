@@ -28,10 +28,12 @@ class ActivationRecord:
 
     def arr_memory(self, cg):
         """set arr and fp"""
+        cg.add_pc(1)
+        cg.pb[cg.pc - 1] = "ADD", _m(cg.top_sp), _m(4 * self.locals, "#"), _m(cg.top_sp)
         table = cg.get_int_vars(self.func_name)
         fp = cg.get_temp()
         cg.add_pc(1)
-        cg.pb[cg.pc - 1] = "SUB", _m(cg.top_sp), _m(self.pre_var_size() + self.variable_size()), _m(fp)
+        cg.pb[cg.pc - 1] = "SUB", _m(cg.top_sp), _m(4 * (self.pre_var_size() + self.variable_size()), "#"), _m(fp)
         t = cg.get_temp()
         for i, entry in enumerate(table):
             if 'var-size' in entry.attributes:
