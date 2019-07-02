@@ -66,7 +66,7 @@ compressed_grammar = [ #TODO FIX CHECK MAIN
       cs(")"),
       s("SCOPE_START"), "statement", a("WHILE_SAVE"), s("SCOPE_END"), a("FILL_BREAKS")]],
     ["return-stmt", [ck("return"), a("PUSH_DUMMY"), a("REMOVE_AR"), cs(";"), s("CHECK_VOID_FUNCTION"), a("SET_RETURN")],
-     [ck("return"), a("REMOVE_AR"), s("BEGIN_EXPRESSION_CHECK"), "expression", s("CHECK_NOT_VOID"),
+     [ck("return"), s("BEGIN_EXPRESSION_CHECK"), "expression", s("CHECK_NOT_VOID"), a("REMOVE_AR"),
       s("END_SECONDARY_EXPRESSION_CHECK"), a("SET_RETURN"), cs(";")]],
     ["switch-stmt",
      [ck("switch"), a("JP_SAVE"), cs("("), s("BEGIN_EXPRESSION_CHECK"), "expression", s("END_EXPRESSION_CHECK"), cs(")"),

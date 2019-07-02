@@ -163,8 +163,8 @@ class CodeGenerator:
         self.pb[self.pc - 2] = "LT", _m(CodeGenerator.INIT_MEMORY_VALUE + CodeGenerator.REGISTER_SIZE, "#"), _m(i), _m(
             t)
         self.pb[self.pc - 1] = "JPF", _m(t), _m(self.pc - 5)
-        self.pb[self.pc - 1] = "ASSIGN", _m(fp), _m(self.top_sp, "@")
         self.add_pc(1)
+        self.pb[self.pc - 1] = "ASSIGN", _m(fp), _m(self.top_sp, "@")
         self.free_temp(fp)
         self.free_temp(t)
         self.free_temp(j)
@@ -187,7 +187,8 @@ class CodeGenerator:
             print(e)
 
     def pop_ss(self, *args, **kwargs):
-        self.pop(1)
+        t = self.pop(1)
+        self.free_temp(t)
 
     def push_tok(self, current_node, **kwargs):
         self.push(current_node.token_value)
@@ -316,11 +317,17 @@ class CodeGenerator:
         self.use_ar()
 
     def call_end(self, *args, **kwargs):
-        ar = self.semantics.get_sym_table_entry(self.ss_i(1))[0].attributes["ar"]
+        entry = self.semantics.get_sym_table_entry(self.ss_i(1))[0]
         self.add_pc(1)
-        self.pb[self.pc - 1] = "JP", _m(ar.func_line)
+        self.pb[self.pc - 1] = "JP", _m(entry.attributes["ar"].func_line)
         self.pb[self.ss_i(0)] = "ASSIGN", _m(self.pc, "#"), _m(self.top_sp, "@")
         self.pop(2)
+        if entry.type != "void":
+            t = self.get_temp()
+            self.add_pc(2)
+            self.pb[self.pc - 2] = "ADD", _m(entry.attributes["ar"].return_cnt * 4, "#"), _m(self.top_sp), _m(t)
+            self.pb[self.pc - 1] = "ASSIGN", _m(t, "@"), _m(t)
+            self.push(t)
 
     def call_arg(self, *args, **kwargs):
         self.add_pc(2)
@@ -380,8 +387,8 @@ class CodeGenerator:
     def set_return(self, *args, **kwargs):
         t = self.get_temp()
         self.add_pc(2)
-        self.pb[self.pc - 3] = "ASSIGN", _m(self.top_sp, "@"), _m(t)
-        self.pb[self.pc - 1] = "SUB", _m(self.top_sp), _m(4 + 4 * self.get_top_ar().return_cnr, "#"), _m(self.top_sp)
+        self.pb[self.pc - 2] = "ASSIGN", _m(self.top_sp, "@"), _m(t)
+        self.pb[self.pc - 1] = "SUB", _m(self.top_sp), _m(4 + 4 * self.get_top_ar().return_cnt, "#"), _m(self.top_sp)
         self.free_temp(t)  # danger
         self.add_pc(1)
         self.pb[self.pc - 1] = "JP", _m(t, "@")
