@@ -189,7 +189,7 @@ class CodeGenerator:
 
     def pop_ss(self, *args, **kwargs):
         t = self.pop(1)
-        self.free_temp(t)
+        # self.free_temp(t)
 
     def push_tok(self, current_node, **kwargs):
         self.push(current_node.token_value)
