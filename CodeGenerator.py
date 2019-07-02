@@ -55,8 +55,8 @@ class CodeGenerator:
         self.pb[self.ss_i(0)] = "ASSIGN", _m(self.pc, "#"), _m(self.top_sp, "@")
 
     def make_output(self):
-        self.push("__output__")
-        output_ar = ActivationRecord("__output__", -2)
+        self.push("output")
+        output_ar = ActivationRecord("output", -2)
         self.semantics.set_ar(output_ar)
         self.ar_stack.append(output_ar)
         self.add_param()
