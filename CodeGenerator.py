@@ -56,7 +56,7 @@ class CodeGenerator:
 
     def make_output(self):
         self.push("output")
-        output_ar = ActivationRecord("output", -2)
+        output_ar = ActivationRecord("output", self.pc)
         self.semantics.set_ar(output_ar)
         self.ar_stack.append(output_ar)
         self.add_param()
