@@ -1,3 +1,5 @@
-int f(int a){
-    return f(f(a));
+void main(void){
+    int a[3];
+    a[2] = 1;
+    a[a[2]] = 0;
 }

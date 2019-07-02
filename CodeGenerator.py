@@ -42,7 +42,7 @@ class CodeGenerator:
         self.pb[self.pc - 1] = "ASSIGN", _m(CodeGenerator.REGISTER_SIZE + CodeGenerator.INIT_MEMORY_VALUE, "#"), _m(
             self.top_sp)
         self.init_global_func()
-        self.save()  # control_link at end of
+        # self.save()  # control_link at end of
         self.save()  # for j main
         self.make_output()
 
@@ -189,7 +189,7 @@ class CodeGenerator:
 
     def pop_ss(self, *args, **kwargs):
         t = self.pop(1)
-        self.free_temp(t)
+        # self.free_temp(t)
 
     def push_tok(self, current_node, **kwargs):
         self.push(current_node.token_value)
@@ -284,10 +284,10 @@ class CodeGenerator:
         self.pb[self.pc - 1] = "JP", _m(self.ss_i(2))
         self.pop(3)
 
-    def switch_start(self):
-        self.push(self.pc)
-        self.add_pc(1)
-        # todo
+    # def switch_start(self):
+    #     self.push(self.pc)
+    #     self.add_pc(1)
+    #     # todo
 
     def calc_arr(self, *args, **kwargs):
         self.add_pc(2)
@@ -465,3 +465,10 @@ class CodeGenerator:
             for i in entry[1]:
                 self.pb[i] = "JP", _m(self.pc)
         self.while_switch_stack.pop()
+
+
+    def call_main(self, *args, **kwargs):
+        self.pb[self.ss_i(0)] = "JP", _m(self.pc)
+        self.call_start(*args, **kwargs)
+        self.call_end(*args, **kwargs)
+
