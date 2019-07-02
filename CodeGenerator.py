@@ -9,6 +9,10 @@ def _m(value, access_type=""):
 
 class CodeGenerator:
     INIT_PC_VALUE = 0
+    RESERVED_REGISTER_LOCATION_1 = 484
+    RESERVED_REGISTER_LOCATION_2 = 488
+    RESERVED_REGISTER_LOCATION_3 = 492
+    RESERVED_REGISTER_LOCATION_4 = 496
     INIT_MEMORY_VALUE = 500
     REGISTER_SIZE = 200
 
@@ -62,8 +66,20 @@ class CodeGenerator:
 
     def end_and_use_global(self, *args, **kwargs):
         self.call_main()
-        self.end_function()
+        self.push_dummy()
+        t = self.get_temp()
+        self.add_pc(2)
+        self.pb[self.pc - 2] = "ASSIGN", _m(self.top_sp, "@"), _m(t)
+        if self.ss_i(0) == 0:
+            self.pb[self.pc - 1] = "ASSIGN", _m(0, "#"), _m(t, "@")
+        else:
+            self.pb[self.pc - 1] = "ASSIGN", _m(self.ss_i(0)), _m(t, "@")
+        # self.free_temp(t)
+        self.pop(1)
         self.add_pc(1)
+        self.pb[self.pc - 1] = "ADD", _m(self.top_sp, "@"), _m(self.get_top_ar().return_cnt * 4, "#"), _m(self.top_sp)
+        self.set_return()
+        self.end_function()
         self.pb[self.ss_i(0)] = "JP", _m(self.pc)
         self.pop(1)
         self.call_global()
@@ -176,14 +192,14 @@ class CodeGenerator:
         with assumption of fp not being in fp, put all Reg_size in SP
         """
 
-        i = self.get_temp()
-        j = self.get_temp()
-        t = self.get_temp()
-        fp = self.get_temp()
+        i = CodeGenerator.RESERVED_REGISTER_LOCATION_1
+        j = CodeGenerator.RESERVED_REGISTER_LOCATION_2
+        t = CodeGenerator.RESERVED_REGISTER_LOCATION_3
+        fp = CodeGenerator.RESERVED_REGISTER_LOCATION_4
         self.add_pc(1)
         self.pb[self.pc - 1] = "ASSIGN", _m(self.top_sp, "@"), _m(fp)
         self.add_pc(7)
-        self.pb[self.pc - 7] = "ADD", _m(self.top_sp), _m(+ 4, "#"), _m(j)
+        self.pb[self.pc - 7] = "ADD", _m(self.top_sp), _m(4, "#"), _m(j)
         self.pb[self.pc - 6] = "ASSIGN", _m(CodeGenerator.INIT_MEMORY_VALUE + 4, "#"), _m(i)
         self.pb[self.pc - 5] = "ADD", _m(i), _m(CodeGenerator.INIT_MEMORY_VALUE + 4, "#"), _m(i)
         self.pb[self.pc - 4] = "ASSIGN", _m(i), _m(self.top_sp, "@")
@@ -193,10 +209,6 @@ class CodeGenerator:
         self.pb[self.pc - 1] = "JPF", _m(t), _m(self.pc - 5)
         self.add_pc(1)
         self.pb[self.pc - 1] = "ASSIGN", _m(fp), _m(self.top_sp, "@")
-        self.free_temp(fp)
-        self.free_temp(t)
-        self.free_temp(j)
-        self.free_temp(i)
 
     def handle_action_symbol(self, action_symbol, **kwargs):
         current_node = kwargs.pop('current_node', None)
@@ -228,8 +240,7 @@ class CodeGenerator:
         self.push(t)
 
     def push_dummy(self, *args, **kwargs):
-        t = self.get_temp()
-        self.push(t)
+        self.push(0)
 
     def pid(self, *args, **kwargs):
         """
@@ -381,15 +392,15 @@ class CodeGenerator:
         self.pb[self.pc - 7] = "ADD", _m(self.top_sp), _m(4, "#"), _m(after_sp_ptr)
         self.pb[self.pc - 6] = "SUB", _m(self.top_sp), _m(4 + 4 * ar.return_cnt, "#"), _m(self.top_sp)
         if prev_ar:
-            al_loc = ActivationRecord.control_link + prev_ar.return_cnt
+            al_loc =  prev_ar.return_cnt
             self.pb[self.pc - 5] = "ADD", _m(al_loc * 4, "#"), _m(self.top_sp, "@"), _m(after_sp_ptr, "@")
         else:
-            al_loc = ActivationRecord.control_link + 1
+            al_loc = 1
             self.pb[self.pc - 5] = "ADD", _m(al_loc * 4, "#"), _m(CodeGenerator.INIT_MEMORY_VALUE), _m(after_sp_ptr, "@")
         self.pb[self.pc - 4] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
         al_size = len(self.get_int_vars("__global__")) - len(self.get_int_vars(self.ss_i(0)))
         self.pb[self.pc - 3] = "ASSIGN", _m(al_size, "#"), _m(after_sp_ptr, "@")
-        self.pb[self.pc - 2] = "ADD", _m(after_sp_ptr, "@"), _m(4 * (ar.variable_size() + 1), "#"), _m(after_sp_ptr)
+        self.pb[self.pc - 2] = "ADD", _m(after_sp_ptr), _m(4 * (ar.locals + 1), "#"), _m(after_sp_ptr)
         # self.pb[self.pc - 2] = "PRINT", _m(self.top_sp)
 
         # self.pb[self.pc - 2] = "ASSIGN", _m(self.top_sp), _m(after_sp_ptr, "@")
@@ -419,20 +430,26 @@ class CodeGenerator:
     """return"""
 
     def remove_ar(self, *args, **kwargs):
-        self.add_pc(1)
-        self.pb[self.pc - 1] = "ASSIGN", _m(self.ss_i(0)), _m(self.top_sp, "@")
-        self.pop(1)
-        self.add_pc(1)
-        self.pb[self.pc - 1] = "ADD", _m(self.top_sp, "@"), _m(self.get_top_ar().return_cnt * 4, "#"), _m(self.top_sp)
-        self.retrieve_temp()
-        pass
-
-    def set_return(self, *args, **kwargs):
         t = self.get_temp()
         self.add_pc(2)
         self.pb[self.pc - 2] = "ASSIGN", _m(self.top_sp, "@"), _m(t)
+        if self.ss_i(0) == 0:
+            self.pb[self.pc - 1] = "ASSIGN", _m(0, "#"), _m(t, "@")
+        else:
+            self.pb[self.pc - 1] = "ASSIGN", _m(self.ss_i(0)), _m(t, "@")
+        # self.free_temp(t)
+        self.pop(1)
+        self.retrieve_temp()
+        self.add_pc(1)
+        self.pb[self.pc - 1] = "ADD", _m(self.top_sp, "@"), _m(self.get_top_ar().return_cnt * 4, "#"), _m(self.top_sp)
+        pass
+
+    def set_return(self, *args, **kwargs):
+        t = CodeGenerator.RESERVED_REGISTER_LOCATION_1
+        self.add_pc(2)
+        self.pb[self.pc - 2] = "ASSIGN", _m(self.top_sp, "@"), _m(t)
         self.pb[self.pc - 1] = "SUB", _m(self.top_sp), _m(4 + 4 * self.get_top_ar().return_cnt, "#"), _m(self.top_sp)
-        self.free_temp(t)  # danger
+        # self.free_temp(t)  # danger
         self.add_pc(1)
         self.pb[self.pc - 1] = "JP", _m(t, "@")
 

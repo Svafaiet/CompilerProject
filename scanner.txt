@@ -1,4 +1,18 @@
-void main(void){
+
+void f(void){
+    output(1);
+    return;
+}
+void g(void){
     output(2);
+    return;
+}
+
+void main(void){
+    g();
+    f();
+    //int a;
+    //a = 1;
+    //output(a);
     return;
 }

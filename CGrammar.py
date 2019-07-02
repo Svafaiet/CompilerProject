@@ -127,7 +127,7 @@ compressed_grammar = [
      ],
     ["factor-left",
      [cs("("), "expression", cs(")")],
-     [Token(CTokenType.NUM), s("ADD_VAR_TO_EXPRESSION"), a("PUSH_NUM")] #todo check push tok
+     [Token(CTokenType.NUM), s("ADD_VAR_TO_EXPRESSION"), a("PUSH_NUM")]
      ],
     ["var-call", ["var-left"], ["call"]],
     ["call", [s("CHECK_EXPRESSION_FUNC"), s("CHECK_FUNC_ARGS_BEGIN"), s("CHECK_FUNC"), a("CALL_START"), cs("("), "args",
