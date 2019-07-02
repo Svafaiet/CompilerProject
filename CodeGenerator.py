@@ -52,7 +52,6 @@ class CodeGenerator:
         self.ar_stack.append(global_ar)
         self.use_ar(0)
 
-
     def make_output(self):
         pass
 
@@ -95,7 +94,7 @@ class CodeGenerator:
 
     def add_break(self, *args, **kwargs):
         self.add_pc(1)
-        self.while_switch_stack[len(self.while_switch_stack) - 1][1].append(self.pc - 1)
+        self.while_switch_stack[-1][1].append(self.pc - 1)
 
     def get_top_ar(self):
         return self.ar_stack[-1]
@@ -330,9 +329,13 @@ class CodeGenerator:
         self.semantics.set_ar(ar)
         self.temp_set = set()
 
-    def end_function(self, *args, **kwargs):
-        ar = self.ar_stack.pop()
+    def end_local(self, *args, **kwargs):
+        ar = self.ar_stack[-1]
         ar.arr_memory(self)
+
+    def end_function(self, *args, **kwargs):
+        self.ar_stack.pop()
+
         # self.get_top_ar().after_local()
         # self.pb[self.ss_i(0)] = "ADD", _m(self.top_sp), _m(len(self.get_top_ar().temps), "#"), _m(self.top_sp)
         # self.pop(1)
@@ -433,3 +436,10 @@ class CodeGenerator:
                         inst += ", {}{}".format(operand.access_type, operand.value)
                 inst += ")\n"
                 f.write(inst)
+
+    def fill_breaks(self, *args, **kwargs):
+        entry = self.while_switch_stack[-1]
+        if len(entry[1]) > 0:
+            for i in entry[1]:
+                self.pb[i] = "JP", _m(self.pc)
+        self.while_switch_stack.pop()

@@ -1,9 +1,18 @@
-void f(void) {
-    //int c;
-    //int a[10];
-    //int b[20];
-    //a[2];
-    //a[1] = 2;
-    //f(1);
-    return;
+int a;
+void main(void){
+    a = 3;
+    int b;
+    switch (a) {
+        case 2:
+            b = b + 1;
+        case 3:
+            b = b + 2;
+        case 4:
+        {
+            u = 5;
+            b = u * -123;
+            break;}
+        default:
+            b = b - -1;
+    }
 }
