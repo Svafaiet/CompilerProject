@@ -72,7 +72,7 @@ compressed_grammar = [ #TODO FIX CHECK MAIN
      [ck("switch"), a("JP_SAVE"), cs("("), s("BEGIN_EXPRESSION_CHECK"), "expression", s("END_EXPRESSION_CHECK"), cs(")"),
       cs("{"), s("SCOPE_START"), "case-stmts", "default-stmt", s("SCOPE_END"), cs("}"), a("END_SWITCH")]],
     ["case-stmts", ["case-stmts", "case-stmt"], epsilon, ],
-    ["case-stmt", [ck("case"), Token(CTokenType.NUM), a("COMP_SAVE"), cs(":"), "statement-list", a("BACK_PATCH")]],
+    ["case-stmt", [ck("case"), Token(CTokenType.NUM), a("PUSH_NUM"), a("COMP_SAVE"), cs(":"), "statement-list", a("BACK_PATCH")]],
     ["default-stmt",
      [ck("default"), cs(":"), "statement-list"],
      epsilon
