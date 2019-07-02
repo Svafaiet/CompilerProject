@@ -57,11 +57,12 @@ class CodeGenerator:
     def make_output(self):
         self.push("output")
         output_ar = ActivationRecord("output", self.pc)
+        output_ar.arr_memory(self)
         self.semantics.set_ar(output_ar)
         self.ar_stack.append(output_ar)
         self.add_param()
-        self.use_ar()
-        self.pb[self.ss_i(0)] = "ASSIGN", _m(self.pc, "#"), _m(self.top_sp, "@")
+        #todo maybe uncomment this
+        # self.pb[self.ss_i(0)] = "ASSIGN", _m(self.pc, "#"), _m(self.top_sp, "@")
         self.add_pc(1)
         # todo  fix fp
         self.pb[self.pc - 1] = "PRINT", _m(self.top_sp, "@")
