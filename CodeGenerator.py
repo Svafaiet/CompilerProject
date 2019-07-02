@@ -125,6 +125,9 @@ class CodeGenerator:
         """
         i = self.get_temp()
         t = self.get_temp()
+        fp = self.get_temp()
+        self.add_pc(1)
+        self.pb[self.pc - 1] = "ASSIGN", _m(self.top_sp, "@"), _m(fp)
         self.add_pc(6)
         self.pb[self.pc - 6] = "ASSIGN", _m(CodeGenerator.INIT_MEMORY_VALUE, "#"), _m(i)
         self.pb[self.pc - 5] = "ADD", _m(i), _m(4, "#"), _m(i)
@@ -133,6 +136,9 @@ class CodeGenerator:
         self.pb[self.pc - 2] = "LT", _m(CodeGenerator.INIT_MEMORY_VALUE + CodeGenerator.REGISTER_SIZE, "#"), _m(i), _m(
             t)
         self.pb[self.pc - 1] = "JPF", _m(t), _m(self.pc - 5)
+        self.add_pc(1)
+        self.pb[self.pc - 1] = "ASSIGN", _m(fp), _m(self.top_sp, "@")
+        self.free_temp(fp)
         self.free_temp(t)
         self.free_temp(i)
         # self.pb[]
@@ -145,8 +151,11 @@ class CodeGenerator:
         i = self.get_temp()
         j = self.get_temp()
         t = self.get_temp()
-        self.add_pc(6)
-        self.pb[self.pc - 6] = "ADD", _m(self.top_sp), _m(+ 4, "#"), _m(j)
+        fp = self.get_temp()
+        self.add_pc(1)
+        self.pb[self.pc - 1] = "ASSIGN", _m(self.top_sp, "@"), _m(fp)
+        self.add_pc(7)
+        self.pb[self.pc - 7] = "ADD", _m(self.top_sp), _m(+ 4, "#"), _m(j)
         self.pb[self.pc - 6] = "ASSIGN", _m(CodeGenerator.INIT_MEMORY_VALUE + 4, "#"), _m(i)
         self.pb[self.pc - 5] = "ADD", _m(i), _m(CodeGenerator.INIT_MEMORY_VALUE + 4, "#"), _m(i)
         self.pb[self.pc - 4] = "ASSIGN", _m(i), _m(self.top_sp, "@")
@@ -154,6 +163,9 @@ class CodeGenerator:
         self.pb[self.pc - 2] = "LT", _m(CodeGenerator.INIT_MEMORY_VALUE + CodeGenerator.REGISTER_SIZE, "#"), _m(i), _m(
             t)
         self.pb[self.pc - 1] = "JPF", _m(t), _m(self.pc - 5)
+        self.pb[self.pc - 1] = "ASSIGN", _m(fp), _m(self.top_sp, "@")
+        self.add_pc(1)
+        self.free_temp(fp)
         self.free_temp(t)
         self.free_temp(j)
         self.free_temp(i)
@@ -303,12 +315,10 @@ class CodeGenerator:
 
     def call_end(self, *args, **kwargs):
         ar = self.semantics.get_sym_table_entry(self.ss_i(1))[0].attributes["ar"]
-        self.reset_temp()
         self.add_pc(1)
         self.pb[self.pc - 1] = "JP", _m(ar.func_line)
         self.pb[self.ss_i(0)] = "ASSIGN", _m(self.pc, "#"), _m(self.top_sp, "@")
         self.pop(2)
-        self.retrieve_temp()
 
     def call_arg(self, *args, **kwargs):
         self.add_pc(2)
@@ -322,12 +332,15 @@ class CodeGenerator:
         # 8 pc passed, one poped
         entry, _ = self.semantics.get_sym_table_entry(self.ss_i(0))
         ar = entry.attributes['ar']
-        self.add_pc(8)
+        prev_ar = self.get_top_ar()
+        self.add_pc(9)
         after_sp_ptr = self.get_temp()
-        self.pb[self.pc - 8] = "ADD", _m(self.top_sp), _m(4, "#"), _m(self.top_sp)
+        self.pb[self.pc - 10] = "ADD", _m(self.top_sp), _m(4 * ar.return_cnt, "#"), _m(self.top_sp)
+        self.pb[self.pc - 9] = "ADD", _m(self.top_sp), _m(4, "#"), _m(self.top_sp)
         # self.pb[self.pc - 7] = "ASSIGN", _m(control_link, "#"), _m(self.top_sp, "@")
-        self.push(self.pc - 7)
-        self.pb[self.pc - 6] = "ADD", _m(self.top_sp), _m(4, "#"), _m(after_sp_ptr)
+        self.push(self.pc - 8)
+        self.pb[self.pc - 7] = "ADD", _m(self.top_sp), _m(4, "#"), _m(after_sp_ptr)
+        self.pb[self.pc - 6] = "SUB", _m(self.top_sp), _m(4 + 4 * ar.return_cnt, "#"), _m(self.top_sp)
         al_loc = ActivationRecord.control_link
         self.pb[self.pc - 5] = "ADD", _m(al_loc * 4, "#"), _m(self.top_sp), _m(after_sp_ptr, "@")
         self.pb[self.pc - 4] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
@@ -340,12 +353,13 @@ class CodeGenerator:
         ar = ActivationRecord(self.ss_i(0), self.pc)
         self.ar_stack.append(ar)
         self.semantics.set_ar(ar)
-        self.call_stack.append(self.temp_set)
-        self.temp_set = set()
 
     def end_local(self, *args, **kwargs):
         ar = self.ar_stack[-1]
         ar.arr_memory(self)
+        self.reset_temp()
+        self.call_stack.append(self.temp_set)
+        self.temp_set = set()
 
     def end_function(self, *args, **kwargs):
         self.ar_stack.pop()
@@ -353,6 +367,7 @@ class CodeGenerator:
 
     """return"""
     def remove_ar(self, *args, **kwargs):
+        self.retrieve_temp()
         self.add_pc(1)
         self.pb[self.pc - 1] = "ASSIGN", _m(self.top_sp, "@"), _m(self.top_sp)
         pass
