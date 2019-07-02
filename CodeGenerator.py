@@ -383,6 +383,7 @@ class CodeGenerator:
         :param kwargs:
         :return:
         """
+        self.while_switch_stack.append(("switch", []))
         self.add_pc(2)
         self.pb[self.pc - 2] = "JP", _m(self.pc)
         self.push(self.pc - 1)
@@ -396,8 +397,8 @@ class CodeGenerator:
         :param kwargs:
         :return:
         """
-        self.add_pc(2)
         t = self.get_temp()
+        self.add_pc(2)
         self.pb[self.pc - 2] = "EQ", _m(self.ss_i(0)), _m(self.ss_i(1)), _m(t)
         self.pop(1)
         self.push(t)
@@ -422,6 +423,7 @@ class CodeGenerator:
         """
         self.pb[self.ss_i(1)] = "JP", _m(self.pc)
         self.pop(2)
+        self.fill_breaks(*args, **kwargs)
 
     def print_code(self):
         with open(file=self.file_out, mode="w") as f:

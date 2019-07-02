@@ -49,7 +49,7 @@ class ActivationRecord:
         t = cg.get_temp()
         t2 = cg.get_temp()
         al = cg.get_temp()
-        cg.add_pc(9)
+        cg.add_pc(10)
         cg.pb[cg.pc - 10] = "ADD", _m(al_loc * 4, "#"), _m(cg.top_sp), _m(al)
         cg.pb[cg.pc - 9] = "JP", _m(cg.pc - 7)
         cg.pb[cg.pc - 8] = "ASSIGN", _m(al, "@"), _m(al)
