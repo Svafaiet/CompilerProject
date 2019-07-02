@@ -54,9 +54,19 @@ class CodeGenerator:
         self.use_ar()
         self.pb[self.ss_i(0)] = "ASSIGN", _m(self.pc, "#"), _m(self.top_sp, "@")
 
-
     def make_output(self):
-        pass
+        self.push("__output__")
+        output_ar = ActivationRecord("__output__", -2)
+        self.semantics.set_ar(output_ar)
+        self.ar_stack.append(output_ar)
+        self.add_param()
+        self.use_ar()
+        self.pb[self.ss_i(0)] = "ASSIGN", _m(self.pc, "#"), _m(self.top_sp, "@")
+        self.pc += 1
+        # todo  fix fp
+        self.pb[self.pc - 1] = "PRINT", _m(self.top_sp, "@")
+        self.end_local()
+        self.end_function()
 
     def add_pc(self, offset):
         self.pb += [None] * offset

@@ -23,6 +23,10 @@ class Semantics:
         self.symbol_table[-1].attributes = {"dec-type": "function"}
         self.stack.append([0, "__global__"])
 
+        self.symbol_table.append(SymbolTableRecord("void", "__output__"))
+        self.symbol_table[-1].attributes = {"dec-type": "function"}
+        self.stack.append([0, "__output__"])
+
     def get_sym_table_funcless_entry(self, name):
         func_less_list = list(filter(lambda x: (x.attributes['dec-type'] != "function"), self.symbol_table[::-1]))
         for i, entry in enumerate(func_less_list):
