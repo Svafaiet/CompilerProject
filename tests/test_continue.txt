@@ -1,0 +1,17 @@
+int a;
+void main(void){
+    int b;
+    int u;
+    a = 6;
+    b = 10;
+    while (a > 0) {
+        if a < 3 {
+            a = a - 1;
+            continue;
+        }
+        else {
+            output(b - a);
+            a = a - 1;
+        }
+    }
+}
