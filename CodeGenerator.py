@@ -294,12 +294,10 @@ class CodeGenerator:
     def call_end(self, *args, **kwargs):
         ar = self.semantics.get_sym_table_entry(self.ss_i(1))[0].attributes["ar"]
         self.reset_temp()
-        self.temp_set = set()
         self.add_pc(1)
         self.pb[self.pc - 1] = "JP", _m(ar.func_line)
         self.pb[self.ss_i(0)] = "ASSIGN", _m(self.pc, "#"), _m(self.top_sp, "@")
         self.pop(2)
-        self.temp_set = self.call_stack.pop()
         self.retrieve_temp()
 
     def call_arg(self, *args, **kwargs):
