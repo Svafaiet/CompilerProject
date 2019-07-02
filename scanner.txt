@@ -1,18 +1,3 @@
-int a;
-void main(void){
-    a = 3;
-    int b;
-    switch (a) {
-        case 2:
-            b = b + 1;
-        case 3:
-            b = b + 2;
-        case 4:
-        {
-            u = 5;
-            b = u * -123;
-            break;}
-        default:
-            b = b - -1;
-    }
+int f(int a){
+    return f(f(1));
 }
