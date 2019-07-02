@@ -1,6 +1,4 @@
 void main(void){
-    int a[3];
-    a[2] = 1;
-    a[a[2]] = 0;
+    output(2);
     return;
 }

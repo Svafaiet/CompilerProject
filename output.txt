@@ -1,125 +1,82 @@
-program
-|- declaration-list
- |- declaration-list.new
-  |- declaration
-   |- type-specifier
-    |- void
-   |- CTokenType.ID
-   |- var-func-declaration
-    |- fun-declaration
-     |- (
-     |- params
-      |- params.void
-       |- void
-       |- params.void.void
-     |- )
-     |- compound-stmt
-      |- {
-      |- declaration-list
-       |- declaration-list.new
-        |- declaration
-         |- type-specifier
-          |- int
-         |- CTokenType.ID
-         |- var-func-declaration
-          |- var-declaration
-           |- [
-           |- CTokenType.NUM
-           |- ]
-           |- ;
-        |- declaration-list.new
-         |- __EPSILON__
-      |- statement-list
-       |- statement-list.new
-        |- statement
-         |- expression-stmt
-          |- expression
-           |- CTokenType.ID
-           |- expression-left
-            |- var-left
-             |- [
-             |- expression
-              |- simple-expression
-               |- additive-expression-right
-                |- factor-left
-                 |- CTokenType.NUM
-                |- term-left
-                 |- __EPSILON__
-                |- additive-expression-left
-                 |- __EPSILON__
-               |- simple-expression-left
-                |- __EPSILON__
-             |- ]
-            |- expression-right
-             |- =
-             |- expression
-              |- simple-expression
-               |- additive-expression-right
-                |- factor-left
-                 |- CTokenType.NUM
-                |- term-left
-                 |- __EPSILON__
-                |- additive-expression-left
-                 |- __EPSILON__
-               |- simple-expression-left
-                |- __EPSILON__
-          |- ;
-        |- statement-list.new
-         |- statement
-          |- expression-stmt
-           |- expression
-            |- CTokenType.ID
-            |- expression-left
-             |- var-left
-              |- [
-              |- expression
-               |- CTokenType.ID
-               |- expression-left
-                |- var-left
-                 |- [
-                 |- expression
-                  |- simple-expression
-                   |- additive-expression-right
-                    |- factor-left
-                     |- CTokenType.NUM
-                    |- term-left
-                     |- __EPSILON__
-                    |- additive-expression-left
-                     |- __EPSILON__
-                   |- simple-expression-left
-                    |- __EPSILON__
-                 |- ]
-                |- expression-right
-                 |- term-left
-                  |- __EPSILON__
-                 |- additive-expression-left
-                  |- __EPSILON__
-                 |- simple-expression-left
-                  |- __EPSILON__
-              |- ]
-             |- expression-right
-              |- =
-              |- expression
-               |- simple-expression
-                |- additive-expression-right
-                 |- factor-left
-                  |- CTokenType.NUM
-                 |- term-left
-                  |- __EPSILON__
-                 |- additive-expression-left
-                  |- __EPSILON__
-                |- simple-expression-left
-                 |- __EPSILON__
-           |- ;
-         |- statement-list.new
-          |- statement
-           |- return-stmt
-            |- return
-            |- return-stmt.return
-             |- ;
-          |- statement-list.new
-           |- __EPSILON__
-      |- }
-  |- declaration-list.new
-   |- __EPSILON__
-|- CTokenType.EOF
+0	(ASSIGN, #700, 500)
+1	(JP, 72)
+2	(JP, 49)
+3	(SUB, 500, #4, 500)
+4	(PRINT, @500)
+5	(SUB, 500, #12, 500)
+6	(ASSIGN, @500, 508)
+7	(SUB, 500, #8, 500)
+8	(JP, @508)
+9	(JP, 10)
+10	(ADD, 500, #0, 500)
+11	(SUB, 500, #16, 508)
+12	(ASSIGN, 508, @500)
+13	(ASSIGN, @500, 520)
+14	(ASSIGN, #500, 508)
+15	(ADD, 508, #4, 508)
+16	(ADD, 500, #4, 500)
+17	(ASSIGN, 508, @500)
+18	(LT, #700, 508, 516)
+19	(JPF, 516, 15)
+20	(ASSIGN, 520, @500)
+21	(ADD, 500, #4, 500)
+22	(ADD, 500, #4, 500)
+23	(ASSIGN, #35, @500)
+24	(ADD, 500, #4, 508)
+25	(SUB, 500, #8, 500)
+26	(ADD, #8, @500, @508)
+27	(ADD, 508, #4, 508)
+28	(ASSIGN, #0, @508)
+29	(ADD, @508, #8, 508)
+30	(ASSIGN, 508, 500)
+31	(ASSIGN, #2, 512)
+32	(ASSIGN, 512, @500)
+33	(ADD, 500, #4, 500)
+34	(JP, 3)
+35	(ASSIGN, 516, @500)
+36	(ADD, @500, #4, 500)
+37	(ASSIGN, @500, 532)
+38	(ADD, 500, #4, 524)
+39	(ASSIGN, #504, 520)
+40	(ADD, 520, #504, 520)
+41	(ASSIGN, 520, @500)
+42	(ADD, 500, #4, 500)
+43	(LT, #700, 520, 528)
+44	(JPF, 528, 40)
+45	(ASSIGN, 532, @500)
+46	(ASSIGN, @500, 520)
+47	(SUB, 500, #8, 500)
+48	(JP, @520)
+49	(ADD, 500, #0, 500)
+50	(SUB, 500, #16, 508)
+51	(ASSIGN, 508, @500)
+52	(ASSIGN, @500, 524)
+53	(ASSIGN, #500, 508)
+54	(ADD, 508, #4, 508)
+55	(ADD, 500, #4, 500)
+56	(ASSIGN, 508, @500)
+57	(LT, #700, 508, 520)
+58	(JPF, 520, 54)
+59	(ASSIGN, 524, @500)
+60	(ADD, 500, #4, 500)
+61	(ADD, 500, #4, 500)
+62	(ASSIGN, #71, @500)
+63	(ADD, 500, #4, 508)
+64	(SUB, 500, #8, 500)
+65	(ADD, #8, @500, @508)
+66	(ADD, 508, #4, 508)
+67	(ASSIGN, #0, @508)
+68	(ADD, @508, #4, 508)
+69	(ASSIGN, 508, 500)
+70	(JP, 9)
+72	(ADD, 500, #4, 500)
+73	(ADD, 500, #4, 500)
+74	(ASSIGN, #83, @500)
+75	(ADD, 500, #4, 508)
+76	(SUB, 500, #8, 500)
+77	(ADD, #8, 500, @508)
+78	(ADD, 508, #4, 508)
+79	(ASSIGN, #0, @508)
+80	(ADD, @508, #4, 508)
+81	(ASSIGN, 508, 500)
+82	(JP, 2)

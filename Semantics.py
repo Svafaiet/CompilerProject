@@ -24,7 +24,7 @@ class Semantics:
         self.stack.append([0, "__global__"])
 
         self.symbol_table.append(SymbolTableRecord("void", "output"))
-        self.symbol_table[-1].attributes = {"dec-type": "function"}
+        self.symbol_table[-1].attributes = {"dec-type": "function", "param-len": 1}
         self.stack.append([0, "output"])
 
     def get_sym_table_funcless_entry(self, name):
