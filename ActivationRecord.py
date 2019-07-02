@@ -14,6 +14,7 @@ class ActivationRecord:
         self.func_name = func_name
         self.func_line = func_line
         self.state_machine = 2000
+        self.return_cnt = 1
         self.params = 0
         self.locals = 0
         self.array_stack = []
@@ -47,7 +48,7 @@ class ActivationRecord:
 
     def find_ptr(self, name, cg):
         _, i = cg.semantics.get_sym_table_funcless_entry(name)
-        al_loc = ActivationRecord.control_link
+        al_loc = ActivationRecord.control_link + self.return_cnt
         t = cg.get_temp()
         t2 = cg.get_temp()
         al = cg.get_temp()
@@ -67,7 +68,7 @@ class ActivationRecord:
         return t
 
     def pre_var_size(self):
-        return ActivationRecord.access_link + ActivationRecord.control_link
+        return ActivationRecord.access_link + ActivationRecord.control_link + self.return_cnt
 
     def variable_size(self):
         return self.params + self.locals
