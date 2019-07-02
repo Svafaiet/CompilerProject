@@ -24,36 +24,54 @@ program
       |- statement-list
        |- statement-list.new
         |- statement
-         |- expression-stmt
-          |- expression
-           |- CTokenType.ID
-           |- expression-left
-            |- call
-             |- (
-             |- args
-              |- arg-list
-               |- expression
-                |- CTokenType.ID
-                |- expression-left
-                 |- var-left
-                  |- __EPSILON__
-                 |- expression-right
+         |- return-stmt
+          |- return
+          |- return-stmt.return
+           |- expression
+            |- CTokenType.ID
+            |- expression-left
+             |- call
+              |- (
+              |- args
+               |- arg-list
+                |- expression
+                 |- CTokenType.ID
+                 |- expression-left
+                  |- call
+                   |- (
+                   |- args
+                    |- arg-list
+                     |- expression
+                      |- CTokenType.ID
+                      |- expression-left
+                       |- var-left
+                        |- __EPSILON__
+                       |- expression-right
+                        |- term-left
+                         |- __EPSILON__
+                        |- additive-expression-left
+                         |- __EPSILON__
+                        |- simple-expression-left
+                         |- __EPSILON__
+                     |- arg-list.new
+                      |- __EPSILON__
+                   |- )
                   |- term-left
                    |- __EPSILON__
                   |- additive-expression-left
                    |- __EPSILON__
                   |- simple-expression-left
                    |- __EPSILON__
-               |- arg-list.new
-                |- __EPSILON__
-             |- )
-            |- term-left
-             |- __EPSILON__
-            |- additive-expression-left
-             |- __EPSILON__
-            |- simple-expression-left
-             |- __EPSILON__
-          |- ;
+                |- arg-list.new
+                 |- __EPSILON__
+              |- )
+             |- term-left
+              |- __EPSILON__
+             |- additive-expression-left
+              |- __EPSILON__
+             |- simple-expression-left
+              |- __EPSILON__
+           |- ;
         |- statement-list.new
          |- __EPSILON__
       |- }
