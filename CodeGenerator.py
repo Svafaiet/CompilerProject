@@ -44,7 +44,8 @@ class CodeGenerator:
         :return:
         """
         self.add_pc(2)
-        self.pb[self.pc - 2] = "ASSIGN", _m(CodeGenerator.REGISTER_SIZE + CodeGenerator.INIT_MEMORY_VALUE, "#"), _m(self.top_sp)
+        self.pb[self.pc - 2] = "ASSIGN", _m(CodeGenerator.REGISTER_SIZE + CodeGenerator.INIT_MEMORY_VALUE, "#"), _m(
+            self.top_sp)
         self.pb[self.pc - 1] = "ASSIGN", _m(self.top_sp), _m(self.top_sp, "@")
         self.init_global_func()
         self.make_output()
@@ -81,13 +82,11 @@ class CodeGenerator:
         self.end_function()
         self.call_global()
 
-
-
     def make_output(self):
         self.push("output")
         output_ar = ActivationRecord("output", self.pc + 1)
         self.ar_stack.append(output_ar)
-        #save ignored
+        # save ignored
         self.add_param()
         self.semantics.set_ar(output_ar)
         # output_ar.arr_memory(self)
@@ -161,12 +160,14 @@ class CodeGenerator:
         _, i = self.semantics.get_sym_table_entry(func_name)
         return list(filter(lambda x: (x.attributes['dec-type'] != "function"), self.semantics.symbol_table[i:]))
 
-    def get_last_scope_vars(self):
+    def scope_var_cnt(self):
         """
         returns list of not function entries in last_scop
         :return:
         """
-        return list(filter(lambda x: (x.attributes['dec-type'] != "function"), self.semantics.symbol_table[self.semantics.stack[-1][0]:]))
+        # todo
+        return list(filter(lambda x: (x.attributes['dec-type'] != "function"),
+                           self.semantics.symbol_table[self.semantics.stack[-1][0]:]))
 
     def reset_temp(self):
         """
@@ -362,7 +363,8 @@ class CodeGenerator:
         entry = self.semantics.get_sym_table_entry(self.ss_i(1))[0]
         ar = entry.attributes["ar"]
         self.add_pc(1)
-        self.pb[self.pc - 1] = "SUB", _m(self.top_sp), _m(4 * (ar.pre_var_size() + ar.params), "#"), _m(self.top_sp, "@")
+        self.pb[self.pc - 1] = "SUB", _m(self.top_sp), _m(4 * (ar.pre_var_size() + ar.params), "#"), _m(self.top_sp,
+                                                                                                        "@")
         self.add_pc(1)
         self.pb[self.pc - 1] = "JP", _m(entry.attributes["ar"].func_line)
         self.pb[self.ss_i(0)] = "ASSIGN", _m(self.pc, "#"), _m(self.top_sp, "@")
@@ -398,7 +400,7 @@ class CodeGenerator:
         self.pb[self.pc - 7] = "ADD", _m(self.top_sp), _m(4, "#"), _m(after_sp_ptr)
         self.pb[self.pc - 6] = "SUB", _m(self.top_sp), _m(4 + 4 * ar.return_cnt, "#"), _m(self.top_sp)
         if prev_ar:
-            al_loc =  prev_ar.return_cnt
+            al_loc = prev_ar.return_cnt
             self.pb[self.pc - 5] = "ADD", _m(al_loc * 4, "#"), _m(self.top_sp, "@"), _m(after_sp_ptr, "@")
         else:
             al_loc = 1
@@ -426,8 +428,12 @@ class CodeGenerator:
         ar.arr_memory(self)
 
     def end_scope(self, *args, **kwargs):
-        pass
+        top_ar = self.get_top_ar()
+        top_ar.del_arr(self)
 
+    def scope_size(self):
+        #todo
+        pass
 
     def end_function(self, *args, **kwargs):
         self.ar_stack.pop()

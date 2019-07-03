@@ -34,7 +34,6 @@ class ActivationRecord:
         cg.pb[cg.pc - 1] = "ASSIGN", _m(cg.top_sp, "@"), _m(fp)
         cg.add_pc(1)
         cg.pb[cg.pc - 1] = "ADD", _m(cg.top_sp), _m(4 * self.locals, "#"), _m(cg.top_sp)
-        table = cg.get_last_scope_vars()
         t = cg.get_temp()
         for i, entry in enumerate(table):
             if 'var-size' in entry.attributes:
@@ -42,6 +41,16 @@ class ActivationRecord:
                 cg.pb[cg.pc - 3] = "ADD", _m(cg.top_sp, "@"), _m(4 * (i + self.pre_var_size()), "#"), _m(t)
                 cg.pb[cg.pc - 2] = "ASSIGN", _m(cg.top_sp), _m(t, "@")
                 cg.pb[cg.pc - 1] = "ADD", _m(cg.top_sp), _m(4 * int(entry.attributes['var-size']), '#'), _m(cg.top_sp)
+        cg.add_pc(1)
+        cg.pb[cg.pc - 1] = "ASSIGN", _m(fp), _m(cg.top_sp, "@")
+        cg.free_temp(fp)
+
+    def del_arr(self, cg):
+        fp = cg.get_temp()
+        cg.add_pc(1)
+        cg.pb[cg.pc - 1] = "ASSIGN", _m(cg.top_sp, "@"), _m(fp)
+        cg.add_pc(1)
+        cg.pb[cg.pc - 1] = "ADD", _m(cg.top_sp), _m(4 * cg.scope_size(), "#"), _m(cg.top_sp)
         cg.add_pc(1)
         cg.pb[cg.pc - 1] = "ASSIGN", _m(fp), _m(cg.top_sp, "@")
         cg.free_temp(fp)
