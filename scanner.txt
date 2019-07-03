@@ -5,6 +5,7 @@ void f(void){
 }
 void g(void){
     output(2);
+    f();
     return;
 }
 
@@ -25,7 +26,7 @@ void main(void){
         output(1);
     }
     */
-    f();
+    //f();
     g();
     return;
 }
