@@ -53,7 +53,44 @@ class Semantics:
         :param name:
         :return:
         """
-        pass
+        func_ind = 0
+        var_ind = 0
+        done = False
+        for i, entry in enumerate(self.symbol_table[::-1]):
+            if entry.name == name:
+                var_ind = i
+                for j, ent in self.symbol_table[::-1]:
+                    if ent.attributes['dec-type'] == "function" and self.in_stack(j + 1):
+                        func_ind = j
+                        done = True
+                        break
+            if done:
+                break
+        j = 0
+        for i, item in enumerate(self.stack):
+            if item[0] == func_ind + 1:
+                j = i
+                while self.stack[j][0] - 1 < var_ind and self.stack[j + 1][0] - 1 < var_ind:
+                    j += 1
+                    continue
+        u = self.stack[j][0] - 1
+        size = 0
+        for i, item in enumerate(self.symbol_table[func_ind:]):
+            if i < u and item.type != 'void' and item.attributes['dec-type'] != "function":
+                if 'var-size' in item.attributes:
+                    size += item.attributes['var-size']
+                else:
+                    size += 1
+        for item in self.symbol_table[u:var_ind]:
+            if item.attributes['dec-type'] != 'function':
+                size += 1
+        return size
+
+    def in_stack(self, t):
+        for entry in self.stack:
+            if entry[0] == t:
+                return True
+        return False
 
     def set_ar(self, ar):
         for entry in self.symbol_table[::-1]:
