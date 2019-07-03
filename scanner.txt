@@ -1,15 +1,16 @@
-/*
-int f(int a){
-    return a;
-}
-void g(int a){
-    output(a);
+
+void f(void){
+    output(1);
     return;
 }
-*/
+void g(void){
+    output(2);
+    return;
+}
+
 void main(void){
     //g(2);
-    int a;
+    //int a;
     //a = 1;
     //output(a);
     /*
@@ -24,5 +25,7 @@ void main(void){
         output(1);
     }
     */
+    f();
+    g();
     return;
 }

@@ -31,7 +31,7 @@ class ActivationRecord:
         """set arr and fp"""
         fp = cg.get_temp()
         cg.add_pc(1)
-        cg.pb[cg.pc - 1] = "ASSIGN", _m(cg.top_sp), _m(fp)
+        cg.pb[cg.pc - 1] = "ASSIGN", _m(cg.top_sp, "@"), _m(fp)
         cg.add_pc(1)
         cg.pb[cg.pc - 1] = "ADD", _m(cg.top_sp), _m(4 * self.locals, "#"), _m(cg.top_sp)
         table = cg.get_last_scope_vars()

@@ -43,9 +43,9 @@ class CodeGenerator:
         call main
         :return:
         """
-        self.add_pc(1)
-        self.pb[self.pc - 1] = "ASSIGN", _m(CodeGenerator.REGISTER_SIZE + CodeGenerator.INIT_MEMORY_VALUE, "#"), _m(
-            self.top_sp)
+        self.add_pc(2)
+        self.pb[self.pc - 2] = "ASSIGN", _m(CodeGenerator.REGISTER_SIZE + CodeGenerator.INIT_MEMORY_VALUE, "#"), _m(self.top_sp)
+        self.pb[self.pc - 1] = "ASSIGN", _m(self.top_sp), _m(self.top_sp, "@")
         self.init_global_func()
         self.make_output()
 
@@ -355,6 +355,7 @@ class CodeGenerator:
     #     self.pb[self.pc - 1] = "SUB", _m(self.top_sp), _m(self.get_top_ar().get_const_size(), "#"), _m(self.top_sp, "@")
 
     def call_start(self, *args, **kwargs):
+        self.reset_temp()
         self.use_ar()
 
     def call_end(self, *args, **kwargs):
@@ -401,7 +402,7 @@ class CodeGenerator:
             self.pb[self.pc - 5] = "ADD", _m(al_loc * 4, "#"), _m(self.top_sp, "@"), _m(after_sp_ptr, "@")
         else:
             al_loc = 1
-            self.pb[self.pc - 5] = "ADD", _m(al_loc * 4, "#"), _m(CodeGenerator.INIT_MEMORY_VALUE), _m(after_sp_ptr, "@")
+            self.pb[self.pc - 5] = "ADD", _m(al_loc * 4, "#"), _m(self.top_sp, "@"), _m(after_sp_ptr, "@")
         self.pb[self.pc - 4] = "ADD", _m(after_sp_ptr), _m(4, "#"), _m(after_sp_ptr)
         al_size = len(self.get_int_vars("__global__")) - len(self.get_int_vars(self.ss_i(0)))
         self.pb[self.pc - 3] = "ASSIGN", _m(al_size, "#"), _m(after_sp_ptr, "@")
@@ -417,16 +418,15 @@ class CodeGenerator:
         self.ar_stack.append(ar)
         self.semantics.set_ar(ar)
         self.save(*args, **kwargs)
-        self.reset_temp()
         self.call_stack.append(self.temp_set)
         self.temp_set = set()
-
-    def start_scope(self):
-        pass
 
     def end_dec(self, *args, **kwargs):
         ar = self.ar_stack[-1]
         ar.arr_memory(self)
+
+    def end_scope(self, *args, **kwargs):
+        pass
 
 
     def end_function(self, *args, **kwargs):
