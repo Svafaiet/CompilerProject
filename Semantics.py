@@ -59,7 +59,7 @@ class Semantics:
         for i, entry in enumerate(self.symbol_table[::-1]):
             if entry.name == name:
                 var_ind = i
-                for j, ent in self.symbol_table[::-1]:
+                for j, ent in enumerate(self.symbol_table[:i:-1]):
                     if ent.attributes['dec-type'] == "function" and self.in_stack(j + 1):
                         func_ind = j
                         done = True
@@ -144,6 +144,7 @@ class Semantics:
     def scope_end(self, *args, **kwargs):
         self.symbol_table = self.symbol_table[:self.stack[-1][0]]
         del self.stack[-1]
+        self.get_size_from_start("b")
 
     def declare_type(self, current_node, **kwargs):
         entry = SymbolTableRecord(type=current_node.token_value)

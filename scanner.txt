@@ -1,33 +1,11 @@
-
-void f(void){
-    output(1);
-    return;
-}
-void g(void){
-    output(2);
-    f();
-    return;
-}
-
 void main(void){
-    //g(2);
-    //int a;
-    //a = 1;
-    //output(a);
-    /*
-    if (1) {
-        int a;
-        output(2);
-    } else {
-        {
-
-        int b;
-       }
-        output(1);
+    int b;
+    int c[10];
+    int f(int a) {
+        return a;
     }
-    */
-    //f();
-    int a;
-    g();
-    return;
+    int g(void) {
+        int a;
+        b = b + 1;
+    }
 }

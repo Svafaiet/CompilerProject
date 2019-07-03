@@ -29,6 +29,7 @@ class ActivationRecord:
 
     def arr_memory(self, cg):
         """set arr and fp"""
+        table = cg.scope_var_cnt()
         fp = cg.get_temp()
         cg.add_pc(1)
         cg.pb[cg.pc - 1] = "ASSIGN", _m(cg.top_sp, "@"), _m(fp)

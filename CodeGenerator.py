@@ -432,8 +432,14 @@ class CodeGenerator:
         top_ar.del_arr(self)
 
     def scope_size(self):
-        #todo
-        pass
+        size = 0
+        for item in self.semantics.symbol_table[self.semantics.stack[-1][0]:]:
+            if item.attributes['dec-type'] != "function":
+                if 'var-size'in item.attributes:
+                    size += item.attributes['var-size']
+                else:
+                    size += 1
+        return size
 
     def end_function(self, *args, **kwargs):
         self.ar_stack.pop()
