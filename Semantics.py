@@ -24,7 +24,7 @@ class Semantics:
         self.stack.append([0, "__global__"])
 
         self.symbol_table.append(SymbolTableRecord("void", "output"))
-        self.symbol_table[-1].attributes = {"dec-type": "function"}
+        self.symbol_table[-1].attributes = {"dec-type": "function", "param-len": 1}
         self.stack.append([0, "output"])
 
     def get_sym_table_funcless_entry(self, name):
@@ -41,6 +41,19 @@ class Semantics:
                 return entry, len(self.symbol_table) - i - 1
         else:
             return None, None
+
+    def get_size_from_start(self, name):
+        """
+        start from start of table
+        for each variable, add 1 to result
+        if it was an array add its length to result
+        until you reach name,
+        (don't count name)
+        :return result + 1
+        :param name:
+        :return:
+        """
+        pass
 
     def set_ar(self, ar):
         for entry in self.symbol_table[::-1]:

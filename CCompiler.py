@@ -24,7 +24,7 @@ class Compiler:
         self.token_handler.set_io(file_in=file_in, error_writer=error_writer)
         self.parse_handler.set_io(error_writer=error_writer)
         parse_tree = self.parse_handler.parser.parse_tree
-        directive_handler = DirectiveHandler(error_writer=error_writer, file_out="code.txt")
+        directive_handler = DirectiveHandler(error_writer=error_writer, file_out="output.txt")
         parse_tree.set_handler(directive_handler)
         tok_gen = self.token_handler.get_next_token()
         is_terminated, error = False, False
@@ -48,7 +48,7 @@ class Compiler:
 
 
 DEFAULT_FILE_IN_NAME = "scanner.txt"
-DEFAULT_FILE_OUT_NAME = "output.txt"
+DEFAULT_FILE_OUT_NAME = "parsetree.txt"
 DEFAULT_FILE_ERROR_NAME = "error.txt"
 
 c_lexical_dfa = CLexicalDFA.make_c_lexical_dfa()

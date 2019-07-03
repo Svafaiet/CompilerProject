@@ -1,6 +1,28 @@
+/*
+int f(int a){
+    return a;
+}
+void g(int a){
+    output(a);
+    return;
+}
+*/
 void main(void){
-    int a[3];
-    a[2] = 1;
-    a[a[2]] = 0;
+    //g(2);
+    int a;
+    //a = 1;
+    //output(a);
+    /*
+    if (1) {
+        int a;
+        output(2);
+    } else {
+        {
+
+        int b;
+       }
+        output(1);
+    }
+    */
     return;
 }
